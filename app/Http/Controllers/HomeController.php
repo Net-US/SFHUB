@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\LandingContent;
 
 class HomeController extends Controller
 {
@@ -11,6 +12,10 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $features = LandingContent::active()->bySection('features')->orderBy('sort_order')->get();
+        $stats    = LandingContent::active()->bySection('stats')->orderBy('sort_order')->get();
+        $hero     = LandingContent::where('key', 'hero_title')->first();
+
+        return view('home', compact('features', 'stats', 'hero'));
     }
 }

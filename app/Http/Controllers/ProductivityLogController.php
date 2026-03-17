@@ -10,9 +10,9 @@ class ProductivityLogController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function productivity()
     {
-        //
+        return view('dashboard.productivity');
     }
 
     /**

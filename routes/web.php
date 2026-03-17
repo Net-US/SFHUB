@@ -10,22 +10,16 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SmartCalendarController;
 use App\Http\Controllers\CreativeStudioController;
 use App\Http\Controllers\GeneralTrackerController;
-use App\Http\Controllers\ProductivityLogController;
+use App\Http\Controllers\AcademicController;
+use App\Http\Controllers\PklController;
+use App\Http\Controllers\ProductivityController;
+use App\Http\Controllers\AdminController;
 // ── Controllers baru ──────────────────────────────────────────────────
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\InvestmentController;
 
-use App\Livewire\Dashboard\TodayPriority;
-use App\Livewire\Dashboard\ProductivityDashboard;
-use App\Livewire\Dashboard\FinanceDashboard;
-use App\Livewire\Dashboard\AssetsDashboard;
-use App\Livewire\Dashboard\DebtsDashboard;
-use App\Livewire\Dashboard\InvestmentsDashboard;
-use App\Livewire\Schedule\ScheduleManager;
-use App\Livewire\Tasks\TaskManager;
-use App\Livewire\Settings\UserSettings;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -46,10 +40,21 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    // ── PROFILE & SETTINGS ────────────────────────────────────────────────
+    Route::get('/profile',             [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile',             [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password',    [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::put('/profile/preferences', [ProfileController::class, 'updatePreferences'])->name('profile.preferences');
-    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+    Route::delete('/profile',          [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // ── NOTIFICATIONS ─────────────────────────────────────────────────────
+    Route::get('/notifications',              [ProfileController::class, 'getNotifications'])->name('notifications.index');
+    Route::post('/notifications/read-all',    [ProfileController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::delete('/notifications',           [ProfileController::class, 'clearAllNotifications'])->name('notifications.clear');
+    Route::post('/notifications/{id}/read',   [ProfileController::class, 'markRead'])->name('notifications.read');
+    Route::delete('/notifications/{id}',      [ProfileController::class, 'destroyNotification'])->name('notifications.destroy');
+
 
     // Dashboard utama
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -73,6 +78,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/task/{id}', [CreativeStudioController::class, 'showTaskDetail'])->name('dashboard.creative.task.show');
         Route::post('/task/{taskId}/subtask', [CreativeStudioController::class, 'storeSubtask'])->name('dashboard.creative.subtask.store');
         Route::put('/task/{taskId}/subtask/{subtaskId}', [CreativeStudioController::class, 'updateSubtask'])->name('dashboard.creative.subtask.update');
+        Route::delete('/task/{taskId}/subtask/{subtaskId}', [CreativeStudioController::class, 'destroySubtask'])->name('dashboard.creative.subtask.destroy');
         Route::post('/task/{taskId}/create-default-subtasks', [CreativeStudioController::class, 'createDefaultSubtasks']);
         Route::post('/{id}/status', [CreativeStudioController::class, 'updateStatus'])->name('dashboard.creative.status.update');
         Route::post('/{id}/links', [CreativeStudioController::class, 'addLink'])->name('dashboard.creative.links.add');
@@ -87,34 +93,62 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{task}', [CreativeStudioController::class, 'destroy'])->name('destroy');
     });
 
-    // Smart Calendar Routes
+    // ════════════════════════════════════════════════════════════════════════
+    // SMART CALENDAR - UPDATED dengan route updateSchedule
+    // ════════════════════════════════════════════════════════════════════════
     Route::get('/dashboard/smart-calendar', [SmartCalendarController::class, 'index'])->name('dashboard.smartcalendar');
-    Route::get('/calendar/day/{date}', [SmartCalendarController::class, 'showDay'])->name('calendar.day');
-    Route::post('/calendar/events', [SmartCalendarController::class, 'storeEvent'])->name('calendar.events.store');
-    Route::post('/calendar/schedules', [SmartCalendarController::class, 'storeSchedule'])->name('calendar.schedules.store');
-    Route::delete('/calendar/events/{id}', [SmartCalendarController::class, 'destroyEvent'])->name('calendar.events.destroy');
-    Route::delete('/calendar/schedules/{id}', [SmartCalendarController::class, 'destroySchedule'])->name('calendar.schedules.destroy');
-    Route::post('/calendar/tasks', [SmartCalendarController::class, 'storeTask'])->name('calendar.tasks.store');
-    Route::post('/tasks/{id}/complete', [SmartCalendarController::class, 'markTaskComplete'])->name('tasks.complete');
+    Route::get('/calendar/day/{date}',      [SmartCalendarController::class, 'showDay'])->name('calendar.day');
 
-    // Productivity Logs
-    Route::get('/dashboard/productivity', [ProductivityLogController::class, 'index'])->name('dashboard.productivity');
+    // Events (one-off)
+    Route::post('/calendar/events',          [SmartCalendarController::class, 'storeEvent'])->name('calendar.events.store');
+    Route::delete('/calendar/events/{id}',   [SmartCalendarController::class, 'destroyEvent'])->name('calendar.events.destroy');
+
+    // Schedules (recurring) — UPDATE endpoint ditambahkan
+    Route::post('/calendar/schedules',       [SmartCalendarController::class, 'storeSchedule'])->name('calendar.schedules.store');
+    Route::put('/calendar/schedules/{id}',   [SmartCalendarController::class, 'updateSchedule'])->name('calendar.schedules.update');
+    Route::delete('/calendar/schedules/{id}', [SmartCalendarController::class, 'destroySchedule'])->name('calendar.schedules.destroy');
+
+    // Tasks
+    Route::post('/calendar/tasks',           [SmartCalendarController::class, 'storeTask'])->name('calendar.tasks.store');
+    Route::post('/tasks/{id}/complete',      [SmartCalendarController::class, 'markTaskComplete'])->name('tasks.complete');
+
+    // Productivity
+    Route::get('/dashboard/productivity', [DashboardController::class, 'productivity'])->name('dashboard.productivity');
+    Route::post('/productivity/log', [ProductivityController::class, 'store'])->name('productivity.store');
+
+    // ── ACADEMIC ──────────────────────────────────────────────────────────
+    Route::prefix('academic')->name('academic.')->group(function () {
+        // Courses (Subjects)
+        Route::post('/courses',         [AcademicController::class, 'storeCourse'])->name('courses.store');
+        Route::put('/courses/{id}',    [AcademicController::class, 'updateCourse'])->name('courses.update');
+        Route::delete('/courses/{id}', [AcademicController::class, 'destroyCourse'])->name('courses.destroy');
+
+        // Academic Tasks
+        Route::post('/tasks',               [AcademicController::class, 'storeTask'])->name('tasks.store');
+        Route::put('/tasks/{id}',          [AcademicController::class, 'updateTask'])->name('tasks.update');
+        Route::post('/tasks/{id}/status',  [AcademicController::class, 'updateTaskStatus'])->name('tasks.status');
+        Route::delete('/tasks/{id}',       [AcademicController::class, 'destroyTask'])->name('tasks.destroy');
+
+        // Thesis Milestones
+        Route::post('/milestones',         [AcademicController::class, 'storeMilestone'])->name('milestones.store');
+        Route::put('/milestones/{id}',    [AcademicController::class, 'updateMilestone'])->name('milestones.update');
+        Route::delete('/milestones/{id}', [AcademicController::class, 'destroyMilestone'])->name('milestones.destroy');
+    });
+
+    // ── PKL ───────────────────────────────────────────────────────────────
+    Route::prefix('pkl')->name('pkl.')->group(function () {
+        Route::post('/info',         [PklController::class, 'storePklInfo'])->name('info.store');
+        Route::put('/info/{id}',    [PklController::class, 'updatePklInfo'])->name('info.update');
+        Route::post('/schedule',    [PklController::class, 'updateSchedule'])->name('schedule.update');
+        Route::post('/activities',          [PklController::class, 'storeActivity'])->name('activities.store');
+        Route::put('/activities/{id}',     [PklController::class, 'updateActivity'])->name('activities.update');
+        Route::delete('/activities/{id}',  [PklController::class, 'destroyActivity'])->name('activities.destroy');
+    });
 
     // Dashboard views (statis)
     Route::get('/dashboard/focus', [DashboardController::class, 'focus'])->name('dashboard.focus');
     Route::get('/dashboard/academic', [DashboardController::class, 'academic'])->name('dashboard.academic');
     Route::get('/dashboard/pkl', [DashboardController::class, 'pkl'])->name('dashboard.pkl');
-
-    // Livewire Component Routes
-    Route::get('/dashboard/livewire/today-priority', TodayPriority::class)->name('livewire.today-priority');
-    Route::get('/dashboard/livewire/productivity', ProductivityDashboard::class)->name('livewire.productivity');
-    Route::get('/dashboard/livewire/finance', FinanceDashboard::class)->name('livewire.finance');
-    Route::get('/dashboard/livewire/assets', AssetsDashboard::class)->name('livewire.assets');
-    Route::get('/dashboard/livewire/debts', DebtsDashboard::class)->name('livewire.debts');
-    Route::get('/dashboard/livewire/investments', InvestmentsDashboard::class)->name('livewire.investments');
-    Route::get('/dashboard/livewire/schedule', ScheduleManager::class)->name('livewire.schedule');
-    Route::get('/dashboard/livewire/tasks', TaskManager::class)->name('livewire.tasks');
-    Route::get('/dashboard/livewire/settings', UserSettings::class)->name('livewire.settings');
 
     // API untuk AJAX
     Route::get('/dashboard/recommendations', [DashboardController::class, 'getRecommendations'])->name('dashboard.recommendations');
@@ -194,17 +228,39 @@ Route::middleware('auth')->group(function () {
     Route::get('/investments/summary',           [InvestmentController::class, 'getSummary'])->name('investments.summary');
     Route::delete('/investments/purchases/{id}',    [InvestmentController::class, 'destroyPurchase'])->name('investments.purchases.destroy');
 
-    Route::post('/investments',             [InvestmentController::class, 'storeInstrument'])->name('investments.instruments.store');
-    Route::get('/investments/{id}',        [InvestmentController::class, 'showInstrument'])->name('investments.instruments.show');
-    Route::put('/investments/{id}',        [InvestmentController::class, 'updateInstrument'])->name('investments.instruments.update');
-    Route::patch('/investments/{id}/price',  [InvestmentController::class, 'updatePrice'])->name('investments.instruments.price');
-    Route::delete('/investments/{id}',        [InvestmentController::class, 'destroyInstrument'])->name('investments.instruments.destroy');
+    // ── INVESTMENT INSTRUMENTS ─────────────────────────────────────────
+    // Route untuk input manual (HARUS di atas route /investments/{id})
+    Route::post('/investments/manual', [InvestmentController::class, 'storeInstrumentWithInitial'])->name('investments.instruments.manual');
 
+    Route::post('/investments',                    [InvestmentController::class, 'storeInstrument'])->name('investments.instruments.store');
+    Route::get('/investments/{id}',               [InvestmentController::class, 'showInstrument'])->name('investments.instruments.show');
+    Route::put('/investments/{id}',               [InvestmentController::class, 'updateInstrument'])->name('investments.instruments.update');
+    Route::patch('/investments/{id}/price',        [InvestmentController::class, 'updatePrice'])->name('investments.instruments.price');
+    Route::patch('/investments/{id}/position',     [InvestmentController::class, 'updatePosition'])->name('investments.instruments.position');
+
+    // Route untuk update manual value (PATCH, spesifik)
+    Route::patch('/investments/{id}/manual-value', [InvestmentController::class, 'updateManualValue'])->name('investments.instruments.manual-value');
+
+    Route::delete('/investments/{id}',             [InvestmentController::class, 'destroyInstrument'])->name('investments.instruments.destroy');
+
+    // ── INVESTMENT PURCHASES ───────────────────────────────────────────
     Route::post('/investments/{id}/purchases', [InvestmentController::class, 'storePurchase'])->name('investments.purchases.store');
 });
 
 // Admin Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('users', UsersController::class);
-    Route::post('/users/{user}/preferences', [UsersController::class, 'updatePreferences'])->name('users.preferences');
+    Route::get('/',                             [AdminController::class, 'index'])->name('index');
+
+    // User Management
+    Route::get('/users',                        [AdminController::class, 'users'])->name('users');
+    Route::get('/users/create',                 [AdminController::class, 'createUser'])->name('users.create');
+    Route::post('/users',                       [AdminController::class, 'storeUser'])->name('users.store');
+    Route::post('/users/{user}/toggle-active',  [AdminController::class, 'toggleUserActive'])->name('users.toggle');
+    Route::delete('/users/{user}',              [AdminController::class, 'destroyUser'])->name('users.destroy');
+
+    // Landing Content Management
+    Route::get('/landing',                          [AdminController::class, 'landingContent'])->name('landing');
+    Route::post('/landing',                         [AdminController::class, 'storeLandingContent'])->name('landing.store');
+    Route::patch('/landing/{content}',              [AdminController::class, 'updateLandingContent'])->name('landing.update');
+    Route::delete('/landing/{content}',             [AdminController::class, 'destroyLandingContent'])->name('landing.destroy');
 });

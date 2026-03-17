@@ -14,12 +14,18 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
         'avatar',
         'role',
+        'is_active',
         'plan',
         'preferences',
+        'occupation',
+        'phone',
+        'location',
+        'bio',
     ];
 
     protected $hidden = [
@@ -96,6 +102,26 @@ class User extends Authenticatable
     public function pklLogs()
     {
         return $this->hasMany(PklLog::class);
+    }
+
+    public function pklInfos()
+    {
+        return $this->hasMany(PklInfo::class);
+    }
+
+    public function activePklInfo()
+    {
+        return $this->hasOne(PklInfo::class)->where('is_active', true)->latest();
+    }
+
+    public function pklSchedules()
+    {
+        return $this->hasMany(PklSchedule::class);
+    }
+
+    public function thesisMilestones()
+    {
+        return $this->hasMany(ThesisMilestone::class)->orderBy('sort_order');
     }
 
     public function notifications()

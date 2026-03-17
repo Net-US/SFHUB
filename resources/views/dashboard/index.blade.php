@@ -1,1145 +1,869 @@
-<!-- resources/views/dashboard/index.blade.php -->
+{{-- resources/views/dashboard/focus.blade.php --}}
 @extends('layouts.app-dashboard')
-
-@section('title', 'Dashboard - StudentHub')
+@section('title', 'Focus Today | StudentHub')
+@section('page-title', 'Focus Today')
 
 @push('styles')
     <style>
-        /* Custom styles from your template */
-        .hero-gradient {
-            background: linear-gradient(rgba(255, 247, 237, 0.95), rgba(245, 245, 244, 0.9));
-            background-size: cover;
-            background-position: center;
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
         }
 
-        .dark .hero-gradient {
-            background: linear-gradient(rgba(28, 25, 23, 0.9), rgba(12, 10, 9, 0.95));
+        @keyframes slideNow {
+            from {
+                opacity: 0;
+                transform: translateY(-8px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
         }
 
-        .floating-card {
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
+        @keyframes pulseNow {
 
             0%,
             100% {
-                transform: translateY(0px);
+                box-shadow: 0 0 0 0 rgba(249, 115, 22, .5)
             }
 
             50% {
-                transform: translateY(-20px);
+                box-shadow: 0 0 0 8px rgba(249, 115, 22, 0)
             }
         }
 
-        .hover-lift {
-            transition: transform 0.3s ease;
+        .fade-up {
+            animation: fadeUp .4s ease-out both
         }
 
-        .hover-lift:hover {
-            transform: translateY(-8px);
+        /* ── Gantt Timeline ─────────────────────────────────────── */
+        .gantt-wrap {
+            overflow-x: auto;
+            padding-bottom: 6px
         }
 
-        /* Priority colors */
-        .priority-urgent-important {
-            border-left-color: #ef4444 !important;
-            background-color: rgba(239, 68, 68, 0.05) !important;
+        .gantt-wrap::-webkit-scrollbar {
+            height: 5px
         }
 
-        .priority-important-not-urgent {
-            border-left-color: #3b82f6 !important;
-            background-color: rgba(59, 130, 246, 0.05) !important;
+        .gantt-wrap::-webkit-scrollbar-thumb {
+            background: #e7e5e4;
+            border-radius: 3px
         }
 
-        .priority-urgent-not-important {
-            border-left-color: #f97316 !important;
-            background-color: rgba(249, 115, 22, 0.05) !important;
+        .dark .gantt-wrap::-webkit-scrollbar-thumb {
+            background: #44403c
         }
 
-        .priority-not-urgent-not-important {
-            border-left-color: #6b7280 !important;
-            background-color: rgba(107, 114, 128, 0.05) !important;
+        .gantt-grid {
+            min-width: 760px;
+            position: relative
         }
 
-        /* Schedule colors */
-        .schedule-academic {
-            background-color: rgba(59, 130, 246, 0.05) !important;
-            border-left-color: #3b82f6 !important;
+        .gantt-row {
+            display: flex;
+            align-items: center;
+            height: 42px;
+            position: relative
         }
 
-        .schedule-creative {
-            background-color: rgba(249, 115, 22, 0.05) !important;
-            border-left-color: #f97316 !important;
+        .gantt-row+.gantt-row {
+            border-top: 1px solid #f5f5f4
         }
 
-        .schedule-pkl {
-            background-color: rgba(16, 185, 129, 0.05) !important;
-            border-left-color: #10b981 !important;
+        .dark .gantt-row+.gantt-row {
+            border-color: #292524
         }
 
-        .schedule-exam {
-            background-color: rgba(239, 68, 68, 0.05) !important;
-            border-left-color: #ef4444 !important;
+        .gantt-label {
+            width: 120px;
+            flex-shrink: 0;
+            font-size: 11px;
+            font-weight: 600;
+            color: #78716c;
+            padding-right: 10px;
+            text-align: right;
+            white-space: nowrap
         }
 
-        .schedule-personal {
-            background-color: rgba(139, 92, 246, 0.05) !important;
-            border-left-color: #8b5cf6 !important;
+        .dark .gantt-label {
+            color: #a8a29e
         }
 
-        .schedule-routine {
-            background-color: rgba(107, 114, 128, 0.05) !important;
-            border-left-color: #6b7280 !important;
+        .gantt-track {
+            flex: 1;
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center
         }
 
+        /* hour cells — subtle vertical grid */
+        .gantt-hour-grid {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            pointer-events: none
+        }
+
+        .gantt-hour-cell {
+            flex: 1;
+            border-right: 1px dashed #e7e5e480
+        }
+
+        .dark .gantt-hour-cell {
+            border-color: #29252430
+        }
+
+        /* blocks */
+        .gantt-block {
+            position: absolute;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            cursor: pointer;
+            transition: opacity .15s, transform .12s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .12)
+        }
+
+        .gantt-block:hover {
+            opacity: .85;
+            transform: translateY(-1px)
+        }
+
+        .gantt-block.active {
+            box-shadow: 0 0 0 2.5px white, 0 0 0 4.5px currentColor, 0 4px 12px rgba(0, 0, 0, .2)
+        }
+
+        /* "Sekarang" needle */
+        .now-needle {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2.5px;
+            background: linear-gradient(to bottom, #f97316, #ef4444);
+            z-index: 20;
+            border-radius: 2px;
+            pointer-events: none
+        }
+
+        .now-needle::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #f97316;
+            border: 2px solid white;
+            animation: pulseNow 2s ease-in-out infinite
+        }
+
+        .now-label {
+            position: absolute;
+            top: -22px;
+            transform: translateX(-50%);
+            background: #f97316;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 6px;
+            white-space: nowrap;
+            animation: slideNow .4s ease-out both
+        }
+
+        .now-label::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: #f97316
+        }
+
+        /* header hours */
+        .gantt-header {
+            display: flex;
+            margin-left: 120px;
+            min-width: calc(100% - 120px)
+        }
+
+        .gantt-hour-lbl {
+            flex: 1;
+            text-align: center;
+            font-size: 9px;
+            color: #a8a29e;
+            padding-bottom: 4px;
+            border-right: 1px dashed #e7e5e440
+        }
+
+        .dark .gantt-hour-lbl {
+            color: #57534e
+        }
+
+        /* time block vertical (right side) */
         .time-block {
-            transition: all 0.3s ease;
+            transition: all .18s
         }
 
         .time-block:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .1)
+        }
+
+        /* priority borders */
+        .priority-do {
+            border-left: 3.5px solid #ef4444
+        }
+
+        .priority-schedule {
+            border-left: 3.5px solid #3b82f6
+        }
+
+        .priority-delegate {
+            border-left: 3.5px solid #f97316
+        }
+
+        .priority-eliminate {
+            border-left: 3.5px solid #9ca3af
         }
     </style>
 @endpush
 
 @section('content')
-    <!-- Dashboard Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main Content (2/3 width) -->
-        <div class="lg:col-span-2 space-y-6">
-            <!-- Welcome Card with Priority Engine -->
-            <!-- Welcome Card with Priority Engine -->
-            <div
-                class="bg-gradient-to-br from-stone-800 to-stone-900 dark:from-stone-800 dark:to-black text-white rounded-3xl p-6 shadow-xl relative overflow-hidden">
-                <!-- Decorations -->
-                <div
-                    class="absolute top-0 right-0 w-64 h-64 bg-orange-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20 transform translate-x-1/2 -translate-y-1/2">
-                </div>
-                <div
-                    class="absolute bottom-0 left-0 w-40 h-40 bg-blue-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20 transform -translate-x-1/2 translate-y-1/2">
-                </div>
+    @php
+        $currentHour = now()->hour;
+        $currentMinute = now()->minute;
+        // Timeline spans 06:00–23:00 = 17 hours
+        $timelineStart = 6;
+        $timelineEnd = 23;
+        $timelineHours = $timelineEnd - $timelineStart;
 
-                <div class="relative z-10">
-                    <div class="flex justify-between items-start mb-6">
-                        <div>
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium">Mode:
-                                    {{ ucfirst(auth()->user()->role ?? 'student_freelancer') }}</span>
-                                <span id="current-schedule-badge"
-                                    class="bg-{{ isset($currentActivity['type'])
-                                        ? ($currentActivity['type'] == 'pkl'
-                                            ? 'emerald'
-                                            : ($currentActivity['type'] == 'academic'
-                                                ? 'blue'
-                                                : ($currentActivity['type'] == 'creative'
-                                                    ? 'orange'
-                                                    : ($currentActivity['type'] == 'break'
-                                                        ? 'yellow'
-                                                        : 'gray'))))
-                                        : 'gray' }}-500 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium">
-                                    <i class="fa-solid fa-clock mr-1"></i>
-                                    @if (isset($currentActivity['title']))
-                                        {{ $currentActivity['title'] }}
-                                    @else
-                                        {{ $timeOfDay }}
-                                    @endif
-                                </span>
-                            </div>
-                            <h2 class="text-3xl font-bold mt-2 mb-2">Selamat {{ $timeOfDay }},
-                                {{ auth()->user()->name }}!</h2>
-                            <p class="text-stone-300">
-                                @if ($currentSchedule)
-                                    {{ $currentSchedule->location ? '📍 ' . $currentSchedule->location : '' }}
-                                    {{ $currentSchedule->instructor ? '👤 ' . $currentSchedule->instructor : '' }}
-                                @else
-                                    {{ $currentActivity['recommendation'] ?? 'Rekomendasi sistem berdasarkan jadwal dan deadline Anda' }}
-                                @endif
-                            </p>
-                        </div>
-                        <div class="bg-white/10 p-3 rounded-full backdrop-blur-sm">
-                            <i class="fa-solid fa-bolt text-2xl text-yellow-400"></i>
-                        </div>
-                    </div>
+        // Calculate needle position %
+        $nowDecimal = $currentHour + $currentMinute / 60;
+        $needlePct = max(0, min(100, (($nowDecimal - $timelineStart) / $timelineHours) * 100));
 
-                    <!-- Current Schedule (from database) -->
-                    @if ($currentSchedule)
-                        <div id="current-schedule" class="mb-6">
-                            <div
-                                class="mb-4 p-4 rounded-xl bg-{{ $currentSchedule->type == 'pkl'
-                                    ? 'emerald'
-                                    : ($currentSchedule->type == 'academic'
-                                        ? 'blue'
-                                        : ($currentSchedule->type == 'creative'
-                                            ? 'orange'
-                                            : 'gray')) }}-500 border border-{{ $currentSchedule->type == 'pkl'
-                                    ? 'emerald'
-                                    : ($currentSchedule->type == 'academic'
-                                        ? 'blue'
-                                        : ($currentSchedule->type == 'creative'
-                                            ? 'orange'
-                                            : 'gray')) }}-400">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <h3 class="font-bold text-white">{{ $currentSchedule->activity }}</h3>
-                                        <p class="text-white/80 text-sm">
-                                            <i
-                                                class="fa-solid fa-clock mr-1"></i>{{ $currentSchedule->start_time->format('H:i') }}
-                                            - {{ $currentSchedule->end_time->format('H:i') }}
-                                            @if ($currentSchedule->location)
-                                                • <i
-                                                    class="fa-solid fa-location-dot ml-2 mr-1"></i>{{ $currentSchedule->location }}
-                                            @endif
-                                        </p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white">{{ $currentActivity['time_remaining'] }}</p>
-                                        <p class="text-white/80 text-xs">Jadwal rutin</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @elseif($currentActivity['is_scheduled'] == false)
-                        <!-- Waktu bebas (tidak ada jadwal di database) -->
-                        <div id="current-schedule" class="mb-6">
-                            <div
-                                class="mb-4 p-4 rounded-xl
-                                    @if ($hour >= 0 && $hour < 5) bg-indigo-500 border-indigo-400
-                                    @elseif($hour >= 5 && $hour < 12) bg-blue-500 border-blue-400
-                                    @elseif($hour >= 12 && $hour < 17) bg-orange-500 border-orange-400
-                                    @else bg-gray-500 border-gray-400 @endif">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <h3 class="font-bold text-white">{{ $currentActivity['title'] }}</h3>
-                                        <p class="text-white/80 text-sm">
-                                            <i class="fa-solid fa-clock mr-1"></i>{{ sprintf('%02d:00', $hour) }}
-                                            • {{ $currentActivity['recommendation'] }}
-                                        </p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="font-bold text-white">
-                                            @if ($hour >= 0 && $hour < 5)
-                                                💤 Waktu Tidur
-                                            @elseif($hour >= 5 && $hour < 8)
-                                                🌅 Persiapan Pagi
-                                            @elseif($hour >= 12 && $hour < 13)
-                                                🍽️ Istirahat Siang
-                                            @elseif($hour >= 17 && $hour < 19)
-                                                🏃 Waktu Bebas
-                                            @elseif($hour >= 19)
-                                                🌙 Waktu Produktif
-                                            @else
-                                                ⏳ Waktu Kosong
-                                            @endif
-                                        </p>
-                                        <p class="text-white/80 text-xs">
-                                            @if ($isSimulation)
-                                                Simulasi: {{ $hour }}:00
-                                            @else
-                                                Waktu Nyata
-                                            @endif
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                    <!-- Smart Recommendations -->
-                    <!-- Smart Recommendations -->
-                    <div class="bg-white/10 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
-                        <h3 class="text-sm font-bold text-orange-300 uppercase mb-3">Rekomendasi Sistem (AI Priority)</h3>
-                        <div id="priority-recommendations" class="space-y-3">
-                            @if (isset($smartRecommendations['recommendations']) && count($smartRecommendations['recommendations']) > 0)
-                                @foreach ($smartRecommendations['recommendations'] as $index => $recommendation)
-                                    @php
-                                        // Tentukan icon dan warna berdasarkan jenis rekomendasi
-                                        $icon = match ($recommendation['type']) {
-                                            'overdue_alert' => '🚨',
-                                            'deadline_today' => '🔥',
-                                            'deadline_tomorrow' => '⏰',
-                                            'late_night' => '💤',
-                                            'early_morning' => '🌅',
-                                            'morning_preparation' => '☕',
-                                            'lunch_break' => '🍽️',
-                                            'productive_night' => '🌙',
-                                            'wind_down' => '😴',
-                                            default => '📝',
-                                        };
+        // Helper: convert hour (float) to % within timeline
+        // Used in blade inline style
 
-                                        $color = match ($recommendation['priority'] ?? 'normal') {
-                                            'critical' => 'text-red-400',
-                                            'high' => 'text-orange-400',
-                                            'medium' => 'text-yellow-400',
-                                            'low' => 'text-blue-400',
-                                            default => 'text-gray-400',
-                                        };
+        // Build ganttRows from controller-passed schedule data (fallback to empty)
+        $todaySchedule = $todaySchedule ?? collect();
+        $colorMap = [
+            'pkl' => '#10b981',
+            'work' => '#059669',
+            'academic' => '#3b82f6',
+            'skripsi' => '#f97316',
+            'creative' => '#8b5cf6',
+            'freelance' => '#a855f7',
+            'personal' => '#94a3b8',
+            'rest' => '#64748b',
+        ];
+        $iconMap = [
+            'pkl' => '💼',
+            'work' => '💼',
+            'academic' => '�',
+            'skripsi' => '✍️',
+            'creative' => '🎬',
+            'freelance' => '🎬',
+            'personal' => '🌅',
+            'rest' => '☕',
+        ];
+        // Group schedules by type/category for gantt rows
+        $ganttGroups = [];
+        foreach (
+            $todaySchedule instanceof \Illuminate\Support\Collection ? $todaySchedule : collect($todaySchedule)
+            as $s
+        ) {
+            $type = $s->type ?? ($s['type'] ?? 'personal');
+            $start = is_string($s->start_time ?? null)
+                ? (float) explode(':', $s->start_time)[0] + (float) (explode(':', $s->start_time)[1] ?? 0) / 60
+                : $s['start'] ?? 8;
+            $end = is_string($s->end_time ?? null)
+                ? (float) explode(':', $s->end_time)[0] + (float) (explode(':', $s->end_time)[1] ?? 0) / 60
+                : $s['end'] ?? 9;
+            $label = $s->activity ?? ($s->title ?? ($s['label'] ?? ucfirst($type)));
+            $ganttGroups[$type][] = [
+                'start' => $start,
+                'end' => $end,
+                'label' => $label,
+                'color' => $colorMap[$type] ?? '#94a3b8',
+                'icon' => $iconMap[$type] ?? '📌',
+            ];
+        }
+        $labelMap = [
+            'pkl' => 'PKL / Kerja',
+            'academic' => 'Kuliah',
+            'skripsi' => 'Skripsi / Deep Work',
+            'creative' => 'Freelance / Kreatif',
+            'personal' => 'Personal',
+        ];
+        $ganttRows = [];
+        foreach ($ganttGroups as $type => $blocks) {
+            $ganttRows[] = ['label' => $labelMap[$type] ?? ucfirst($type), 'blocks' => $blocks];
+        }
+        // Fallback if no schedule data yet
+        if (empty($ganttRows)) {
+            $ganttRows = [
+                ['label' => 'PKL / Kerja', 'blocks' => []],
+                ['label' => 'Kuliah', 'blocks' => []],
+                ['label' => 'Skripsi', 'blocks' => []],
+                ['label' => 'Freelance', 'blocks' => []],
+                ['label' => 'Personal', 'blocks' => []],
+            ];
+        }
 
-                                        $bgColor = match ($recommendation['priority'] ?? 'normal') {
-                                            'critical' => 'bg-red-500/20 border-red-500/30',
-                                            'high' => 'bg-orange-500/20 border-orange-500/30',
-                                            'medium' => 'bg-yellow-500/20 border-yellow-500/30',
-                                            'low' => 'bg-blue-500/20 border-blue-500/30',
-                                            default => 'bg-gray-500/20 border-gray-500/30',
-                                        };
-                                    @endphp
+        // Hours to show in header (every hour)
+        $headerHours = range($timelineStart, $timelineEnd);
+    @endphp
 
-                                    <div class="p-3 {{ $bgColor }} border rounded-lg">
-                                        <div class="flex items-start justify-between mb-2">
-                                            <div class="flex items-center">
-                                                <span class="text-lg mr-2">{{ $icon }}</span>
-                                                <h4 class="font-medium text-white text-sm">{{ $recommendation['title'] }}
-                                                </h4>
-                                            </div>
-                                            @if (isset($recommendation['time_left']))
-                                                <span class="text-xs px-2 py-0.5 bg-white/10 rounded">
-                                                    {{ $recommendation['time_left'] }}
-                                                </span>
-                                            @endif
-                                        </div>
+    <div class="fade-up space-y-5">
 
-                                        <p class="text-xs text-stone-300 mb-2">{{ $recommendation['message'] }}</p>
-
-                                        @if (isset($recommendation['suggestion']))
-                                            <p class="text-xs text-orange-300 mb-2">
-                                                <i
-                                                    class="fa-solid fa-lightbulb mr-1"></i>{{ $recommendation['suggestion'] }}
-                                            </p>
-                                        @endif
-
-                                        <!-- Tampilkan tasks jika ada -->
-                                        @if (isset($recommendation['tasks']) && count($recommendation['tasks']) > 0)
-                                            <div class="space-y-2 mt-2">
-                                                @foreach ($recommendation['tasks'] as $task)
-                                                    <div class="flex items-center justify-between p-2 bg-black/20 rounded">
-                                                        <div>
-                                                            <p class="text-xs text-white">{{ $task['title'] }}</p>
-                                                            <p class="text-[10px] text-stone-400">
-                                                                Deadline:
-                                                                {{ \Carbon\Carbon::parse($task['due_date'])->translatedFormat('d M') }}
-                                                                •
-                                                                {{ $task['urgency_level'] == 'critical' ? 'TERLAMBAT ' . abs($task['days_until_due']) . ' HARI' : $task['days_until_due'] . ' hari lagi' }}
-                                                            </p>
-                                                        </div>
-                                                        <button onclick="startTask({{ $task['id'] }})"
-                                                            class="text-xs px-2 py-1 bg-orange-500 hover:bg-orange-600 rounded">
-                                                            Kerjakan
-                                                        </button>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @endif
-
-                                        <!-- Tampilkan ideal tasks jika ada -->
-                                        @if (isset($recommendation['ideal_tasks']) && count($recommendation['ideal_tasks']) > 0)
-                                            <div class="mt-2">
-                                                <p class="text-xs text-stone-400 mb-1">Tugas yang cocok:</p>
-                                                <div class="space-y-1">
-                                                    @foreach ($recommendation['ideal_tasks'] as $task)
-                                                        <div class="flex items-center justify-between text-xs">
-                                                            <span class="text-stone-300">{{ $task['title'] }}</span>
-                                                            <button onclick="startTask({{ $task['id'] }})"
-                                                                class="text-[10px] px-2 py-0.5 bg-orange-500/30 hover:bg-orange-500/50 rounded">
-                                                                Mulai
-                                                            </button>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                        @endif
-
-                                        <!-- Time slots untuk perencanaan -->
-                                        @if (isset($recommendation['time_slots']))
-                                            <div class="mt-2">
-                                                <p class="text-xs text-stone-400 mb-1">Saran pembagian waktu:</p>
-                                                <div class="space-y-1">
-                                                    @foreach ($recommendation['time_slots'] as $slot)
-                                                        <div class="flex items-center text-xs">
-                                                            <span class="w-16 text-orange-300">{{ $slot['time'] }}</span>
-                                                            <span class="text-stone-300">: {{ $slot['activity'] }}</span>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            @else
-                                <!-- Fallback jika tidak ada rekomendasi -->
-                                <div class="p-3 bg-white/5 border border-white/5 rounded-lg">
-                                    <div class="flex items-center mb-2">
-                                        <span class="text-lg mr-2">📝</span>
-                                        <h4 class="font-medium text-white text-sm">Tidak ada rekomendasi spesifik</h4>
-                                    </div>
-                                    <p class="text-xs text-stone-300 mb-2">
-                                        Cek tugas yang deadline-nya paling dekat atau tambahkan jadwal untuk mendapatkan
-                                        rekomendasi yang lebih spesifik.
-                                    </p>
-                                    <div class="flex gap-2">
-                                        <button onclick="showAddTaskModal()"
-                                            class="flex-1 py-1 bg-orange-500 hover:bg-orange-600 text-white rounded text-xs">
-                                            Tambah Tugas
-                                        </button>
-                                        <button onclick="showAddScheduleModal()"
-                                            class="flex-1 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs">
-                                            Tambah Jadwal
-                                        </button>
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <!-- Time Slider Simulation (untuk testing) -->
-                    <div class="mt-6">
-                        <label class="text-xs text-stone-400 mb-1 block">
-                            @if ($isSimulation)
-                                ⚡ SIMULASI WAKTU: {{ sprintf('%02d:00', $hour) }}
-                            @else
-                                ⌚ WAKTU NYATA: {{ now()->format('H:i') }}
-                            @endif
-                        </label>
-                        <form id="time-simulation-form" method="GET" action="{{ url()->current() }}">
-                            <input type="range" id="time-slider" name="simulated_hour" min="0" max="23"
-                                value="{{ $isSimulation ? $hour : date('H') }}"
-                                class="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-orange-500"
-                                oninput="updateTimeDisplay(this.value)">
-                            <div class="flex justify-between text-[10px] text-stone-500 mt-1">
-                                <span>00:00</span>
-                                <span>06:00</span>
-                                <span>12:00</span>
-                                <span>18:00</span>
-                                <span>23:00</span>
-                            </div>
-                            <div class="mt-2 flex items-center justify-between">
-                                <div class="text-xs text-stone-300">
-                                    <i class="fa-solid fa-clock mr-1"></i>
-                                    <span
-                                        id="selected-time">{{ sprintf('%02d:00', $isSimulation ? $hour : date('H')) }}</span>
-                                    <span
-                                        class="ml-2 px-2 py-0.5 rounded text-xs
-                    @if ($isSimulation) bg-orange-500/30 text-orange-300
-                    @else bg-emerald-500/30 text-emerald-300 @endif">
-                                        @if ($isSimulation)
-                                            ⚡ Simulasi
-                                        @else
-                                            ✅ Waktu Nyata
-                                        @endif
-                                    </span>
-                                </div>
-                                <div class="flex gap-2">
-                                    @if ($isSimulation)
-                                        <a href="{{ url()->current() }}"
-                                            class="text-xs px-3 py-1 bg-stone-700 hover:bg-stone-600 rounded transition-colors">
-                                            Reset ke Waktu Nyata
-                                        </a>
-                                    @endif
-                                    <button type="submit"
-                                        class="text-xs px-3 py-1 bg-orange-500 hover:bg-orange-600 rounded transition-colors">
-                                        @if ($isSimulation)
-                                            Update Simulasi
-                                        @else
-                                            Mulai Simulasi
-                                        @endif
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                        <div class="mt-1 text-[10px] text-stone-500">
-                            <i class="fa-solid fa-circle-info mr-1"></i>
-                            Geser slider untuk melihat bagaimana sistem bereaksi pada jam berbeda
-                        </div>
-                    </div>
-
-                    <script>
-                        function updateTimeDisplay(value) {
-                            const hour = String(value).padStart(2, '0');
-                            document.getElementById('selected-time').textContent = hour + ':00';
-
-                            // Update label juga
-                            const label = document.querySelector('label.text-xs');
-                            if (label) {
-                                label.innerHTML = `⚡ SIMULASI WAKTU: ${hour}:00`;
-                            }
-                        }
-                    </script>
-                </div>
-            </div>
-
-            <script>
-                function updateTimeDisplay(value) {
-                    document.getElementById('selected-time').textContent =
-                        String(value).padStart(2, '0') + ':00';
-                }
-
-                function resetToRealTime() {
-                    document.getElementById('time-slider').value = {{ date('H') }};
-                    updateTimeDisplay({{ date('H') }});
-                    document.getElementById('time-simulation-form').submit();
-                }
-            </script>
-        </div>
-
-
-        <!-- Sidebar (1/3 width) -->
-        <div class="space-y-6">
-            <!-- Priority Summary -->
-            <div
-                class="bg-white dark:bg-stone-900 rounded-3xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-stone-900 dark:text-white">Prioritas Hari Ini</h3>
-                    <span class="text-xs bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded text-stone-500">
-                        {{ $prioritySummary['total_tasks'] ?? 0 }} tugas diprioritaskan
-                    </span>
-                </div>
-
-                <div class="space-y-3">
-                    <!-- Urgent & Important (Do First) -->
-                    @if (isset($prioritySummary['urgent_important']) && count($prioritySummary['urgent_important']) > 0)
-                        @foreach ($prioritySummary['urgent_important'] as $task)
-                            <div
-                                class="p-3 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-r-xl priority-urgent-important">
-                                <span class="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase">Do
-                                    First</span>
-                                <p class="font-medium text-stone-800 dark:text-stone-200 text-sm mt-1">{{ $task->title }}
-                                </p>
-                                <div class="flex justify-between items-center mt-2">
-                                    <span class="text-xs text-stone-500 dark:text-stone-400">
-                                        @if ($task->due_date)
-                                            Deadline: {{ \Carbon\Carbon::parse($task->due_date)->translatedFormat('d M') }}
-                                            @if ($task->due_date < now())
-                                                <span class="text-red-500 font-bold"> (TERLAMBAT)</span>
-                                            @endif
-                                        @endif
-                                    </span>
-                                    @if ($task->estimated_time)
-                                        <span class="text-xs px-2 py-0.5 bg-red-100 dark:bg-red-900/30 rounded">
-                                            {{ $task->estimated_time }}
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-                    @else
-                        <div class="p-3 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-r-xl">
-                            <span class="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase">Do First</span>
-                            <p class="font-medium text-stone-800 dark:text-stone-200 text-sm mt-1">Tidak ada tugas urgent
-                            </p>
-                            <span class="text-xs text-stone-500 dark:text-stone-400">Semua tugas terkendali</span>
-                        </div>
-                    @endif
-
-                    <!-- Important Not Urgent (Schedule) -->
-                    @if (isset($prioritySummary['important_not_urgent']) && count($prioritySummary['important_not_urgent']) > 0)
-                        @foreach ($prioritySummary['important_not_urgent'] as $task)
-                            <div
-                                class="p-3 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-r-xl priority-important-not-urgent">
-                                <span
-                                    class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase">Schedule</span>
-                                <p class="font-medium text-stone-800 dark:text-stone-200 text-sm mt-1">{{ $task->title }}
-                                </p>
-                                <div class="flex justify-between items-center mt-2">
-                                    <span class="text-xs text-stone-500 dark:text-stone-400">
-                                        @if ($task->due_date)
-                                            Deadline: {{ \Carbon\Carbon::parse($task->due_date)->translatedFormat('d M') }}
-                                            ({{ \Carbon\Carbon::parse($task->due_date)->diffForHumans() }})
-                                        @endif
-                                    </span>
-                                    @if ($task->estimated_time)
-                                        <span class="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 rounded">
-                                            {{ $task->estimated_time }}
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-                    @else
-                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-r-xl">
-                            <span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase">Schedule</span>
-                            <p class="font-medium text-stone-800 dark:text-stone-200 text-sm mt-1">Tidak ada tugas penting
-                            </p>
-                            <span class="text-xs text-stone-500 dark:text-stone-400">Tambahkan tugas dengan deadline minggu
-                                depan</span>
-                        </div>
-                    @endif
-
-                    <!-- Routine Tasks -->
-                    @if (isset($prioritySummary['routine']) && count($prioritySummary['routine']) > 0)
-                        @foreach ($prioritySummary['routine'] as $task)
-                            <div class="p-3 bg-stone-50 dark:bg-stone-800 border-l-4 border-stone-400 rounded-r-xl">
-                                <span
-                                    class="text-[10px] font-bold text-stone-500 dark:text-stone-400 uppercase">Routine</span>
-                                <p class="font-medium text-stone-800 dark:text-stone-200 text-sm mt-1">{{ $task->title }}
-                                </p>
-                                <div class="flex justify-between items-center mt-2">
-                                    <span class="text-xs text-stone-500 dark:text-stone-400 capitalize">
-                                        {{ $task->category }}
-                                    </span>
-                                    @if ($task->estimated_time)
-                                        <span class="text-xs px-2 py-0.5 bg-stone-100 dark:bg-stone-700 rounded">
-                                            {{ $task->estimated_time }}
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-                    @endif
-
-                    <!-- Jika tidak ada data sama sekali -->
-                    @if (
-                        (!isset($prioritySummary['urgent_important']) || count($prioritySummary['urgent_important']) == 0) &&
-                            (!isset($prioritySummary['important_not_urgent']) || count($prioritySummary['important_not_urgent']) == 0))
-                        <div class="text-center py-4 text-stone-500 dark:text-stone-400">
-                            <i class="fa-solid fa-tasks text-xl mb-2 opacity-50"></i>
-                            <p class="text-sm">Belum ada tugas yang diprioritaskan</p>
-                            <button onclick="showAddTaskModal()"
-                                class="mt-2 text-sm text-orange-500 hover:text-orange-600">
-                                <i class="fa-solid fa-plus mr-1"></i>Tambah tugas pertama
-                            </button>
-                        </div>
-                    @endif
-                </div>
-
-                <!-- Progress Bar Overall -->
-                @if (isset($prioritySummary['total_tasks']) && $prioritySummary['total_tasks'] > 0)
-                    <div class="mt-4 pt-4 border-t border-stone-200 dark:border-stone-800">
-                        <div class="flex justify-between text-xs text-stone-500 dark:text-stone-400 mb-1">
-                            <span>Progress Prioritas</span>
-                            <span>{{ $prioritySummary['completed_tasks'] ?? 0 }}/{{ $prioritySummary['total_tasks'] ?? 0 }}</span>
-                        </div>
-                        <div class="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-2">
-                            <div class="bg-gradient-to-r from-red-500 via-orange-500 to-emerald-500 h-2 rounded-full"
-                                style="width: {{ min(100, (($prioritySummary['completed_tasks'] ?? 0) / max(1, $prioritySummary['total_tasks'])) * 100) }}%">
-                            </div>
-                        </div>
-                        <div class="flex justify-between text-[10px] text-stone-400 dark:text-stone-500 mt-1">
-                            <span>Urgent</span>
-                            <span>Important</span>
-                            <span>Selesai</span>
-                        </div>
-                    </div>
-                @endif
-            </div>
-            <!-- Quick Stats -->
-            <div
-                class="bg-white dark:bg-stone-900 rounded-3xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
-                <h3 class="text-lg font-bold text-stone-900 dark:text-white mb-4">Statistik Cepat</h3>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="text-center p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl hover-lift">
-                        <div class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-1">
-                            {{ $stats['tasks']['pending'] ?? 0 }}
-                        </div>
-                        <p class="text-xs text-orange-700 dark:text-orange-300">Task Pending</p>
-                    </div>
-
-                    <div class="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl hover-lift">
-                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                            {{ $stats['tasks']['overdue'] ?? 0 }}
-                        </div>
-                        <p class="text-xs text-blue-700 dark:text-blue-300">Task Terlambat</p>
-                    </div>
-
-                    <div class="text-center p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl hover-lift">
-                        <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">
-                            {{ $stats['creative']['active_projects'] ?? 0 }}
-                        </div>
-                        <p class="text-xs text-emerald-700 dark:text-emerald-300">Proyek Aktif</p>
-                    </div>
-
-                    <div class="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl hover-lift">
-                        <div class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">
-                            {{ $stats['events']['today'] ?? 0 }}
-                        </div>
-                        <p class="text-xs text-purple-700 dark:text-purple-300">Event Hari Ini</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Schedule Timeline -->
+        {{-- ─── HERO CARD ──────────────────────────────────────────────────── --}}
         <div
-            class="lg:col-span-3 bg-white dark:bg-stone-900 rounded-3xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-stone-900 dark:text-white">Jadwal (Time Blocking)</h3>
-                <span class="text-xs bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded text-stone-500">
-                    {{ \Carbon\Carbon::now()->translatedFormat('l') }}
-                    @if (count($timeBlockingData['blocks']) > 0)
-                        • {{ count($timeBlockingData['blocks']) }} aktivitas
-                    @endif
-                </span>
+            class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-stone-800 via-stone-900 to-black text-white shadow-2xl">
+            <div class="absolute inset-0 opacity-15"
+                style="background-image:radial-gradient(circle at 20% 50%,#f97316 0%,transparent 60%),radial-gradient(circle at 80% 20%,#3b82f6 0%,transparent 50%)">
             </div>
-
-            <!-- Dynamic Time Blocks -->
-            <div class="h-12 flex w-full rounded-full overflow-hidden text-xs font-medium text-white shadow-inner">
-                @foreach ($timeBlockingData['blocks'] as $block)
-                    @php
-                        $bgColor = match ($block['color']) {
-                            'emerald' => 'bg-emerald-500',
-                            'blue' => 'bg-blue-500',
-                            'orange' => 'bg-orange-500',
-                            'purple' => 'bg-purple-500',
-                            'stone' => 'bg-stone-400',
-                            'gray' => 'bg-gray-500',
-                            default => 'bg-gray-500',
-                        };
-
-                        $hoverColor = match ($block['color']) {
-                            'emerald' => 'hover:bg-emerald-600',
-                            'blue' => 'hover:bg-blue-600',
-                            'orange' => 'hover:bg-orange-600',
-                            'purple' => 'hover:bg-purple-600',
-                            'stone' => 'hover:bg-stone-500',
-                            'gray' => 'hover:bg-gray-600',
-                            default => 'hover:bg-gray-600',
-                        };
-
-                        $isNow = $block['is_now'] ?? false;
-                        $borderClass = $isNow ? 'ring-2 ring-white ring-opacity-50' : '';
-                    @endphp
-
-                    <div class="{{ $bgColor }} {{ $hoverColor }} {{ $borderClass }} flex items-center justify-center transition-colors cursor-pointer time-block"
-                        style="width: {{ $block['percentage'] }}%"
-                        title="{{ $block['title'] }} ({{ $block['start_time'] }}-{{ $block['end_time'] }}) - {{ $block['description'] }}"
-                        onclick="showScheduleDetails('{{ $block['title'] }}', '{{ $block['start_time'] }}', '{{ $block['end_time'] }}', '{{ $block['description'] }}')">
-
-                        @if ($isNow)
-                            <div class="animate-pulse">
-                                {{ $block['title'] }}
+            <div class="relative z-10 p-6 md:p-8">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                    <div class="flex-1">
+                        <span
+                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/10 text-xs font-medium mb-4">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Mahasiswa Aktif · Freelancer
+                        </span>
+                        <h2 class="text-3xl md:text-4xl font-bold mb-2">
+                            Selamat datang, <span class="text-orange-400">{{ auth()->user()->name }}</span> 👋
+                        </h2>
+                        <p class="text-stone-300 text-sm mb-4">{{ now()->isoFormat('dddd, D MMMM YYYY') }}</p>
+                        <div class="flex items-center gap-3">
+                            <div class="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl px-4 py-2">
+                                <p class="text-xs text-stone-400 mb-0.5">Sekarang</p>
+                                <p class="text-2xl font-mono font-bold text-white" id="live-clock">
+                                    {{ now()->format('H:i') }}</p>
                             </div>
-                        @else
-                            {{ $block['title'] }}
-                        @endif
-
-                        @if ($block['is_scheduled'])
-                            <span class="ml-1 text-[8px] opacity-75">✓</span>
-                        @endif
+                            <div class="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl px-4 py-2">
+                                <p class="text-xs text-stone-400 mb-0.5">Hari ke</p>
+                                <p class="text-2xl font-bold text-orange-400">{{ now()->dayOfYear }}</p>
+                                <p class="text-xs text-stone-400">dari 365</p>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl px-4 py-2">
+                                @php
+                                    $actNow = 'Bebas';
+                                    $actColor = 'text-stone-300';
+                                    foreach ($ganttRows as $row) {
+                                        foreach ($row['blocks'] as $b) {
+                                            if ($nowDecimal >= $b['start'] && $nowDecimal < $b['end']) {
+                                                $actNow = $b['icon'] . ' ' . $b['label'];
+                                                $actColor = 'text-orange-300';
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                <p class="text-xs text-stone-400 mb-0.5">Aktivitas kini</p>
+                                <p class="text-sm font-bold {{ $actColor }}">{{ $actNow }}</p>
+                            </div>
+                        </div>
                     </div>
-                @endforeach
-            </div>
-
-            <!-- Time markers -->
-            <div class="flex justify-between text-xs text-stone-400 mt-2 px-1">
-                <span>{{ $timeBlockingData['day_start'] }}</span>
-                @php
-                    // Tampilkan 3-4 marker waktu penting
-                    $totalHours =
-                        (strtotime($timeBlockingData['day_end']) - strtotime($timeBlockingData['day_start'])) / 3600;
-                    $markerCount = min(5, $totalHours);
-                    $markerInterval = $totalHours / ($markerCount - 1);
-                @endphp
-
-                @for ($i = 1; $i < $markerCount - 1; $i++)
-                    @php
-                        $markerTime = strtotime($timeBlockingData['day_start']) + $i * $markerInterval * 3600;
-                    @endphp
-                    <span>{{ date('H:i', $markerTime) }}</span>
-                @endfor
-                <span>{{ $timeBlockingData['day_end'] }}</span>
-            </div>
-
-            <!-- Today's Schedule Details -->
-            <div class="mt-6 space-y-3" id="today-schedule">
-                @foreach ($todaySchedule as $schedule)
-                    <div class="p-4 border-l-4 schedule-{{ $schedule['type'] }} rounded-r-lg">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <i
-                                        class="fa-solid {{ $schedule['icon'] }} text-{{ $schedule['type'] == 'academic' ? 'blue' : ($schedule['type'] == 'pkl' ? 'emerald' : 'orange') }}-500"></i>
-                                    <h4 class="font-bold text-stone-800 dark:text-white">
-                                        {{ $schedule['activity'] }}</h4>
-                                    @if ($schedule['is_now'])
-                                        <span
-                                            class="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-xs font-medium">
-                                            <i class="fa-solid fa-clock mr-1"></i>Sekarang
-                                        </span>
-                                    @endif
+                    {{-- Quick stats --}}
+                    <div class="grid grid-cols-2 gap-3 md:w-64">
+                        <div class="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-4 col-span-2">
+                            <p class="text-xs text-stone-400 mb-2">Progres Hari Ini</p>
+                            <div class="flex items-center gap-3">
+                                <div class="flex-1 bg-white/10 rounded-full h-2">
+                                    <div class="bg-orange-500 h-2 rounded-full"
+                                        style="width:{{ min(100, round((($nowDecimal - 6) / 17) * 100)) }}%"></div>
                                 </div>
-                                @if ($schedule['location'])
-                                    <p class="text-sm text-stone-600 dark:text-stone-400">
-                                        <i class="fa-solid fa-location-dot mr-1"></i>{{ $schedule['location'] }}
-                                    </p>
-                                @endif
+                                <span class="text-sm font-bold text-white">{{ now()->format('H:i') }}</span>
                             </div>
-                            <div class="text-right">
-                                <p class="font-bold text-stone-800 dark:text-white">
-                                    {{ $schedule['start_time'] }} - {{ $schedule['end_time'] }}</p>
-                                <p class="text-xs text-stone-500 dark:text-stone-400 capitalize">
-                                    {{ $schedule['type'] }}</p>
-                            </div>
+                            <p class="text-[10px] text-stone-500 mt-1.5">{{ 23 - $currentHour }} jam tersisa hari ini</p>
                         </div>
                     </div>
-                @endforeach
-
-                @if ($todaySchedule->isEmpty())
-                    <div class="text-center py-8 text-stone-500 dark:text-stone-400">
-                        <i class="fa-solid fa-calendar-plus text-3xl mb-2 opacity-50"></i>
-                        <p>Tidak ada jadwal untuk hari ini.</p>
-                        <button onclick="showAddScheduleModal()" class="mt-3 text-orange-500 hover:text-orange-600">
-                            <i class="fa-solid fa-plus mr-1"></i>Tambah jadwal
-                        </button>
-                    </div>
-                @endif
-            </div>
-        </div>
-        <!-- Upcoming Deadlines -->
-        <div class="bg-white dark:bg-stone-900 rounded-3xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
-            <h3 class="text-lg font-bold text-stone-900 dark:text-white mb-4">Deadline Mendatang</h3>
-
-            <div class="space-y-3" id="upcoming-deadlines">
-                @foreach ($upcomingDeadlines as $task)
-                    <div
-                        class="p-3 border border-stone-200 dark:border-stone-700 rounded-lg hover:shadow-sm transition-shadow">
-                        <div class="flex justify-between items-start mb-1">
-                            <h4 class="font-medium text-stone-800 dark:text-white text-sm">{{ $task->title }}
-                            </h4>
-                            <span
-                                class="text-xs px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
-                                {{ \Carbon\Carbon::parse($task->due_date)->diffForHumans() }}
-                            </span>
-                        </div>
-                        <div class="flex items-center text-xs text-stone-500 dark:text-stone-400">
-                            <i class="fa-solid fa-tag mr-1"></i>
-                            {{ $task->category }}
-                        </div>
-                    </div>
-                @endforeach
-
-                @if ($upcomingDeadlines->isEmpty())
-                    <div class="text-center py-4 text-stone-500 dark:text-stone-400">
-                        <i class="fa-solid fa-calendar-check text-xl mb-2 opacity-50"></i>
-                        <p class="text-sm">Tidak ada deadline mendatang</p>
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <!-- Active Projects -->
-        <div class="bg-white dark:bg-stone-900 rounded-3xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
-            <h3 class="text-lg font-bold text-stone-900 dark:text-white mb-4">Proyek Aktif</h3>
-
-            <div class="space-y-4" id="active-projects">
-                @foreach ($activeProjects as $project)
-                    <div
-                        class="p-3 border border-stone-200 dark:border-stone-700 rounded-lg hover:shadow-sm transition-shadow">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-medium text-stone-800 dark:text-white">{{ $project->title }}</h4>
-                            <span
-                                class="text-xs px-2 py-0.5 rounded-full {{ $project->stage == 'editing'
-                                    ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
-                                    : ($project->stage == 'script'
-                                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
-                                        : 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300') }}">
-                                {{ $project->stage }}
-                            </span>
-                        </div>
-
-                        <div class="mb-2">
-                            <div class="flex justify-between text-xs text-stone-500 dark:text-stone-400 mb-1">
-                                <span>Progress</span>
-                                <span>{{ $project->progress }}%</span>
-                            </div>
-                            <div class="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-2">
-                                <div class="bg-orange-500 h-2 rounded-full" style="width: {{ $project->progress }}%">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-between text-xs text-stone-500 dark:text-stone-400">
-                            <span>
-                                <i class="fa-solid fa-calendar-day mr-1"></i>
-                                {{ \Carbon\Carbon::parse($project->deadline)->translatedFormat('d M') }}
-                            </span>
-                            @if ($project->client)
-                                <span>
-                                    <i class="fa-solid fa-user mr-1"></i>
-                                    {{ $project->client }}
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
-
-                @if ($activeProjects->isEmpty())
-                    <div class="text-center py-4 text-stone-500 dark:text-stone-400">
-                        <i class="fa-solid fa-folder-open text-xl mb-2 opacity-50"></i>
-                        <p class="text-sm">Tidak ada proyek aktif</p>
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="bg-white dark:bg-stone-900 rounded-3xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
-            <h3 class="text-lg font-bold text-stone-900 dark:text-white mb-4">Aksi Cepat</h3>
-
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="showAddTaskModal()"
-                    class="p-3 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/30 rounded-lg transition-colors hover-lift">
-                    <i class="fa-solid fa-plus text-orange-600 dark:text-orange-400 mb-1 text-lg"></i>
-                    <p class="text-xs font-medium text-orange-800 dark:text-orange-300">Tambah Task</p>
-                </button>
-
-                <button onclick="showAddScheduleModal()"
-                    class="p-3 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors hover-lift">
-                    <i class="fa-solid fa-calendar-plus text-blue-600 dark:text-blue-400 mb-1 text-lg"></i>
-                    <p class="text-xs font-medium text-blue-800 dark:text-blue-300">Tambah Jadwal</p>
-                </button>
-
-                <button onclick="window.location.href='/'"
-                    class="p-3 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-lg transition-colors hover-lift">
-                    <i class="fa-solid fa-palette text-emerald-600 dark:text-emerald-400 mb-1 text-lg"></i>
-                    <p class="text-xs font-medium text-emerald-800 dark:text-emerald-300">Creative Studio</p>
-                </button>
-
-                <button onclick="window.location.href='/'"
-                    class="p-3 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg transition-colors hover-lift">
-                    <i class="fa-solid fa-wallet text-purple-600 dark:text-purple-400 mb-1 text-lg"></i>
-                    <p class="text-xs font-medium text-purple-800 dark:text-purple-300">Finance Manager</p>
-                </button>
-            </div>
-        </div>
-
-        <!-- JavaScript untuk show schedule details -->
-        <script>
-            function showScheduleDetails(title, startTime, endTime, description) {
-                // Buat modal atau tooltip dengan detail schedule
-                const modal = document.createElement('div');
-                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-                modal.innerHTML = `
-        <div class="bg-white dark:bg-stone-800 rounded-xl p-6 max-w-md w-full mx-4">
-            <div class="flex justify-between items-start mb-4">
-                <h3 class="text-lg font-bold text-stone-900 dark:text-white">${title}</h3>
-                <button onclick="this.parentElement.parentElement.remove()"
-                        class="text-stone-400 hover:text-stone-600">
-                    <i class="fa-solid fa-times"></i>
-                </button>
-            </div>
-            <div class="space-y-3">
-                <div class="flex items-center text-sm">
-                    <i class="fa-solid fa-clock mr-2 text-orange-500"></i>
-                    <span class="font-medium">${startTime} - ${endTime}</span>
                 </div>
-                <div class="text-sm text-stone-600 dark:text-stone-300">
-                    <i class="fa-solid fa-info-circle mr-2 text-blue-500"></i>
-                    ${description}
+            </div>
+        </div>
+
+        {{-- ═══════════════════════════════════════════════════════════════
+     GANTT TIMELINE CARD
+════════════════════════════════════════════════════════════════ --}}
+        <div
+            class="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm overflow-hidden">
+            {{-- Card header --}}
+            <div class="flex items-center justify-between px-6 py-4 border-b border-stone-100 dark:border-stone-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                        <i class="fa-solid fa-timeline text-orange-500 text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-stone-800 dark:text-white text-sm">Timeline Harian —
+                            {{ now()->isoFormat('dddd, D MMM YYYY') }}</h3>
+                        <p class="text-[11px] text-stone-400">Jadwal 06:00–23:00 · Garis oranye = posisi kamu sekarang</p>
+                    </div>
                 </div>
-                <div class="pt-4 border-t border-stone-200 dark:border-stone-700">
-                    <button onclick="addToCalendar('${title}', '${startTime}', '${endTime}')"
-                            class="w-full py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium">
-                        <i class="fa-solid fa-calendar-plus mr-2"></i>Tambah ke Kalender
+                <div class="flex items-center gap-2">
+                    {{-- Legend --}}
+                    @foreach ([['#10b981', 'PKL'], ['#3b82f6', 'Kuliah'], ['#f97316', 'Skripsi'], ['#8b5cf6', 'Freelance'], ['#94a3b8', 'Personal']] as [$c, $l])
+                        <div class="hidden lg:flex items-center gap-1">
+                            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                style="background:{{ $c }}"></span>
+                            <span class="text-[10px] text-stone-400">{{ $l }}</span>
+                        </div>
+                    @endforeach
+                    <button onclick="openModal('modal-add-focus-task')"
+                        class="flex items-center gap-1.5 px-3 py-1.5 bg-stone-800 dark:bg-stone-700 hover:bg-stone-900 text-white text-xs font-medium rounded-xl transition-colors ml-2">
+                        <i class="fa-solid fa-plus text-[10px]"></i> Tugas
                     </button>
                 </div>
             </div>
-        </div>
-    `;
-                document.body.appendChild(modal);
-            }
 
-            function addToCalendar(title, startTime, endTime) {
-                // Logic untuk menambahkan ke kalender
-                alert(`"${title}" berhasil ditambahkan ke kalender!`);
-                document.querySelector('.fixed.inset-0').remove();
-            }
-        </script>
+            {{-- Gantt body --}}
+            <div class="px-5 pt-4 pb-5">
+                <div class="gantt-wrap">
+                    <div class="gantt-grid" id="gantt-grid">
+
+                        {{-- Hour header --}}
+                        <div class="gantt-header">
+                            @foreach ($headerHours as $h)
+                                <div class="gantt-hour-lbl">{{ sprintf('%02d', $h) }}</div>
+                            @endforeach
+                        </div>
+
+                        {{-- Rows --}}
+                        @foreach ($ganttRows as $row)
+                            <div class="gantt-row">
+                                <div class="gantt-label">{{ $row['label'] }}</div>
+                                <div class="gantt-track" id="track-{{ $loop->index }}">
+                                    {{-- Hour grid lines (background) --}}
+                                    <div class="gantt-hour-grid">
+                                        @foreach ($headerHours as $h)
+                                            <div class="gantt-hour-cell"></div>
+                                        @endforeach
+                                    </div>
+
+                                    {{-- Blocks --}}
+                                    @foreach ($row['blocks'] as $b)
+                                        @php
+                                            $left = (($b['start'] - $timelineStart) / $timelineHours) * 100;
+                                            $width = (($b['end'] - $b['start']) / $timelineHours) * 100;
+                                            $isActive = $nowDecimal >= $b['start'] && $nowDecimal < $b['end'];
+                                        @endphp
+                                        <div class="gantt-block {{ $isActive ? 'active' : '' }}"
+                                            style="left:{{ $left }}%;width:{{ $width }}%;background:{{ $b['color'] }};
+                                   {{ $isActive ? 'outline:2.5px solid ' . $b['color'] . ';outline-offset:2px' : '' }}"
+                                            title="{{ $b['label'] }} ({{ sprintf('%02d:00', $b['start']) }}–{{ sprintf('%02d:00', $b['end']) }})">
+                                            <span class="truncate">{{ $b['icon'] }} {{ $b['label'] }}</span>
+                                            @if ($isActive)
+                                                <span
+                                                    class="ml-1.5 px-1.5 py-0.5 bg-white/25 rounded text-[9px] font-bold flex-shrink-0">SEKARANG</span>
+                                            @endif
+                                        </div>
+                                    @endforeach
+
+                                    {{-- NOW needle — only on first row, span all rows via JS --}}
+                                    @if ($loop->first)
+                                        <div class="now-needle" id="now-needle" style="left:{{ $needlePct }}%">
+                                            <div class="now-label" id="now-label">{{ now()->format('H:i') }}</div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+
+                    </div>
+                </div>
+
+                {{-- Mobile legend --}}
+                <div class="flex flex-wrap gap-3 mt-4 lg:hidden">
+                    @foreach ([['#10b981', 'PKL / Kerja'], ['#3b82f6', 'Kuliah'], ['#f97316', 'Skripsi / Deep Work'], ['#8b5cf6', 'Freelance'], ['#94a3b8', 'Personal']] as [$c, $l])
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-sm flex-shrink-0" style="background:{{ $c }}"></span>
+                            <span class="text-xs text-stone-500 dark:text-stone-400">{{ $l }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Current activity highlight bar --}}
+            @php
+                $currentBlock = null;
+                $currentRowLabel = null;
+                foreach ($ganttRows as $row) {
+                    foreach ($row['blocks'] as $b) {
+                        if ($nowDecimal >= $b['start'] && $nowDecimal < $b['end']) {
+                            $currentBlock = $b;
+                            $currentRowLabel = $row['label'];
+                        }
+                    }
+                }
+            @endphp
+            @if ($currentBlock)
+                <div class="mx-5 mb-5 flex items-center gap-4 p-4 rounded-xl border-2"
+                    style="background:{{ $currentBlock['color'] }}18;border-color:{{ $currentBlock['color'] }}40">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
+                        style="background:{{ $currentBlock['color'] }}30">
+                        {{ $currentBlock['icon'] }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-stone-800 dark:text-white text-sm flex items-center gap-2">
+                            {{ $currentBlock['label'] }}
+                            <span class="text-[10px] px-2 py-0.5 rounded-full text-white font-bold animate-pulse"
+                                style="background:{{ $currentBlock['color'] }}">AKTIF SEKARANG</span>
+                        </p>
+                        <p class="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                            {{ $currentRowLabel }} ·
+                            {{ sprintf('%02d:00', $currentBlock['start']) }} –
+                            {{ sprintf('%02d:00', $currentBlock['end']) }} ·
+                            Sisa ~{{ round($currentBlock['end'] - $nowDecimal, 1) }} jam
+                        </p>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <p class="text-xs text-stone-400">Selesai</p>
+                        <p class="font-bold text-stone-800 dark:text-white text-sm">
+                            {{ sprintf('%02d:00', $currentBlock['end']) }}</p>
+                    </div>
+                </div>
+            @else
+                <div
+                    class="mx-5 mb-5 flex items-center gap-3 p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700">
+                    <i class="fa-solid fa-mug-hot text-stone-400 text-lg"></i>
+                    <p class="text-sm text-stone-500 dark:text-stone-400">Tidak ada aktivitas terjadwal saat ini. Waktu
+                        bebas — istirahat atau kerjakan tugas tambahan!</p>
+                </div>
+            @endif
+        </div>
+
+        {{-- ─── 2-COLUMN: Eisenhower + Quick Stats ────────────────────────── --}}
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+
+            {{-- Eisenhower Matrix --}}
+            <div
+                class="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm overflow-hidden">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-stone-100 dark:border-stone-800">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                            <i class="fa-solid fa-crosshairs text-orange-500 text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-stone-800 dark:text-white text-sm">Eisenhower Matrix</h3>
+                            <p class="text-[11px] text-stone-400">Prioritas berdasarkan urgensi & kepentingan</p>
+                        </div>
+                    </div>
+                    <button onclick="openModal('modal-add-focus-task')"
+                        class="flex items-center gap-1.5 px-3 py-1.5 bg-stone-800 dark:bg-stone-700 hover:bg-stone-900 text-white text-xs font-medium rounded-xl transition-colors">
+                        <i class="fa-solid fa-plus text-[10px]"></i> Tugas
+                    </button>
+                </div>
+                <div class="grid grid-cols-2 gap-px bg-stone-100 dark:bg-stone-800">
+                    <div class="bg-white dark:bg-stone-900 p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                            <span class="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">Do
+                                First</span>
+                            <span class="ml-auto text-[10px] text-stone-400">Urgent+Penting</span>
+                        </div>
+                        <div class="space-y-2" id="q1-tasks">
+                            @forelse ($eisenhowerTasks['q1'] as $task)
+                                <div class="priority-do bg-red-50 dark:bg-red-900/10 rounded-r-xl p-2.5">
+                                    <p class="text-sm font-medium text-stone-800 dark:text-white">{{ $task->title }}</p>
+                                    <span
+                                        class="text-[10px] text-stone-400">{{ $task->due_date ? $task->due_date->isoFormat('D MMM') : 'Tanpa deadline' }}</span>
+                                </div>
+                            @empty
+                                <p class="text-xs text-stone-400 italic">Tidak ada tugas prioritas 1</p>
+                            @endforelse
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-stone-900 p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                            <span
+                                class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Schedule</span>
+                            <span class="ml-auto text-[10px] text-stone-400">Tidak Urgent+Penting</span>
+                        </div>
+                        <div class="space-y-2" id="q2-tasks">
+                            @forelse ($eisenhowerTasks['q2'] as $task)
+                                <div class="priority-schedule bg-blue-50 dark:bg-blue-900/10 rounded-r-xl p-2.5">
+                                    <p class="text-sm font-medium text-stone-800 dark:text-white">{{ $task->title }}</p>
+                                    <span
+                                        class="text-[10px] text-stone-400">{{ $task->due_date ? $task->due_date->isoFormat('D MMM') : 'Flexible' }}</span>
+                                </div>
+                            @empty
+                                <p class="text-xs text-stone-400 italic">Tidak ada tugas prioritas 2</p>
+                            @endforelse
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-stone-900 p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+                            <span
+                                class="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider">Delegate</span>
+                            <span class="ml-auto text-[10px] text-stone-400">Urgent+Tidak Penting</span>
+                        </div>
+                        <div class="space-y-2" id="q3-tasks">
+                            @forelse ($eisenhowerTasks['q3'] as $task)
+                                <div class="priority-delegate bg-orange-50 dark:bg-orange-900/10 rounded-r-xl p-2.5">
+                                    <p class="text-sm font-medium text-stone-800 dark:text-white">{{ $task->title }}</p>
+                                    <span
+                                        class="text-[10px] text-stone-400">{{ $task->due_date ? $task->due_date->isoFormat('D MMM') : 'Hari ini' }}</span>
+                                </div>
+                            @empty
+                                <p class="text-xs text-stone-400 italic">Tidak ada tugas prioritas 3</p>
+                            @endforelse
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-stone-900 p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-2.5 h-2.5 rounded-full bg-stone-400"></span>
+                            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider">Eliminate</span>
+                            <span class="ml-auto text-[10px] text-stone-400">Tidak Urgent+Tidak Penting</span>
+                        </div>
+                        <div class="space-y-2" id="q4-tasks">
+                            @forelse ($eisenhowerTasks['q4'] as $task)
+                                <div class="priority-eliminate bg-stone-50 dark:bg-stone-800 rounded-r-xl p-2.5">
+                                    <p class="text-sm font-medium text-stone-800 dark:text-white">{{ $task->title }}</p>
+                                    <span
+                                        class="text-[10px] text-stone-400">{{ $task->due_date ? $task->due_date->isoFormat('D MMM') : 'Kapanpun' }}</span>
+                                </div>
+                            @empty
+                                <p class="text-xs text-stone-400 italic">Tidak ada tugas prioritas 4</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Right: AI Recommendation + Quick access --}}
+            <div class="space-y-4">
+                {{-- AI recs --}}
+                <div
+                    class="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm p-5">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div
+                            class="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                            <i class="fa-solid fa-brain text-white text-sm"></i>
+                        </div>
+                        <h3 class="font-bold text-stone-800 dark:text-white text-sm">Rekomendasi Sistem</h3>
+                    </div>
+                    <div class="space-y-2.5">
+                        @php
+                            $recs = [
+                                [
+                                    'fa-fire',
+                                    'text-red-500 bg-red-50 dark:bg-red-900/20',
+                                    'Prioritas Utama',
+                                    'Selesaikan Laporan PKL sebelum jam 12.00. Deadline besok.',
+                                ],
+                                [
+                                    'fa-bolt',
+                                    'text-blue-500 bg-blue-50 dark:bg-blue-900/20',
+                                    'Deep Work Window',
+                                    'Jam 19:00–22:00 adalah waktu terbaik untuk skripsi.',
+                                ],
+                                [
+                                    'fa-coins',
+                                    'text-amber-500 bg-amber-50 dark:bg-amber-900/20',
+                                    'Keuangan',
+                                    'Budget makan bulan ini sudah 75%. Pertimbangkan masak sendiri.',
+                                ],
+                            ];
+                        @endphp
+                        @foreach ($recs as [$ic, $cls, $t, $d])
+                            <div class="flex items-start gap-3 p-3 {{ $cls }} rounded-xl">
+                                <i
+                                    class="fa-solid {{ $ic }} {{ $cls }} mt-0.5 text-sm flex-shrink-0"></i>
+                                <div>
+                                    <p class="text-xs font-bold text-stone-800 dark:text-white">{{ $t }}</p>
+                                    <p class="text-xs text-stone-500 dark:text-stone-400 mt-0.5 leading-relaxed">
+                                        {{ $d }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Quick access --}}
+                <div
+                    class="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm p-5">
+                    <h3 class="font-bold text-stone-800 dark:text-white text-sm mb-3">Akses Cepat</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        @foreach ([[route('dashboard.finance'), 'fa-wallet', 'Finance', 'bg-amber-50 dark:bg-amber-900/20  text-amber-600'], [route('dashboard.academic'), 'fa-graduation-cap', 'Akademik', 'bg-blue-50 dark:bg-blue-900/20    text-blue-600'], [route('dashboard.pkl'), 'fa-briefcase', 'PKL', 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600'], [route('dashboard.investments'), 'fa-chart-line', 'Investasi', 'bg-purple-50 dark:bg-purple-900/20 text-purple-600']] as [$url, $icon, $label, $cls])
+                            <a href="{{ $url }}"
+                                class="flex items-center gap-2.5 p-3 {{ $cls }} rounded-xl hover:opacity-80 transition-opacity text-sm font-medium">
+                                <i class="fa-solid {{ $icon }} text-sm"></i> {{ $label }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {{-- ─── MODAL: TAMBAH TUGAS ────────────────────────────────────────── --}}
+    <div id="modal-add-focus-task"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 flex">
+        <div
+            class="bg-white dark:bg-stone-900 rounded-2xl w-full max-w-md shadow-2xl border border-stone-200 dark:border-stone-800">
+            <div class="flex items-center justify-between p-6 border-b border-stone-100 dark:border-stone-800">
+                <h3 class="font-bold text-stone-900 dark:text-white">Tambah Tugas Prioritas</h3>
+                <button onclick="closeModal('modal-add-focus-task')" class="text-stone-400 hover:text-stone-700"><i
+                        class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">Judul Tugas
+                        *</label>
+                    <input type="text" id="ft-title"
+                        class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-400 focus:outline-none dark:bg-stone-800 dark:text-white"
+                        placeholder="Apa yang harus dikerjakan?">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">Kuadran
+                            *</label>
+                        <select id="ft-quadrant"
+                            class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-400 focus:outline-none dark:bg-stone-800 dark:text-white">
+                            <option value="q1">🔴 Do First</option>
+                            <option value="q2">🔵 Schedule</option>
+                            <option value="q3">🟠 Delegate</option>
+                            <option value="q4">⚪ Eliminate</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">Deadline</label>
+                        <input type="date" id="ft-deadline"
+                            class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-400 focus:outline-none dark:bg-stone-800 dark:text-white"
+                            value="{{ now()->format('Y-m-d') }}">
+                    </div>
+                </div>
+                <div>
+                    <label
+                        class="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">Kategori</label>
+                    <select id="ft-category"
+                        class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-400 focus:outline-none dark:bg-stone-800 dark:text-white">
+                        <option>Skripsi</option>
+                        <option>PKL</option>
+                        <option>Kuliah</option>
+                        <option>Freelance</option>
+                        <option>Creative</option>
+                        <option>Personal</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3 px-6 pb-6">
+                <button onclick="closeModal('modal-add-focus-task')"
+                    class="flex-1 py-2.5 border border-stone-300 dark:border-stone-700 rounded-xl text-stone-600 dark:text-stone-300 text-sm hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">Batal</button>
+                <button onclick="saveFocusTask()"
+                    class="flex-1 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
+                    <i class="fa-solid fa-plus mr-1.5"></i>Tambah
+                </button>
+            </div>
+        </div>
     </div>
 @endsection
 
 @push('scripts')
     <script>
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            initDashboard();
-            loadPriorityRecommendations();
+        // ── Live clock ──────────────────────────────────────────────────────
+        (function tickClock() {
+            const el = document.getElementById('live-clock');
+            const nl = document.getElementById('now-label');
+            if (el) {
+                const n = new Date();
+                const ts = n.toTimeString().slice(0, 5);
+                el.textContent = ts;
+                if (nl) nl.textContent = ts;
+
+                // Update needle position
+                const h = n.getHours() + n.getMinutes() / 60;
+                const pct = Math.max(0, Math.min(100, ((h - 6) / 17) * 100));
+                const needle = document.getElementById('now-needle');
+                if (needle) needle.style.left = pct + '%';
+            }
+            setTimeout(tickClock, 15000); // update every 15s
+        })();
+
+        // ── Extend needle height to cover all rows ──────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const needle = document.getElementById('now-needle');
+            const grid = document.getElementById('gantt-grid');
+            if (needle && grid) {
+                const gridH = grid.offsetHeight;
+                needle.style.height = gridH + 'px';
+                needle.style.top = '28px'; // offset header
+            }
+
+            // Scroll gantt to show current time
+            const pct = {{ $needlePct }};
+            const wrap = document.querySelector('.gantt-wrap');
+            if (wrap) {
+                const scrollTo = (wrap.scrollWidth * pct / 100) - (wrap.clientWidth / 2);
+                wrap.scrollLeft = Math.max(0, scrollTo);
+            }
         });
 
-        function initDashboard() {
-            // Time simulation
-            initTimeSimulation();
-
-            // Update clock display
-            updateClockDisplay();
+        function openModal(id) {
+            document.getElementById(id)?.classList.remove('hidden');
+            document.body.classList.add('modal-open');
         }
 
-        function loadPriorityRecommendations() {
-            // In a real app, this would fetch from API
-            // For now, we'll use the static data from the template
-            console.log('Loading priority recommendations...');
+        function closeModal(id) {
+            document.getElementById(id)?.classList.add('hidden');
+            document.body.classList.remove('modal-open');
         }
 
-        function updateClockDisplay() {
-            const timeInput = document.getElementById('time-simulation');
-            const clockDisplay = document.querySelector('#current-schedule-badge');
-            if (timeInput && clockDisplay) {
-                const time = timeInput.value;
-                const hour = parseInt(time.split(':')[0]);
-
-                // Update schedule badge based on time
-                if (hour >= 8 && hour < 12) {
-                    clockDisplay.innerHTML = '<i class="fa-solid fa-clock mr-1"></i>PKL Half Day';
-                    clockDisplay.className = 'bg-emerald-500 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium';
-                } else if (hour >= 13 && hour < 17) {
-                    clockDisplay.innerHTML = '<i class="fa-solid fa-clock mr-1"></i>Kuliah & Praktikum';
-                    clockDisplay.className = 'bg-blue-500 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium';
-                } else if (hour >= 19 && hour < 23) {
-                    clockDisplay.innerHTML = '<i class="fa-solid fa-clock mr-1"></i>Skripsi/Freelance';
-                    clockDisplay.className = 'bg-orange-500 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium';
-                } else {
-                    clockDisplay.innerHTML = '<i class="fa-solid fa-clock mr-1"></i>Waktu Bebas';
-                    clockDisplay.className = 'bg-gray-500 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium';
-                }
-            }
-        }
-
-        function updateDashboardTime(val) {
-            // Update time display and schedule
-            const hours = String(val).padStart(2, '0');
-            document.querySelector('input#time-simulation').value = hours + ':00';
-            updateClockDisplay();
-
-            // You could also update other time-based elements here
-            console.log('Time updated to:', hours + ':00');
-        }
-
-        function startTask(taskId) {
-            // Show loading state
-            const button = event.target;
-            const originalText = button.innerHTML;
-            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i>Memulai...';
-            button.disabled = true;
-
-            // In a real app, this would make an API call
-            setTimeout(() => {
-                button.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Dimulai';
-                button.className =
-                    'mt-2 w-full py-1 bg-emerald-500 text-white rounded text-xs font-medium transition-colors';
-
-                // Show notification
-                showNotification('Task berhasil dimulai! Fokus dan semangat!', 'success');
-
-                // Reset button after 2 seconds
-                setTimeout(() => {
-                    button.innerHTML = originalText;
-                    button.disabled = false;
-                    button.className =
-                        'mt-2 w-full py-1 bg-orange-500 hover:bg-orange-600 text-white rounded text-xs font-medium transition-colors';
-                }, 2000);
-            }, 1000);
-        }
-
-        function toggleTaskComplete(taskId) {
-            const taskItem = document.querySelector(`[data-task-id="${taskId}"]`);
-            if (!taskItem) return;
-
-            const checkbox = taskItem.querySelector('.w-6.h-6');
-            const title = taskItem.querySelector('h4');
-            const isCompleted = checkbox.classList.contains('bg-emerald-500');
-
-            if (isCompleted) {
-                // Mark as incomplete
-                checkbox.className =
-                    'w-6 h-6 rounded-full border-2 border-stone-300 dark:border-stone-600 flex items-center justify-center';
-                checkbox.innerHTML = '';
-                title.classList.remove('line-through');
-                title.classList.add('text-stone-800', 'dark:text-white');
-            } else {
-                // Mark as complete
-                checkbox.className =
-                    'w-6 h-6 rounded-full border-2 bg-emerald-500 border-emerald-500 flex items-center justify-center';
-                checkbox.innerHTML = '<i class="fa-solid fa-check text-white text-xs"></i>';
-                title.classList.add('line-through');
-                title.classList.remove('text-stone-800', 'dark:text-white');
-                title.classList.add('text-stone-500', 'dark:text-stone-400');
-
-                // Show notification
-                showNotification('Task selesai! Bagus!', 'success');
+        function saveFocusTask() {
+            const title = document.getElementById('ft-title').value.trim();
+            const quadrant = document.getElementById('ft-quadrant').value;
+            const deadline = document.getElementById('ft-deadline').value;
+            const category = document.getElementById('ft-category').value;
+            if (!title) {
+                alert('Isi judul tugas dulu');
+                return;
             }
 
-            // In a real app, make API call to update task status
-            fetch(`/dashboard/tasks/${taskId}/toggle`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                }).then(response => response.json())
-                .then(data => {
-                    if (!data.success) {
-                        // Revert on error
-                        if (isCompleted) {
-                            checkbox.className =
-                                'w-6 h-6 rounded-full border-2 bg-emerald-500 border-emerald-500 flex items-center justify-center';
-                            checkbox.innerHTML = '<i class="fa-solid fa-check text-white text-xs"></i>';
-                            title.classList.add('line-through');
-                        } else {
-                            checkbox.className =
-                                'w-6 h-6 rounded-full border-2 border-stone-300 dark:border-stone-600 flex items-center justify-center';
-                            checkbox.innerHTML = '';
-                            title.classList.remove('line-through');
-                        }
-                    }
-                });
+            const colors = {
+                q1: 'priority-do bg-red-50 dark:bg-red-900/10',
+                q2: 'priority-schedule bg-blue-50 dark:bg-blue-900/10',
+                q3: 'priority-delegate bg-orange-50 dark:bg-orange-900/10',
+                q4: 'priority-eliminate bg-stone-50 dark:bg-stone-800'
+            };
+            const el = document.createElement('div');
+            el.className = colors[quadrant] + ' rounded-r-xl p-2.5 mt-2';
+            el.innerHTML =
+                `<p class="text-sm font-medium text-stone-800 dark:text-white">${title}</p><span class="text-[10px] text-stone-400">${category}${deadline ? ' · ' + deadline : ''}</span>`;
+            document.getElementById(quadrant + '-tasks')?.appendChild(el);
+            closeModal('modal-add-focus-task');
+            document.getElementById('ft-title').value = '';
+
+            const t = document.createElement('div');
+            t.className =
+                'fixed bottom-6 right-6 z-[9999] flex items-center gap-2 px-4 py-3 bg-emerald-500 text-white text-sm font-medium rounded-2xl shadow-xl';
+            t.innerHTML = '<i class="fa-solid fa-check-circle"></i> Tugas berhasil ditambahkan!';
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
         }
-
-        function editTask(taskId) {
-            // In a real app, this would open an edit modal
-            alert(`Edit task ${taskId} - Fitur ini akan dibuka di modal edit`);
-            console.log('Edit task:', taskId);
-        }
-
-
-        function initTimeSimulation() {
-            const timeInput = document.getElementById('time-simulation');
-            if (timeInput) {
-                // Set initial time to current time
-                const now = new Date();
-                timeInput.value = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2,
-                    '0');
-
-                timeInput.addEventListener('change', function() {
-                    updateClockDisplay();
-                    // You could also trigger a re-render of time-sensitive content here
-                });
-            }
-        }
-
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 flex items-center ${
-            type === 'success' ? 'bg-emerald-500 text-white' :
-            type === 'error' ? 'bg-red-500 text-white' :
-            'bg-orange-500 text-white'
-        } animate-fade-in-up`;
-            notification.innerHTML = `
-            <i class="fa-solid ${type === 'success' ? 'fa-check' : 'fa-info'} mr-2"></i>
-            <span>${message}</span>
-        `;
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
-            }, 3000);
-        }
-
-        // Add CSS for animation
-        const style = document.createElement('style');
-        style.textContent = `
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .animate-fade-in-up {
-            animation: fadeInUp 0.5s ease-out;
-        }
-    `;
-        document.head.appendChild(style);
     </script>
 @endpush

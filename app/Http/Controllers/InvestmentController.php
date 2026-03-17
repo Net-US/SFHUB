@@ -125,11 +125,16 @@ class InvestmentController extends Controller
             'symbol'             => 'required|string|max:20',
             'type'               => 'required|in:crypto,stocks,mutual-fund,gold,bonds,etf,other',
             'current_price'      => 'required|numeric|min:0',
-            'finance_account_id' => 'nullable|integer',  // ← platform/akun
+            'finance_account_id' => 'nullable|integer',
             'notes'              => 'nullable|string|max:500',
+            // ── Setup Awal (kondisi saat ini, opsional) ───────────────────
+            // User tidak tahu riwayat pembelian tapi tahu kondisi sekarang:
+            // berapa uang yang sudah diinvestasikan & berapa unit yang dimiliki
+            'initial_value'    => 'nullable|numeric|min:0',   // nilai investasi saat ini (Rp)
+            'initial_quantity' => 'nullable|numeric|min:0',   // jumlah unit/koin yang dimiliki
+            'initial_return_pct' => 'nullable|numeric',       // return % (opsional, untuk hitung modal)
         ]);
 
-        // Kalau pilih akun, pastikan milik user ini
         if (!empty($data['finance_account_id'])) {
             FinanceAccount::where('id', $data['finance_account_id'])
                 ->where('user_id', Auth::id())
@@ -137,18 +142,118 @@ class InvestmentController extends Controller
                 ->firstOrFail();
         }
 
-        $data['user_id']       = Auth::id();
-        $data['total_invested'] = 0;
-        $data['total_quantity'] = 0;
-        $data['average_price']  = 0;
-        $data['symbol']         = strtoupper($data['symbol']);
+        $data['user_id'] = Auth::id();
+        $data['symbol']  = strtoupper($data['symbol']);
 
-        $instrument = InvestmentInstrument::create($data);
+        // ── Hitung total_invested & total_quantity dari setup awal ────────
+        // Logika: user tahu nilai sekarang dan return %, bisa hitung modal.
+        // Jika tidak ada return % → anggap modal = nilai sekarang (breakeven).
+        $initialValue    = (float) ($data['initial_value']    ?? 0);
+        $initialQuantity = (float) ($data['initial_quantity'] ?? 0);
+        $returnPct       = isset($data['initial_return_pct']) ? (float) $data['initial_return_pct'] : null;
+        $currentPrice    = (float) $data['current_price'];
+
+        if ($initialValue > 0 || $initialQuantity > 0) {
+            // Hitung modal dari return %: modal = nilai_sekarang / (1 + return/100)
+            if ($returnPct !== null && $returnPct != 0) {
+                $computedModal = $initialValue / (1 + $returnPct / 100);
+            } elseif ($initialValue > 0) {
+                // Tidak tahu return → anggap modal = nilai sekarang (return 0%)
+                $computedModal = $initialValue;
+            } else {
+                $computedModal = 0;
+            }
+
+            // Hitung quantity dari current_price jika tidak diisi
+            $computedQty = $initialQuantity > 0
+                ? $initialQuantity
+                : ($currentPrice > 0 ? $initialValue / $currentPrice : 0);
+
+            $data['total_invested'] = round($computedModal, 2);
+            $data['total_quantity'] = round($computedQty, 8);
+            $data['average_price']  = $computedQty > 0
+                ? round($computedModal / $computedQty, 8)
+                : 0;
+
+            // Buat satu record pembelian "Setup Awal" sebagai referensi historis
+            // Ini bukan pembelian nyata, hanya penanda kondisi awal
+            $instrument = InvestmentInstrument::create([
+                'user_id'            => $data['user_id'],
+                'finance_account_id' => $data['finance_account_id'] ?? null,
+                'name'               => $data['name'],
+                'symbol'             => $data['symbol'],
+                'type'               => $data['type'],
+                'current_price'      => $currentPrice,
+                'total_invested'     => $data['total_invested'],
+                'total_quantity'     => $data['total_quantity'],
+                'average_price'      => $data['average_price'],
+                'notes'              => $data['notes'] ?? null,
+            ]);
+
+            // Catat sebagai purchase "Setup Awal" jika ada data
+            if ($data['total_invested'] > 0 || $data['total_quantity'] > 0) {
+                $instrument->purchases()->create([
+                    'instrument_id'  => $instrument->id,
+                    'purchase_date'  => now()->toDateString(),
+                    'amount'         => $data['total_invested'],
+                    'quantity'       => $data['total_quantity'],
+                    'price_per_unit' => $data['average_price'],
+                    'fees'           => 0,
+                    'notes'          => 'Setup Awal — kondisi portfolio saat pertama kali dicatat',
+                ]);
+            }
+        } else {
+            // Tidak ada setup awal → instrumen baru, belum ada posisi
+            $instrument = InvestmentInstrument::create([
+                'user_id'            => $data['user_id'],
+                'finance_account_id' => $data['finance_account_id'] ?? null,
+                'name'               => $data['name'],
+                'symbol'             => $data['symbol'],
+                'type'               => $data['type'],
+                'current_price'      => $currentPrice,
+                'total_invested'     => 0,
+                'total_quantity'     => 0,
+                'average_price'      => 0,
+                'notes'              => $data['notes'] ?? null,
+            ]);
+        }
 
         return response()->json([
             'success'    => true,
-            'message'    => 'Instrumen berhasil ditambahkan.',
+            'message'    => 'Instrumen berhasil ditambahkan.' . ($initialValue > 0 ? ' Setup awal dicatat.' : ''),
             'instrument' => $this->formatInstrument($instrument->load(['purchases', 'financeAccount'])),
+        ]);
+    }
+
+    /**
+     * Update kondisi saat ini secara manual (jika user lupa update atau ingin
+     * koreksi total_invested/quantity tanpa menghapus history pembelian).
+     * Mirip "edit saldo" di rekening bank.
+     */
+    public function updatePosition(Request $request, int $id)
+    {
+        $instrument = $this->ownInstrument($id);
+
+        $data = $request->validate([
+            'total_invested' => 'required|numeric|min:0',
+            'total_quantity' => 'required|numeric|min:0',
+            'current_price'  => 'nullable|numeric|min:0',
+            'notes'          => 'nullable|string|max:500',
+        ]);
+
+        // Hitung ulang average price
+        $data['average_price'] = $data['total_quantity'] > 0
+            ? round($data['total_invested'] / $data['total_quantity'], 8)
+            : 0;
+
+        $instrument->update($data);
+
+        $fresh = $instrument->fresh();
+
+        return response()->json([
+            'success'    => true,
+            'message'    => 'Posisi berhasil diupdate.',
+            'instrument' => $this->formatInstrument($fresh->load(['purchases', 'financeAccount'])),
         ]);
     }
 

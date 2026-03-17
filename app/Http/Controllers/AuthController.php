@@ -25,20 +25,30 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
+        $request->validate([
+            'login'    => ['required', 'string'],
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
+        $loginField = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $credentials = [
+            $loginField => $request->login,
+            'password'  => $request->password,
+        ];
 
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $user = Auth::user();
+            if (isset($user->is_active) && !$user->is_active) {
+                Auth::logout();
+                return back()->withErrors(['login' => 'Akun Anda telah dinonaktifkan.'])->onlyInput('login');
+            }
+            $request->session()->regenerate();
             return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->onlyInput('email');
+            'login' => 'Email/username atau password salah.',
+        ])->onlyInput('login');
     }
 
     /**
@@ -70,18 +80,28 @@ class AuthController extends Controller
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
         }
 
+        // Auto-generate username from name
+        $baseUsername = strtolower(str_replace(' ', '', $request->name));
+        $username     = $baseUsername;
+        $counter      = 1;
+        while (User::where('username', $username)->exists()) {
+            $username = $baseUsername . $counter++;
+        }
+
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'avatar' => $avatarPath,
-            'role' => $request->role,
-            'plan' => $request->plan,
+            'name'      => $request->name,
+            'username'  => $username,
+            'email'     => $request->email,
+            'password'  => Hash::make($request->password),
+            'avatar'    => $avatarPath,
+            'role'      => $request->role,
+            'is_active' => true,
+            'plan'      => $request->plan,
             'preferences' => json_encode([
-                'theme' => 'light',
+                'theme'         => 'light',
                 'notifications' => true,
-                'language' => 'id',
-                'timezone' => 'Asia/Jakarta',
+                'language'      => 'id',
+                'timezone'      => 'Asia/Jakarta',
             ]),
         ]);
 

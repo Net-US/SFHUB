@@ -96,6 +96,14 @@ class DashboardController extends Controller
         $timeBlockingData = $this->getTimeBlockingData($user, $now);
         $prioritySummary = $this->getPrioritySummary($user, $now);
 
+        // Eisenhower Matrix tasks
+        $eisenhowerTasks = [
+            'q1' => $user->tasks()->where('priority', 'urgent-important')->whereNotIn('status', ['done', 'archived'])->take(5)->get(),
+            'q2' => $user->tasks()->where('priority', 'important-not-urgent')->whereNotIn('status', ['done', 'archived'])->take(5)->get(),
+            'q3' => $user->tasks()->where('priority', 'urgent-not-important')->whereNotIn('status', ['done', 'archived'])->take(5)->get(),
+            'q4' => $user->tasks()->where('priority', 'not-urgent-not-important')->whereNotIn('status', ['done', 'archived'])->take(5)->get(),
+        ];
+
         return view('dashboard.index', compact(
             'stats',
             'todayTasks',
@@ -109,8 +117,9 @@ class DashboardController extends Controller
             'now',
             'hour',
             'isSimulation',
-            'timeBlockingData',    // Data baru
-            'prioritySummary'      // Data baru
+            'timeBlockingData',
+            'prioritySummary',
+            'eisenhowerTasks'
         ));
     }
 
@@ -145,83 +154,182 @@ class DashboardController extends Controller
 
     public function academic()
     {
-        $title = 'Academic Hub';
         $user = Auth::user();
 
-        // Get all subjects for the user
-        $subjects = $user->subjects()->where('is_active', true)->orderBy('day_of_week')->orderBy('start_time')->get();
+        // Transform subjects to the array format the blade expects
+        $courses = $user->subjects()->where('is_active', true)
+            ->orderBy('day_of_week')
+            ->orderBy('start_time')
+            ->get()
+            ->map(function ($s) {
+                $start = $s->start_time ? $s->start_time->format('H:i') : '';
+                $end   = $s->end_time   ? $s->end_time->format('H:i')   : '';
+                return [
+                    'id'         => $s->id,
+                    'code'       => $s->code ?? '',
+                    'name'       => $s->name,
+                    'sks'        => $s->sks,
+                    'day'        => $s->day_of_week,
+                    'time'       => $start && $end ? "$start\u2013$end" : ($start ?: 'Fleksibel'),
+                    'room'       => $s->room ?? '',
+                    'progress'   => $s->progress ?? 0,
+                    'lecturer'   => $s->lecturer ?? '',
+                    'drive_link' => $s->drive_link ?? '',
+                    'notes'      => $s->notes ?? '',
+                ];
+            })->toArray();
 
-        // Get today's subjects
-        $todayIndex = now()->dayOfWeek == 0 ? 6 : now()->dayOfWeek - 1;
-        $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-        $todayName = $days[$todayIndex];
-        $todaySubjects = $subjects->where('day_of_week', $todayName);
+        // Transform tasks
+        $tasksRaw = $user->tasks()
+            ->whereIn('category', ['academic', 'skripsi'])
+            ->whereNotIn('status', ['archived'])
+            ->orderBy('due_date')
+            ->get();
 
-        // Calculate stats
-        $totalSks = $subjects->sum('sks');
-        $completedSks = $subjects->where('semester', '<', 5)->sum('sks'); // Assuming current semester is 5
-        $gpa = 3.5; // Placeholder - would come from actual grades
-        $currentSemester = 5; // Placeholder
+        $tasks = $tasksRaw->map(function ($t) {
+            $driveLink = '';
+            if (!empty($t->links)) {
+                $dl = collect($t->links)->firstWhere('type', 'drive');
+                $driveLink = $dl['url'] ?? '';
+            }
+            return [
+                'id'        => $t->id,
+                'title'     => $t->title,
+                'course_id' => $t->linked_subject_id,
+                'type'      => $t->task_type ?? $t->category,
+                'deadline'  => $t->due_date ? $t->due_date->format('Y-m-d') : null,
+                'status'    => $t->status,
+                'priority'  => $this->mapPriority($t->priority),
+                'drive_link' => $driveLink,
+                'notes'     => $t->notes ?? $t->description ?? '',
+            ];
+        })->toArray();
+
+        $tasksByCourse = collect($tasks)->groupBy('course_id');
+
+        // Thesis milestones
+        $milestones = $user->thesisMilestones()->orderBy('sort_order')->get()
+            ->map(fn($m) => [
+                'id'     => $m->id,
+                'label'  => $m->label,
+                'date'   => $m->target_date ?? '',
+                'done'   => (bool)$m->done,
+                'active' => (bool)$m->is_active,
+            ])->toArray();
+
+        // Thesis progress
+        $thesisCourse = collect($courses)
+            ->first(fn($c) => str_contains(strtolower($c['name']), 'skripsi') || str_contains($c['code'] ?? '', '499'));
+        $thesisProgress = $thesisCourse ? $thesisCourse['progress'] : 0;
 
         return view('dashboard.academic', compact(
-            'title',
-            'subjects',
-            'todaySubjects',
-            'todayName',
-            'totalSks',
-            'completedSks',
-            'gpa',
-            'currentSemester'
+            'courses',
+            'tasks',
+            'milestones',
+            'tasksByCourse',
+            'thesisProgress'
         ));
+    }
+
+    private function mapPriority(string $priority): string
+    {
+        return match ($priority) {
+            'urgent-important'         => 'high',
+            'important-not-urgent'     => 'medium',
+            'urgent-not-important'     => 'medium',
+            'not-urgent-not-important' => 'low',
+            default                    => $priority,
+        };
     }
 
     public function pkl()
     {
-        $title = 'PKL / Work Log';
         $user = Auth::user();
 
-        // Get PKL logs for the user
-        $pklLogs = $user->pklLogs()->latest()->get();
+        $pklInfoModel = $user->activePklInfo;
 
-        // Calculate totals
-        $totalDays = $pklLogs->count();
-        $totalHours = $pklLogs->sum('hours');
-        $targetDays = 120; // Default target
-        $progressPercentage = $targetDays > 0 ? ($totalDays / $targetDays) * 100 : 0;
+        // Build $pklInfo array for blade
+        $pklInfo = $pklInfoModel ? [
+            'id'               => $pklInfoModel->id,
+            'company'          => $pklInfoModel->company,
+            'department'       => $pklInfoModel->department ?? '',
+            'supervisor'       => $pklInfoModel->supervisor ?? '',
+            'supervisor_hp'    => $pklInfoModel->supervisor_phone ?? '',
+            'address'          => $pklInfoModel->address ?? '',
+            'start_date'       => $pklInfoModel->start_date ? $pklInfoModel->start_date->format('Y-m-d') : '',
+            'end_date'         => $pklInfoModel->end_date ? $pklInfoModel->end_date->format('Y-m-d') : '',
+            'hours_required'   => $pklInfoModel->hours_required ?? 720,
+            'hours_done'       => 0,
+            'allowance'        => $pklInfoModel->allowance ?? 0,
+        ] : null;
+
+        // Weekly schedule
+        $dayOrder   = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+        $schedItems = $user->pklSchedules()->get()->keyBy('day');
+
+        $schedule = array_map(function ($day) use ($schedItems) {
+            $s = $schedItems->get($day);
+            return [
+                'day'   => $day,
+                'start' => $s ? ($s->start_time ? $s->start_time->format('H:i') : '') : '',
+                'end'   => $s ? ($s->end_time   ? $s->end_time->format('H:i')   : '') : '',
+                'type'  => $s ? $s->type : 'off',
+                'notes' => $s ? ($s->notes ?? '') : 'Libur',
+            ];
+        }, $dayOrder);
+
+        // Activities
+        $activitiesRaw = $user->pklLogs()->latest('log_date')->take(50)->get();
+
+        $activities = $activitiesRaw->map(function ($a) {
+            return [
+                'id'       => $a->id,
+                'date'     => $a->log_date ? $a->log_date->format('Y-m-d') : now()->format('Y-m-d'),
+                'task'     => $a->task ?? $a->activity ?? '',
+                'category' => $a->category ?? 'Lainnya',
+                'hours'    => $a->hours ?? $a->working_hours ?? 0,
+                'status'   => $a->status ?? 'done',
+                'notes'    => $a->notes ?? $a->description ?? '',
+            ];
+        })->toArray();
+
+        // Computed stats
+        $hoursDone = collect($activities)->where('status', 'done')->sum('hours');
+        if ($pklInfo) {
+            $pklInfo['hours_done'] = $hoursDone;
+        }
+
+        $daysLeft = 0;
+        $pctDone  = 0;
+        $calPct   = 0;
+        $start    = null;
+        $end      = null;
+
+        if ($pklInfoModel) {
+            $daysLeft = $pklInfoModel->getDaysLeft();
+            $pctDone  = $pklInfoModel->getProgressPercentage($hoursDone);
+            $calPct   = $pklInfoModel->getCalendarProgressPercentage();
+            $start    = $pklInfoModel->start_date;
+            $end      = $pklInfoModel->end_date;
+        }
 
         return view('dashboard.pkl', compact(
-            'title',
-            'pklLogs',
-            'totalDays',
-            'totalHours',
-            'targetDays',
-            'progressPercentage'
+            'pklInfo',
+            'schedule',
+            'activities',
+            'hoursDone',
+            'daysLeft',
+            'pctDone',
+            'calPct',
+            'start',
+            'end'
         ));
     }
 
     public function productivity()
     {
-        $user = Auth::user();
-
-        // Get productivity logs
-        $productivityLogs = $user->productivityLogs()->latest()->take(30)->get();
-
-        // Calculate stats
-        $totalHours = $productivityLogs->sum('hours');
-        $completedTasks = $user->tasks()->where('status', 'done')->count();
-        $currentStreak = 0; // Calculate streak logic
-        $productivityScore = $productivityLogs->avg('focus_level') * 10 ?? 0;
-
-        return view('dashboard.productivity', compact(
-            'title',
-            'productivityLogs',
-            'totalHours',
-            'completedTasks',
-            'currentStreak',
-            'productivityScore'
-        ));
+        return app(\App\Http\Controllers\ProductivityController::class)->index();
     }
-
 
     public function finance()
     {

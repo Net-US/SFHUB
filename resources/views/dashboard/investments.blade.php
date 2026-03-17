@@ -293,6 +293,12 @@
                                                     title="Tautkan ke Platform">
                                                     <i class="fa-solid fa-link text-xs"></i>
                                                 </button>
+                                                <button
+                                                    onclick="openEditPosisiModal({{ $ins->id }}, '{{ addslashes($ins->name) }}', {{ $ins->total_invested }}, {{ $ins->total_quantity }}, {{ $ins->current_price }})"
+                                                    class="w-7 h-7 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center hover:bg-amber-200"
+                                                    title="Edit Posisi (koreksi modal/qty)">
+                                                    <i class="fa-solid fa-sliders text-xs"></i>
+                                                </button>
                                                 <button onclick="deleteInstrument({{ $ins->id }})"
                                                     class="w-7 h-7 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-500 flex items-center justify-center hover:bg-rose-200"
                                                     title="Hapus">
@@ -505,19 +511,24 @@
                     class="text-stone-400 hover:text-stone-700 dark:hover:text-white"><i
                         class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <form id="form-add-instrument" class="p-6 space-y-4">
+            <form id="form-add-instrument" class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                 @csrf
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="col-span-2"><label
-                            class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Nama *</label><input
-                            type="text" name="name" required
+                    {{-- Info dasar --}}
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Nama *</label>
+                        <input type="text" name="name" required
                             class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-stone-800 dark:text-white"
-                            placeholder="Misal: Bitcoin, Saham BBCA"></div>
-                    <div><label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Simbol
-                            *</label><input type="text" name="symbol" required
+                            placeholder="Misal: Bitcoin, Saham BBCA">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Simbol *</label>
+                        <input type="text" name="symbol" required
                             class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-stone-800 dark:text-white"
-                            placeholder="BTC, BBCA"></div>
-                    <div><label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Tipe *</label>
+                            placeholder="BTC, BBCA">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Tipe *</label>
                         <select name="type" required
                             class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-stone-800 dark:text-white">
                             <option value="crypto">Cryptocurrency</option>
@@ -529,19 +540,20 @@
                             <option value="other">Lainnya</option>
                         </select>
                     </div>
-                    <div class="col-span-2"><label
-                            class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Harga Saat Ini (Rp)
-                            *</label><input type="number" name="current_price" required min="0" step="any"
-                            class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-stone-800 dark:text-white"
-                            placeholder="0"></div>
                     <div class="col-span-2">
-                        <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
-                            Platform / Akun Investasi
-                            <span class="text-stone-400 font-normal">(Indodax, Ajaib, dll)</span>
-                        </label>
+                        <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Harga Saat Ini
+                            (Rp) *</label>
+                        <input type="number" name="current_price" id="inst-current-price" required min="0"
+                            step="any" oninput="calcInitialModal()"
+                            class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-stone-800 dark:text-white"
+                            placeholder="0">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Platform / Akun
+                            Investasi <span class="text-stone-400 font-normal">(Indodax, Ajaib, dll)</span></label>
                         <select name="finance_account_id"
                             class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-stone-800 dark:text-white">
-                            <option value="">-- Tanpa Platform (bisa diisi nanti) --</option>
+                            <option value="">-- Tanpa Platform --</option>
                             @foreach ($investmentAccounts as $acc)
                                 <option value="{{ $acc->id }}">{{ $acc->name }} (Rp
                                     {{ number_format($acc->balance, 0, ',', '.') }})</option>
@@ -553,11 +565,92 @@
                                     Finance</a>.</p>
                         @endif
                     </div>
-                    <div class="col-span-2"><label
-                            class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Catatan</label><input
-                            type="text" name="notes"
-                            class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-stone-800 dark:text-white"
-                            placeholder="Opsional"></div>
+                </div>
+
+                {{-- Setup Awal — kondisi portfolio saat ini --}}
+                <div class="border-t border-stone-200 dark:border-stone-700 pt-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <button type="button" onclick="toggleSetupAwal()" id="setup-awal-toggle"
+                            class="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span id="setup-awal-label">Isi kondisi portfolio saat ini (opsional)</span>
+                        </button>
+                    </div>
+
+                    <div id="setup-awal-fields" class="hidden space-y-4">
+                        {{-- Penjelasan kontekstual --}}
+                        <div
+                            class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-3">
+                            <p class="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">
+                                <i class="fa-solid fa-lightbulb mr-1"></i>Untuk apa ini?
+                            </p>
+                            <p class="text-xs text-blue-600 dark:text-blue-400">
+                                Jika kamu sudah punya BTC/saham tapi lupa riwayat pembeliannya, isi saja <strong>nilai
+                                    sekarang</strong> dan <strong>jumlah yang dimiliki</strong>.
+                                Sistem akan otomatis menghitung modal dari return % jika diisi.
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                                    Nilai Saat Ini (Rp)
+                                    <span class="text-stone-400 font-normal text-[11px]">total uang yang ada</span>
+                                </label>
+                                <input type="number" name="initial_value" id="inst-initial-value" min="0"
+                                    step="any" oninput="calcInitialModal()"
+                                    class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-stone-800 dark:text-white"
+                                    placeholder="Contoh: 1650000 untuk BTC">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                                    Jumlah yang Dimiliki
+                                    <span class="text-stone-400 font-normal text-[11px]">unit/koin</span>
+                                </label>
+                                <input type="number" name="initial_quantity" id="inst-initial-qty" min="0"
+                                    step="any" oninput="calcInitialModal()"
+                                    class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-stone-800 dark:text-white"
+                                    placeholder="Contoh: 0.00173 BTC">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                                    Return / Untung-Rugi (%)
+                                    <span class="text-stone-400 font-normal text-[11px]">jika tahu, digunakan menghitung
+                                        modal</span>
+                                </label>
+                                <input type="number" name="initial_return_pct" id="inst-return-pct" step="any"
+                                    oninput="calcInitialModal()"
+                                    class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-stone-800 dark:text-white"
+                                    placeholder="Contoh: 15.5 atau -8.2 (opsional)">
+                            </div>
+                        </div>
+
+                        {{-- Kalkulasi otomatis (preview) --}}
+                        <div id="setup-preview" class="hidden bg-stone-50 dark:bg-stone-800 rounded-xl p-3 space-y-1.5">
+                            <p class="text-xs font-semibold text-stone-600 dark:text-stone-300 mb-2">
+                                <i class="fa-solid fa-calculator mr-1"></i>Estimasi otomatis:
+                            </p>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-stone-500 dark:text-stone-400">Modal (perkiraan)</span>
+                                <span id="preview-modal" class="font-medium text-stone-700 dark:text-stone-300">—</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-stone-500 dark:text-stone-400">Harga rata-rata beli</span>
+                                <span id="preview-avg" class="font-medium text-stone-700 dark:text-stone-300">—</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-stone-500 dark:text-stone-400">Profit/Loss estimasi</span>
+                                <span id="preview-pl" class="font-medium">—</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Catatan</label>
+                    <input type="text" name="notes"
+                        class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none dark:bg-stone-800 dark:text-white"
+                        placeholder="Opsional">
                 </div>
             </form>
             <div class="flex gap-3 px-6 pb-6">
@@ -711,6 +804,70 @@
             </div>
         </div>
     </div>
+
+    {{-- MODAL: EDIT POSISI (koreksi manual total_invested & total_quantity) --}}
+    <div id="modal-edit-posisi"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 flex">
+        <div class="bg-white dark:bg-stone-900 rounded-2xl w-full max-w-md shadow-2xl">
+            <div class="flex justify-between items-center p-6 border-b border-stone-200 dark:border-stone-800">
+                <div>
+                    <h3 class="text-lg font-bold text-stone-900 dark:text-white" id="posisi-modal-title">Edit Posisi</h3>
+                    <p class="text-xs text-stone-400 mt-0.5">Koreksi manual jika data tidak akurat</p>
+                </div>
+                <button onclick="closeModal('modal-edit-posisi')"
+                    class="text-stone-400 hover:text-stone-700 dark:hover:text-white"><i
+                        class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="posisi-instrument-id">
+                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
+                    <p class="text-xs text-amber-700 dark:text-amber-400">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                        Seperti "edit saldo" di bank — gunakan jika modal/quantity tidak sesuai kenyataan.
+                        Pembelian sebelumnya tidak dihapus, tapi summary akan mengikuti nilai yang diisi di sini.
+                    </p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                        Total Modal yang Diinvestasikan (Rp) *
+                    </label>
+                    <input type="number" id="posisi-modal" min="0" step="any" oninput="calcPosisiAvg()"
+                        class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none dark:bg-stone-800 dark:text-white text-lg font-medium"
+                        placeholder="0">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                        Total Unit/Koin yang Dimiliki *
+                    </label>
+                    <input type="number" id="posisi-qty" min="0" step="any" oninput="calcPosisiAvg()"
+                        class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none dark:bg-stone-800 dark:text-white text-lg font-medium"
+                        placeholder="0">
+                </div>
+                <div class="bg-stone-50 dark:bg-stone-800 rounded-xl p-3">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-stone-500 dark:text-stone-400">Harga rata-rata beli (dihitung otomatis)</span>
+                        <span id="posisi-avg-display" class="font-bold text-stone-800 dark:text-white">—</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Update harga saat ini?
+                        <span class="text-stone-400 font-normal">(opsional)</span></label>
+                    <input type="number" id="posisi-price" min="0" step="any"
+                        class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:outline-none dark:bg-stone-800 dark:text-white"
+                        placeholder="Kosongkan jika tidak ingin ubah">
+                </div>
+            </div>
+            <div class="flex gap-3 px-6 pb-6">
+                <button onclick="closeModal('modal-edit-posisi')"
+                    class="flex-1 py-2.5 border border-stone-300 dark:border-stone-700 rounded-xl text-stone-600 dark:text-stone-300">Batal</button>
+                <button onclick="submitEditPosisi()"
+                    class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-medium">
+                    <i class="fa-solid fa-floppy-disk mr-1"></i>Simpan Posisi
+                </button>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @push('scripts')
@@ -735,31 +892,25 @@
             document.body.appendChild(el);
             setTimeout(() => el.remove(), 3500)
         }
-        // ── Core API helper (FINAL FIX) ──────────────────────────────────────────
-        // Kirim PUT/PATCH/DELETE langsung (bukan diubah jadi POST).
-        // fetch() mendukung semua HTTP method secara native.
-        // Yang penting: X-CSRF-TOKEN di header (bukan di body).
-        // Error 405 biasanya karena route belum terdaftar, BUKAN karena method-nya.
+        // ── Core API helper ───────────────────────────────────────────────────
+        // Laravel hanya menerima GET & POST secara native dari fetch/XHR.
+        // PUT/PATCH/DELETE dikirim sebagai POST + _method spoofing.
         async function api(method, url, data = null) {
             const token = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
             const upper = method.toUpperCase();
-
+            const spoof = ['PUT', 'PATCH', 'DELETE'].includes(upper);
+            const payload = Object.assign({}, data ?? {});
+            if (spoof) payload['_method'] = upper;
             const opts = {
-                method: upper, // kirim method sebenarnya langsung
+                method: spoof ? 'POST' : upper,
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': token,
                     'Accept': 'application/json',
                 },
+                body: JSON.stringify(payload),
             };
-
-            // Semua method kecuali GET/HEAD boleh punya body
-            if (!['GET', 'HEAD'].includes(upper)) {
-                opts.body = JSON.stringify(data ?? {});
-            }
-
             const res = await fetch(url, opts);
-
             if (res.status === 419) {
                 toast('Sesi habis, halaman akan di-refresh...', false);
                 setTimeout(() => location.reload(), 1500);
@@ -769,27 +920,14 @@
                 };
             }
             if (res.status === 405) {
-                // Route tidak ada — jangan pakai spoofing, tapi debug routenya
-                toast('Endpoint tidak ditemukan. Pastikan web.php sudah di-update dan php artisan route:clear sudah dijalankan.',
-                    false);
-                console.error('405 on:', upper, url);
+                toast('Method tidak diizinkan (405)', false);
                 return {
                     success: false,
-                    message: 'Method Not Allowed - route belum terdaftar'
-                };
-            }
-            if (!res.ok && res.status !== 422) {
-                const text = await res.text().catch(() => '');
-                console.error(`HTTP ${res.status}:`, text);
-                toast(`Error ${res.status}`, false);
-                return {
-                    success: false,
-                    message: `HTTP ${res.status}`
+                    message: 'Method Not Allowed'
                 };
             }
             return res.json();
         }
-
 
         function formToJson(id) {
             const fd = new FormData(document.getElementById(id));
@@ -915,6 +1053,7 @@
             <button onclick="closeModal('modal-detail');openUpdatePriceModal(${i.id},'${i.name.replace(/'/g,"\\'")}',${i.current_price})" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-medium">Update Harga</button>
             <button onclick="closeModal('modal-detail');document.getElementById('select-instrument').value='${i.id}';setPurchaseInstrument('${i.id}');openModal('modal-add-purchase')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium">Tambah Pembelian</button>
             <button onclick="closeModal('modal-detail');openLinkAccountModal(${i.id},'${i.name.replace(/'/g,"\\'")}');" class="px-4 py-2 bg-stone-600 hover:bg-stone-700 text-white rounded-xl text-sm font-medium">Tautkan Platform</button>
+            <button onclick="closeModal('modal-detail');openEditPosisiModal(${i.id},'${i.name.replace(/'/g,"\\'")}',${i.total_invested},${i.total_quantity},${i.current_price})" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-sm font-medium"><i class='fa-solid fa-sliders mr-1'></i>Edit Posisi</button>
         </div>
     `;
         }
@@ -927,6 +1066,101 @@
                 closeModal('modal-detail');
                 setTimeout(() => location.reload(), 800)
             } else toast(res.message, false)
+        }
+
+        // ── Toggle Setup Awal fields ──────────────────────────────────────
+        function toggleSetupAwal() {
+            const fields = document.getElementById('setup-awal-fields');
+            const label = document.getElementById('setup-awal-label');
+            const icon = document.getElementById('setup-awal-toggle').querySelector('i');
+            const hidden = fields.classList.toggle('hidden');
+            label.textContent = hidden ? 'Isi kondisi portfolio saat ini (opsional)' : 'Sembunyikan setup awal';
+            icon.className = hidden ? 'fa-solid fa-plus-circle' : 'fa-solid fa-minus-circle';
+        }
+
+        function calcInitialModal() {
+            const price = parseFloat(document.getElementById('inst-current-price')?.value) || 0;
+            const value = parseFloat(document.getElementById('inst-initial-value')?.value) || 0;
+            const qty = parseFloat(document.getElementById('inst-initial-qty')?.value) || 0;
+            const retPct = parseFloat(document.getElementById('inst-return-pct')?.value);
+            const preview = document.getElementById('setup-preview');
+
+            if (!preview) return;
+
+            // Hitung nilai
+            const hasData = value > 0 || qty > 0;
+            if (!hasData) {
+                preview.classList.add('hidden');
+                return;
+            }
+            preview.classList.remove('hidden');
+
+            let modal = 0;
+            if (!isNaN(retPct) && retPct !== 0 && value > 0) {
+                modal = value / (1 + retPct / 100);
+            } else if (value > 0) {
+                modal = value;
+            }
+
+            const computedQty = qty > 0 ? qty : (price > 0 && value > 0 ? value / price : 0);
+            const avgPrice = computedQty > 0 ? modal / computedQty : 0;
+            const pl = value - modal;
+
+            const fmt = (n) => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+            document.getElementById('preview-modal').textContent = modal > 0 ? fmt(modal) : '—';
+            document.getElementById('preview-avg').textContent = avgPrice > 0 ? fmt(avgPrice) : '—';
+            const plEl = document.getElementById('preview-pl');
+            if (modal > 0) {
+                plEl.textContent = (pl >= 0 ? '+' : '') + fmt(pl) + (modal > 0 ? ` (${((pl/modal)*100).toFixed(1)}%)` : '');
+                plEl.className = 'font-medium ' + (pl >= 0 ? 'text-emerald-600' : 'text-rose-600');
+            } else {
+                plEl.textContent = '—';
+                plEl.className = 'font-medium text-stone-400';
+            }
+        }
+
+        // ── Edit Posisi ───────────────────────────────────────────────────
+        function openEditPosisiModal(id, name, totalInvested, totalQty, currentPrice) {
+            document.getElementById('posisi-instrument-id').value = id;
+            document.getElementById('posisi-modal-title').textContent = 'Edit Posisi: ' + name;
+            document.getElementById('posisi-modal').value = totalInvested || '';
+            document.getElementById('posisi-qty').value = totalQty || '';
+            document.getElementById('posisi-price').value = '';
+            calcPosisiAvg();
+            openModal('modal-edit-posisi');
+        }
+
+        function calcPosisiAvg() {
+            const modal = parseFloat(document.getElementById('posisi-modal')?.value) || 0;
+            const qty = parseFloat(document.getElementById('posisi-qty')?.value) || 0;
+            const avg = qty > 0 ? modal / qty : 0;
+            const el = document.getElementById('posisi-avg-display');
+            if (el) el.textContent = avg > 0 ? 'Rp ' + Math.round(avg).toLocaleString('id-ID') : '—';
+        }
+
+        async function submitEditPosisi() {
+            const id = document.getElementById('posisi-instrument-id').value;
+            const modal = document.getElementById('posisi-modal').value;
+            const qty = document.getElementById('posisi-qty').value;
+            const price = document.getElementById('posisi-price').value;
+
+            if (!modal || !qty) {
+                toast('Isi total modal dan jumlah unit', false);
+                return;
+            }
+
+            const payload = {
+                total_invested: parseFloat(modal),
+                total_quantity: parseFloat(qty),
+            };
+            if (price) payload.current_price = parseFloat(price);
+
+            const res = await api('PATCH', `/investments/${id}/position`, payload);
+            if (res.success) {
+                toast(res.message);
+                closeModal('modal-edit-posisi');
+                setTimeout(() => location.reload(), 800);
+            } else toast(res.message, false);
         }
 
         // Chart

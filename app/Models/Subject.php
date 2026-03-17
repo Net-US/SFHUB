@@ -21,14 +21,18 @@ class Subject extends Model
         'room',
         'lecturer',
         'is_active',
+        'progress',
+        'drive_link',
+        'notes',
     ];
 
     protected $casts = [
-        'sks' => 'integer',
-        'semester' => 'integer',
-        'is_active' => 'boolean',
+        'sks'        => 'integer',
+        'semester'   => 'integer',
+        'is_active'  => 'boolean',
+        'progress'   => 'integer',
         'start_time' => 'datetime:H:i',
-        'end_time' => 'datetime:H:i',
+        'end_time'   => 'datetime:H:i',
     ];
 
     public function user()

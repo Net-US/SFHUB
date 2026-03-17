@@ -35,11 +35,14 @@
 
                     <div>
                         <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
-                            Email
+                            Email atau Username
                         </label>
-                        <input type="email" name="email" value="{{ old('email') }}" required
+                        <input type="text" name="login" value="{{ old('login') }}" required autofocus
                             class="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 dark:bg-stone-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
-                            placeholder="nama@email.com" />
+                            placeholder="email@contoh.com atau username" />
+                        @error('login')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div>

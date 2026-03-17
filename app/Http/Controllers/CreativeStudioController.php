@@ -93,13 +93,45 @@ class CreativeStudioController extends Controller
             ];
         }
 
+        // Build $projects array in the format the blade Kanban expects
+        $stageColorBorder = [
+            'script'     => 'border-l-4 border-slate-500',
+            'production' => 'border-l-4 border-orange-500',
+            'revision'   => 'border-l-4 border-amber-500',
+            'done'       => 'border-l-4 border-emerald-500',
+        ];
+        $allProjects = $user->tasks()
+            ->where('category', 'Creative')
+            ->whereNotIn('status', ['archived'])
+            ->get();
+
+        $stageMap = ['todo' => 'script', 'doing' => 'production', 'done' => 'done'];
+
+        $projects = $allProjects->map(function ($t) use ($stageMap, $stageColorBorder) {
+            $stage    = $t->workflow_stage && $t->workflow_stage !== 'none' ? $t->workflow_stage : ($stageMap[$t->status] ?? 'script');
+            $priority = match ($t->priority) {
+                'urgent-important'         => 'high',
+                'important-not-urgent'     => 'medium',
+                'urgent-not-important'     => 'medium',
+                'not-urgent-not-important' => 'low',
+                default                    => $t->priority ?? 'medium',
+            };
+            return [
+                'id'       => $t->id,
+                'title'    => $t->title,
+                'stage'    => $stage,
+                'type'     => $t->project_type ?? 'Personal',
+                'progress' => $t->progress ?? 0,
+                'deadline' => $t->due_date ? $t->due_date->format('d M') : 'Flexible',
+                'tags'     => $t->tags ?? [],
+                'color'    => $stageColorBorder[$stage] ?? 'border-l-4 border-stone-400',
+                'priority' => $priority,
+            ];
+        })->toArray();
+
         return view('dashboard.creative-studio', compact(
-            'todoTasks',
-            'doingTasks',
-            'doneTasks',
+            'projects',
             'stats',
-            'projectTypes',
-            'projectTypeCounts',
             'status',
             'projectType',
             'priority'
@@ -112,37 +144,41 @@ class CreativeStudioController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'project_type' => 'required|in:video_editing,graphic_design,motion_graphics,audio_production,script_writing,ui_ux_design,animation,photography,illustration,branding,social_media',
-            'priority' => 'required|in:urgent-important,important-not-urgent,urgent-not-important,not-urgent-not-important',
-            'due_date' => 'required|date',
-            'estimated_time' => 'nullable|string',
-            'tags' => 'nullable|array',
-            'tags.*' => 'string',
-            'links' => 'nullable|array',
-            'links.*.type' => 'required|string',
-            'links.*.url' => 'required|url',
-            'links.*.label' => 'nullable|string',
+            'title'          => 'required|string|max:255',
+            'description'    => 'nullable|string',
+            'project_type'   => 'nullable|string|max:100',
+            'priority'       => 'nullable|string',
+            'workflow_stage' => 'nullable|string',
+            'due_date'       => 'nullable|date',
+            'tags'           => 'nullable|array',
+            'tags.*'         => 'string',
         ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Create the project
+        // Map simple priority to internal format
+        $priorityMap = ['high' => 'urgent-important', 'medium' => 'important-not-urgent', 'low' => 'not-urgent-not-important'];
+        $stageStatusMap = ['script' => 'todo', 'production' => 'doing', 'revision' => 'doing', 'done' => 'done'];
+        $stage    = $request->input('workflow_stage', 'script');
+        $priority = $priorityMap[$request->input('priority', 'medium')] ?? $request->input('priority', 'important-not-urgent');
+
         $task = $user->tasks()->create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'category' => 'Creative',
-            'project_type' => $request->project_type,
-            'priority' => $request->priority,
-            'status' => 'todo',
-            'due_date' => $request->due_date,
-            'estimated_time' => $request->estimated_time,
-            'tags' => $request->tags,
-            'links' => $request->links,
-            'progress' => 0,
+            'title'          => $request->title,
+            'description'    => $request->description,
+            'category'       => 'Creative',
+            'project_type'   => $request->project_type,
+            'priority'       => $priority,
+            'status'         => $stageStatusMap[$stage] ?? 'todo',
+            'workflow_stage' => $stage,
+            'due_date'       => $request->due_date,
+            'tags'           => $request->tags,
+            'progress'       => 0,
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Proyek berhasil dibuat!', 'task' => $task]);
+        }
 
         return redirect()->route('dashboard.creative')
             ->with('success', 'Project kreatif berhasil ditambahkan!');
@@ -323,13 +359,58 @@ class CreativeStudioController extends Controller
         $user = Auth::user();
         $task = $user->tasks()->with('subtasks')->findOrFail($id);
 
-        return view('dashboard.creative-task-detail', compact('task'));
+        return response()->json([
+            'success' => true,
+            'task' => [
+                'id' => $task->id,
+                'title' => $task->title,
+                'description' => $task->description,
+                'project_type' => $task->project_type,
+                'priority' => $task->priority,
+                'status' => $task->status,
+                'workflow_stage' => $task->workflow_stage,
+                'progress' => $task->progress,
+                'due_date' => $task->due_date?->format('Y-m-d'),
+                'tags' => $task->tags ?? [],
+                'links' => $task->links ?? [],
+                'subtasks' => $task->subtasks->map(fn($s) => [
+                    'id' => $s->id,
+                    'title' => $s->title,
+                    'status' => $s->status,
+                    'progress' => $s->progress,
+                    'stage_key' => $s->stage_key,
+                    'stage_label' => $s->stage_label,
+                ]),
+                'workflow_stages' => $task->getWorkflowStages(),
+            ]
+        ]);
+    }
+
+    public function createDefaultSubtasks(Request $request, $taskId)
+    {
+        $user = Auth::user();
+        $task = $user->tasks()->findOrFail($taskId);
+
+        // Hanya buat jika belum ada subtasks
+        if ($task->subtasks()->count() === 0) {
+            $subtasks = $task->createDefaultSubtasks();
+            return response()->json([
+                'success' => true,
+                'message' => 'Workflow stages created!',
+                'subtasks' => $subtasks
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Subtasks already exist'
+        ]);
     }
 
     public function updateSubtask(Request $request, $taskId, $subtaskId)
     {
         $request->validate([
-            'status' => 'required|in:todo,doing,done',
+            'status' => 'required|in:pending,in_progress,completed',
             'progress' => 'nullable|integer|min:0|max:100',
         ]);
 
@@ -337,7 +418,7 @@ class CreativeStudioController extends Controller
         $task = $user->tasks()->findOrFail($taskId);
         $subtask = $task->subtasks()->findOrFail($subtaskId);
 
-        if ($request->status === 'done') {
+        if ($request->status === 'completed') {
             $subtask->markAsComplete();
         } else {
             $subtask->update([
@@ -345,15 +426,19 @@ class CreativeStudioController extends Controller
                 'progress' => $request->progress ?? $subtask->progress
             ]);
 
-            if ($request->status === 'doing' && !$subtask->started_at) {
+            if ($request->status === 'in_progress' && !$subtask->started_at) {
                 $subtask->start();
             }
         }
 
+        // Update parent task progress
+        $task->updateProgressFromSubtasks();
+
         return response()->json([
             'success' => true,
             'message' => 'Subtask berhasil diperbarui',
-            'task_progress' => $task->fresh()->progress
+            'task_progress' => $task->fresh()->progress,
+            'subtask' => $subtask->fresh()
         ]);
     }
 
@@ -375,13 +460,32 @@ class CreativeStudioController extends Controller
         ]);
 
         // Update parent task counters
-        $task->total_subtasks = $task->subtasks()->count();
-        $task->save();
+        $task->update([
+            'total_subtasks' => $task->subtasks()->count(),
+        ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Subtask berhasil ditambahkan',
             'subtask' => $subtask
         ]);
+    }
+
+    public function destroySubtask($taskId, $subtaskId)
+    {
+        $user = Auth::user();
+        $task = $user->tasks()->findOrFail($taskId);
+        $subtask = $task->subtasks()->findOrFail($subtaskId);
+        $subtask->delete();
+
+        // Update parent task counters
+        $completed = $task->subtasks()->where('status', 'completed')->count();
+        $task->update([
+            'total_subtasks' => $task->subtasks()->count(),
+            'completed_subtasks' => $completed,
+        ]);
+        $task->updateProgressFromSubtasks();
+
+        return response()->json(['success' => true, 'message' => 'Subtask dihapus']);
     }
 }

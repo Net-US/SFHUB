@@ -1,352 +1,195 @@
-<!-- resources/views/dashboard/general-tracker.blade.php -->
+{{-- resources/views/dashboard/general-tracker.blade.php --}}
 @extends('layouts.app-dashboard')
+@section('title', 'General Tracker | StudentHub')
+@section('page-title', 'General Tracker')
 
-@section('title', 'General Task Tracker')
+@push('styles')
+    <style>
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
+        .fade-up { animation: fadeUp .4s ease-out both }
+        .task-row { transition: background .12s }
+        .task-row:hover { background: #fafaf9 }
+        .dark .task-row:hover { background: #292524 }
+    </style>
+@endpush
 
 @section('content')
-    <div class="animate-fade-in-up">
-        <!-- Header -->
-        <div class="mb-8">
-            <h2 class="text-2xl font-bold text-stone-900 dark:text-white">General Task Tracker</h2>
-            <p class="text-stone-500 dark:text-stone-400 text-sm">
-                Kelola semua tugas non-akademik: kesehatan, pengembangan diri, organisasi, perawatan, dan lainnya.
-            </p>
+    @php
+        $allTasks = $allTasks ?? [];
+        $completedCount = $completedCount ?? 0;
+        $totalCount = $totalCount ?? 0;
+        $catCounts = $catCounts ?? collect();
+        $doneByCat = $doneByCat ?? collect();
+    @endphp
+
+    <div class="fade-up space-y-5">
+        {{-- Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <h2 class="text-2xl font-bold text-stone-900 dark:text-white">General Tracker</h2>
+                <p class="text-stone-400 text-xs">Semua tugas di luar akademik: kesehatan, personal, perawatan, dan lainnya</p>
+            </div>
+            <button onclick="openModal('modal-add-gtask')" class="flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-medium transition-colors self-start sm:self-auto">
+                <i class="fa-solid fa-plus text-xs"></i> Tambah Tugas
+            </button>
         </div>
 
-        <!-- Alert Messages -->
-        @if (session('success'))
-            <div
-                class="mb-4 p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-xl">
-                <div class="flex items-center">
-                    <i class="fa-solid fa-check-circle text-emerald-500 mr-3"></i>
-                    <span class="text-emerald-700 dark:text-emerald-300">{{ session('success') }}</span>
-                </div>
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl">
-                <div class="flex items-center">
-                    <i class="fa-solid fa-exclamation-circle text-red-500 mr-3"></i>
-                    <div>
-                        <span class="font-medium text-red-700 dark:text-red-300">Ada kesalahan:</span>
-                        <ul class="mt-1 text-sm text-red-600 dark:text-red-400">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800 shadow-sm">
-                <div class="flex items-center">
-                    <div
-                        class="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mr-4">
-                        <i class="fa-solid fa-list-check text-rose-600 dark:text-rose-400"></i>
+        {{-- Stats --}}
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            @foreach ([[$completedCount, 'Selesai', 'fa-circle-check', 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600'], [$totalCount - $completedCount, 'Belum', 'fa-clock', 'bg-rose-100 dark:bg-rose-900/30 text-rose-600'], [$totalCount, 'Total', 'fa-list-check', 'bg-blue-100 dark:bg-blue-900/30 text-blue-600'], [$catCounts->count(), 'Kategori', 'fa-tags', 'bg-amber-100 dark:bg-amber-900/30 text-amber-600']] as [$v, $l, $ic, $cls])
+                <div class="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm p-5 flex items-center gap-4">
+                    <div class="w-11 h-11 rounded-xl {{ $cls }} flex items-center justify-center shrink-0">
+                        <i class="fa-solid {{ $ic }} text-lg"></i>
                     </div>
                     <div>
-                        <p class="text-sm text-stone-500 dark:text-stone-400">Total Tugas</p>
-                        <h3 class="text-2xl font-bold text-stone-800 dark:text-white">{{ $stats['total_tasks'] }}</h3>
+                        <p class="text-2xl font-bold text-stone-800 dark:text-white">{{ $v }}</p>
+                        <p class="text-xs text-stone-400">{{ $l }}</p>
                     </div>
                 </div>
-            </div>
-
-            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800 shadow-sm">
-                <div class="flex items-center">
-                    <div
-                        class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mr-4">
-                        <i class="fa-solid fa-check-circle text-emerald-600 dark:text-emerald-400"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm text-stone-500 dark:text-stone-400">Selesai</p>
-                        <h3 class="text-2xl font-bold text-stone-800 dark:text-white">{{ $stats['completed_tasks'] }}</h3>
-                        <p class="text-xs text-emerald-600 dark:text-emerald-400">{{ $stats['completion_rate'] }}%
-                            completion rate</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800 shadow-sm">
-                <div class="flex items-center">
-                    <div
-                        class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-4">
-                        <i class="fa-solid fa-clock text-blue-600 dark:text-blue-400"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm text-stone-500 dark:text-stone-400">Sedang Dikerjakan</p>
-                        <h3 class="text-2xl font-bold text-stone-800 dark:text-white">{{ $stats['in_progress_tasks'] }}</h3>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800 shadow-sm">
-                <div class="flex items-center">
-                    <div
-                        class="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mr-4">
-                        <i class="fa-solid fa-layer-group text-amber-600 dark:text-amber-400"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm text-stone-500 dark:text-stone-400">Kategori</p>
-                        <h3 class="text-2xl font-bold text-stone-800 dark:text-white">{{ $stats['categories_count'] }}</h3>
-                    </div>
-                </div>
-            </div>
+            @endforeach
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Column - Task List -->
-            <div class="lg:col-span-2">
-                <!-- Add Task Form (Simple) -->
-                <div
-                    class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800 mb-6">
-                    <h3 class="font-bold text-stone-800 dark:text-white mb-4">Tambah Task Baru</h3>
-
-                    <form method="POST" action="{{ route('tasks.store') }}" class="space-y-4">
-                        @csrf
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Judul
-                                    Task</label>
-                                <input type="text" name="title" required
-                                    class="w-full border border-stone-300 dark:border-stone-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500 dark:bg-stone-800 dark:text-white"
-                                    placeholder="Apa yang perlu dikerjakan?">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {{-- Task list --}}
+            <div class="lg:col-span-2 bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm overflow-hidden">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-stone-100 dark:border-stone-800">
+                    <h3 class="font-bold text-stone-800 dark:text-white text-sm">Semua Tugas</h3>
+                    <div class="flex gap-1">
+                        @foreach (['all' => 'Semua', 'pending' => 'Belum', 'done' => 'Selesai', 'today' => 'Hari Ini'] as $k => $v)
+                            <button onclick="filterGT('{{ $k }}')" id="gtf-{{ $k }}" class="px-2.5 py-1 text-[11px] rounded-lg font-medium transition-colors {{ $k === 'all' ? 'bg-stone-800 dark:bg-stone-700 text-white' : 'bg-stone-100 dark:bg-stone-800 text-stone-500 hover:bg-stone-200' }}">{{ $v }}</button>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="divide-y divide-stone-100 dark:divide-stone-800" id="gtask-list">
+                    @forelse($allTasks as $t)
+                        @php $isToday = $t['date'] === now()->format('Y-m-d'); @endphp
+                        <div class="task-row flex items-center gap-4 px-5 py-3.5 {{ $t['done'] ? 'opacity-60' : '' }}" data-status="{{ $t['done'] ? 'done' : 'pending' }}" data-today="{{ $isToday ? '1' : '0' }}">
+                            <button onclick="toggleGT({{ $t['id'] }}, this)" class="w-5 h-5 rounded-full border-2 {{ $t['done'] ? 'bg-emerald-500 border-emerald-500' : 'border-stone-300 dark:border-stone-600 hover:border-emerald-400' }} flex items-center justify-center shrink-0 transition-colors">
+                                @if ($t['done'])<i class="fa-solid fa-check text-white text-[9px]"></i>@endif
+                            </button>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-stone-800 dark:text-white {{ $t['done'] ? 'line-through' : '' }}">{{ $t['title'] }}</p>
+                                <div class="flex items-center gap-2 mt-0.5">
+                                    <span class="text-[10px] bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 px-2 py-0.5 rounded-full">{{ $t['category'] }}</span>
+                                    <span class="text-[10px] text-stone-400"><i class="fa-regular fa-clock text-[9px] mr-0.5"></i>{{ $t['time'] }}</span>
+                                    @if ($isToday)<span class="text-[10px] text-orange-600 dark:text-orange-400 font-semibold">Hari ini</span>@endif
+                                </div>
                             </div>
-
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Kategori</label>
-                                <select name="category" required
-                                    class="w-full border border-stone-300 dark:border-stone-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500 dark:bg-stone-800 dark:text-white">
-                                    <option value="">Pilih Kategori</option>
-                                    @foreach ($categories as $cat)
-                                        <option value="{{ $cat }}">{{ $cat }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Priority</label>
-                                <select name="priority" required
-                                    class="w-full border border-stone-300 dark:border-stone-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500 dark:bg-stone-800 dark:text-white">
-                                    <option value="not-urgent-not-important">Not Urgent/Important</option>
-                                    <option value="urgent-not-important">Urgent Not Important</option>
-                                    <option value="important-not-urgent">Important Not Urgent</option>
-                                    <option value="urgent-important">Urgent & Important</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Deadline</label>
-                                <input type="date" name="due_date" required
-                                    class="w-full border border-stone-300 dark:border-stone-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500 dark:bg-stone-800 dark:text-white"
-                                    value="{{ date('Y-m-d') }}">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Deskripsi
-                                (Opsional)</label>
-                            <textarea name="description" rows="2"
-                                class="w-full border border-stone-300 dark:border-stone-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500 dark:bg-stone-800 dark:text-white"
-                                placeholder="Detail task..."></textarea>
-                        </div>
-
-                        <div class="flex justify-end">
-                            <button type="submit"
-                                class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-colors">
-                                <i class="fa-solid fa-plus mr-2"></i>Tambah Task
+                            <button class="w-7 h-7 rounded-lg bg-stone-100 dark:bg-stone-700 text-stone-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center justify-center transition-colors shrink-0">
+                                <i class="fa-solid fa-trash text-[10px]"></i>
                             </button>
                         </div>
-                    </form>
-                </div>
-
-                <!-- Task List -->
-                <div class="space-y-3" id="task-list">
-                    @if ($tasks->count() > 0)
-                        <!-- resources/views/dashboard/general-tracker.blade.php -->
-                        <!-- Dalam loop task -->
-                        @foreach ($tasks as $task)
-                            <div class="task-item bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-4 hover:shadow-md transition-shadow"
-                                data-task-id="{{ $task->id }}">
-                                <div class="flex items-start">
-                                    <!-- Checkbox -->
-                                    <div class="mr-4 mt-1">
-                                        <input type="checkbox" onclick="toggleTaskStatus({{ $task->id }}, this)"
-                                            {{ $task->status === 'done' ? 'checked' : '' }}
-                                            class="task-checkbox w-5 h-5 rounded border-2 border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 checked:bg-emerald-500 checked:border-emerald-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
-                                            id="task-checkbox-{{ $task->id }}">
-                                    </div>
-
-                                    <!-- Task Content -->
-                                    <div class="flex-1">
-                                        <div class="flex justify-between items-start">
-                                            <div>
-                                                <h4
-                                                    class="font-medium text-stone-800 dark:text-white {{ $task->status === 'done' ? 'line-through text-stone-500' : '' }}">
-                                                    {{ $task->title }}
-                                                </h4>
-
-                                                <!-- DEBUG: Tampilkan status dan ID -->
-                                                <div class="text-xs text-gray-400 mt-1">
-                                                    ID: {{ $task->id }} | Status: {{ $task->status }} | Progress:
-                                                    {{ $task->progress }}%
-                                                </div>
-
-                                                @if ($task->description)
-                                                    <p class="text-sm text-stone-600 dark:text-stone-400 mt-1">
-                                                        {{ $task->description }}</p>
-                                                @endif
-                                            </div>
-
-                                            <!-- Due Date Badge -->
-                                            <span
-                                                class="due-date-badge px-2 py-1 rounded-full text-xs
-                        @if ($task->is_overdue && $task->status !== 'done') bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300
-                        @elseif($task->is_today && $task->status !== 'done')
-                            bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300
-                        @elseif($task->status === 'done')
-                            bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300
-                        @else
-                            bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 @endif">
-                                                <i class="fa-regular fa-calendar mr-1"></i>
-                                                <span class="due-date-text">
-                                                    @if ($task->status === 'done')
-                                                        Selesai
-                                                    @elseif($task->is_today)
-                                                        Hari ini
-                                                    @elseif($task->is_overdue)
-                                                        Terlambat {{ $task->due_date->diffForHumans() }}
-                                                    @else
-                                                        {{ $task->due_date ? $task->due_date->diffForHumans() : 'Tanpa deadline' }}
-                                                    @endif
-                                                </span>
-                                            </span>
-                                        </div>
-
-                                        <!-- Category -->
-                                        <div class="mt-2">
-                                            <span
-                                                class="text-xs px-2 py-1 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400">
-                                                <i
-                                                    class="fa-solid fa-tag mr-1"></i>{{ $task->category ?? 'Uncategorized' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-
-                        <!-- Pagination -->
-                        @if ($tasks->hasPages())
-                            <div class="mt-6">
-                                {{ $tasks->withQueryString()->links() }}
-                            </div>
-                        @endif
-                    @else
-                        <div class="text-center py-12">
-                            <div
-                                class="w-16 h-16 bg-stone-100 dark:bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <i class="fa-solid fa-clipboard-list text-2xl text-stone-400 dark:text-stone-500"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-stone-800 dark:text-white mb-2">Tidak ada tugas</h3>
-                            <p class="text-stone-600 dark:text-stone-400 mb-4">Mulai dengan menambahkan tugas baru</p>
+                    @empty
+                        <div class="text-center py-12 text-stone-400">
+                            <i class="fa-solid fa-clipboard-list text-4xl mb-3 block opacity-30"></i>
+                            <p class="text-sm">Belum ada tugas. Tambahkan tugas pertamamu!</p>
                         </div>
-                    @endif
+                    @endforelse
                 </div>
             </div>
 
-            <!-- Right Column -->
-            <div class="space-y-6">
-                <!-- Category Breakdown -->
-                <div
-                    class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
-                    <h3 class="font-bold text-stone-800 dark:text-white mb-4">Breakdown per Kategori</h3>
-                    <div class="space-y-4">
-                        @foreach ($categoryBreakdown as $category)
-                            <div class="space-y-2">
-                                <div class="flex justify-between items-center">
-                                    <span
-                                        class="text-sm font-medium text-stone-700 dark:text-stone-300">{{ $category['name'] }}</span>
-                                    <span
-                                        class="text-sm font-bold text-stone-800 dark:text-white">{{ $category['completion_rate'] }}%</span>
+            {{-- Sidebar --}}
+            <div class="space-y-4">
+                {{-- Category stats --}}
+                <div class="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm p-5">
+                    <h4 class="font-bold text-stone-800 dark:text-white text-sm mb-4">Progress per Kategori</h4>
+                    <div class="space-y-3">
+                        @foreach ($catCounts as $cat => $total)
+                            @php $done = $doneByCat->get($cat, 0); $pct = $total > 0 ? round(($done / $total) * 100) : 0; @endphp
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-stone-600 dark:text-stone-400">{{ $cat }}</span>
+                                    <span class="font-bold text-stone-700 dark:text-stone-300">{{ $pct }}%</span>
                                 </div>
-                                <div class="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-2">
-                                    <div class="h-2 rounded-full"
-                                        style="width: {{ $category['completion_rate'] }}%; background-color: {{ $category['color'] }}">
-                                    </div>
+                                <div class="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-1.5">
+                                    <div class="bg-rose-500 h-1.5 rounded-full" style="width:{{ $pct }}%"></div>
                                 </div>
-                                <div class="text-xs text-stone-500 dark:text-stone-400">
-                                    {{ $category['completed'] }}/{{ $category['total'] }} tugas selesai
-                                </div>
+                                <p class="text-[10px] text-stone-400 mt-0.5">{{ $done }}/{{ $total }} selesai</p>
                             </div>
                         @endforeach
                     </div>
                 </div>
 
-                <!-- Quick Add -->
-                <div
-                    class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
-                    <h3 class="font-bold text-stone-800 dark:text-white mb-4">Tambah Task Cepat</h3>
-                    <form method="POST" action="{{ route('tasks.quick-add') }}" class="space-y-3">
-                        @csrf
-                        <input type="text" name="title" required
-                            class="w-full border border-stone-300 dark:border-stone-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 dark:bg-stone-800 dark:text-white"
-                            placeholder="Judul tugas">
-                        <select name="category" required
-                            class="w-full border border-stone-300 dark:border-stone-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 dark:bg-stone-800 dark:text-white">
-                            <option value="">Pilih Kategori</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category }}">{{ $category }}</option>
-                            @endforeach
+                {{-- Quick add form with Priority --}}
+                <div class="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm p-5">
+                    <h4 class="font-bold text-stone-800 dark:text-white text-sm mb-3">Tambah Cepat</h4>
+                    <div class="space-y-2">
+                        <input type="text" id="qt-title" placeholder="Judul tugas..." class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none dark:bg-stone-800 dark:text-white">
+                        <select id="qt-cat" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none dark:bg-stone-800 dark:text-white">
+                            @foreach (['Kesehatan', 'Pengembangan Diri', 'Personal', 'Organisasi', 'Perawatan', 'Freelance', 'Shutterstock'] as $c)<option>{{ $c }}</option>@endforeach
                         </select>
-                        <button type="submit"
-                            class="w-full px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-sm transition-colors">
-                            Tambah Task
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Recently Completed -->
-                <div
-                    class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
-                    <h3 class="font-bold text-stone-800 dark:text-white mb-4">Baru Selesai</h3>
-                    <div class="space-y-3">
-                        @if ($recentlyCompleted->count() > 0)
-                            @foreach ($recentlyCompleted as $task)
-                                <div
-                                    class="p-3 border border-emerald-100 dark:border-emerald-800 rounded-lg bg-emerald-50 dark:bg-emerald-900/30">
-                                    <div class="flex items-start">
-                                        <div
-                                            class="w-8 h-8 bg-emerald-100 dark:bg-emerald-800 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-300 mr-3">
-                                            <i class="fa-solid fa-check text-xs"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-medium text-emerald-900 dark:text-emerald-200 text-sm">
-                                                {{ $task->title }}</h4>
-                                            <div
-                                                class="flex items-center text-xs text-emerald-700 dark:text-emerald-300 mt-1">
-                                                <span class="mr-3">{{ $task->category }}</span>
-                                                <span>{{ $task->updated_at->diffForHumans() }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        @else
-                            <p class="text-center py-4 text-stone-500 dark:text-stone-400">Belum ada tugas yang
-                                diselesaikan</p>
-                        @endif
+                        <select id="qt-priority" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none dark:bg-stone-800 dark:text-white">
+                            <option value="urgent-important">🔴 Urgent & Penting (Do First)</option>
+                            <option value="important-not-urgent" selected>🔵 Penting, Tidak Urgent (Schedule)</option>
+                            <option value="urgent-not-important">🟠 Urgent, Tidak Penting (Delegate)</option>
+                            <option value="not-urgent-not-important">⚪ Tidak Urgent & Tidak Penting (Eliminate)</option>
+                        </select>
+                        <button onclick="quickAddGT()" class="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-medium transition-colors"><i class="fa-solid fa-plus mr-1.5"></i>Tambah</button>
                     </div>
                 </div>
+
+                {{-- Recently completed --}}
+                <div class="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm p-5">
+                    <h4 class="font-bold text-stone-800 dark:text-white text-sm mb-3">Baru Selesai</h4>
+                    @forelse(collect($allTasks)->where('done',true)->take(3) as $t)
+                        <div class="flex items-center gap-3 p-2.5 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl mb-2">
+                            <div class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-check text-emerald-600 text-xs"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-semibold text-stone-800 dark:text-white truncate">{{ $t['title'] }}</p>
+                                <p class="text-[10px] text-stone-400">{{ $t['category'] }}</p>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-xs text-stone-400 text-center py-3">Belum ada tugas selesai</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL: ADD TASK --}}
+    <div id="modal-add-gtask" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-stone-900 rounded-2xl w-full max-w-md shadow-2xl border border-stone-200 dark:border-stone-800">
+            <div class="flex items-center justify-between p-6 border-b border-stone-100 dark:border-stone-800">
+                <h3 class="font-bold text-stone-900 dark:text-white">Tambah Tugas Baru</h3>
+                <button onclick="closeModal('modal-add-gtask')" class="text-stone-400 hover:text-stone-700"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">Judul *</label>
+                    <input type="text" id="gta-title" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none dark:bg-stone-800 dark:text-white" placeholder="Apa yang akan dikerjakan?">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">Kategori</label>
+                        <select id="gta-cat" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none dark:bg-stone-800 dark:text-white">
+                            @foreach (['Kesehatan', 'Pengembangan Diri', 'Personal', 'Organisasi', 'Perawatan', 'Freelance', 'Shutterstock', 'Lainnya'] as $c)<option>{{ $c }}</option>@endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">Estimasi</label>
+                        <input type="text" id="gta-time" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none dark:bg-stone-800 dark:text-white" placeholder="30m, 1j, dll">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">Prioritas</label>
+                    <select id="gta-priority" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none dark:bg-stone-800 dark:text-white">
+                        <option value="urgent-important">🔴 Urgent & Penting</option>
+                        <option value="important-not-urgent" selected>🔵 Penting, Tidak Urgent</option>
+                        <option value="urgent-not-important">🟠 Urgent, Tidak Penting</option>
+                        <option value="not-urgent-not-important">⚪ Tidak Urgent & Tidak Penting</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">Tanggal Target</label>
+                    <input type="date" id="gta-date" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none dark:bg-stone-800 dark:text-white" value="{{ now()->format('Y-m-d') }}">
+                </div>
+            </div>
+            <div class="flex gap-3 px-6 pb-6">
+                <button onclick="closeModal('modal-add-gtask')" class="flex-1 py-2.5 border border-stone-300 dark:border-stone-700 rounded-xl text-stone-600 dark:text-stone-300 text-sm hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">Batal</button>
+                <button onclick="saveGTask()" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-semibold transition-colors"><i class="fa-solid fa-plus mr-1.5"></i>Tambah</button>
             </div>
         </div>
     </div>
@@ -354,148 +197,70 @@
 
 @push('scripts')
     <script>
-        // Fungsi untuk toggle status task dengan debug
-        async function toggleTaskStatus(taskId, checkbox) {
-            console.log('toggleTaskStatus called for task:', taskId);
-            console.log('Checkbox checked:', checkbox.checked);
+        function openModal(id) { document.getElementById(id)?.classList.remove('hidden'); document.body.classList.add('modal-open'); }
+        function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); document.body.classList.remove('modal-open'); }
 
-            // Tentukan status baru berdasarkan checkbox
-            const newStatus = checkbox.checked ? 'done' : 'todo';
-            console.log('New status to send:', newStatus);
-
-            try {
-                // Kirim request ke server
-                const response = await fetch(`/tasks/${taskId}/status`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        status: newStatus
-                    })
-                });
-
-                console.log('Response status:', response.status);
-                const data = await response.json();
-                console.log('Response data:', data);
-
-                if (data.success) {
-                    // Update UI
-                    const taskItem = checkbox.closest('.task-item');
-                    const title = taskItem.querySelector('h4');
-                    const dueDateSpan = taskItem.querySelector('.due-date-badge');
-
-                    if (newStatus === 'done') {
-                        title.classList.add('line-through', 'text-stone-500');
-                        if (dueDateSpan) {
-                            dueDateSpan.className =
-                                'px-2 py-1 rounded-full text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300';
-                            dueDateSpan.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Selesai';
-                        }
-
-                        // Tampilkan notifikasi sukses
-                        showNotification('🎉 Task berhasil diselesaikan!', 'success');
-
-                    } else {
-                        title.classList.remove('line-through', 'text-stone-500');
-                        if (dueDateSpan) {
-                            // Kembalikan ke tampilan normal
-                            updateDueDateBadge(taskItem, dueDateSpan);
-                        }
-                        showNotification('Task dikembalikan ke belum selesai', 'info');
-                    }
-
-                    // Refresh halaman setelah 1.5 detik untuk update statistik
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-
-                } else {
-                    // Jika gagal, kembalikan checkbox
-                    checkbox.checked = !checkbox.checked;
-                    showNotification(data.message || 'Gagal mengubah status task', 'error');
-                }
-
-            } catch (error) {
-                console.error('Error in toggleTaskStatus:', error);
-                // Jika error, kembalikan checkbox
-                checkbox.checked = !checkbox.checked;
-                showNotification('Terjadi kesalahan koneksi', 'error');
+        function toggleGT(id, btn) {
+            const isChecked = btn.classList.contains('bg-emerald-500');
+            btn.classList.toggle('bg-emerald-500', !isChecked);
+            btn.classList.toggle('border-emerald-500', !isChecked);
+            btn.classList.toggle('border-stone-300', isChecked);
+            btn.innerHTML = !isChecked ? '<i class="fa-solid fa-check text-white text-[9px]"></i>' : '';
+            const row = btn.closest('[data-status]');
+            if (row) {
+                row.dataset.status = !isChecked ? 'done' : 'pending';
+                row.classList.toggle('opacity-60', !isChecked);
+                const title = row.querySelector('p');
+                if (title) title.classList.toggle('line-through', !isChecked);
             }
         }
 
-        // Helper function untuk update badge tanggal
-        function updateDueDateBadge(taskItem, dueDateSpan) {
-            // Ambil data tanggal dari atribut data atau teks
-            const dueDateText = taskItem.querySelector('.due-date-text')?.textContent;
-            if (!dueDateText) return;
-
-            // Parse tanggal (contoh: "2 hari lagi", "Hari ini", "Kemarin")
-            if (dueDateText.includes('Hari ini')) {
-                dueDateSpan.className =
-                    'px-2 py-1 rounded-full text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300';
-                dueDateSpan.innerHTML = '<i class="fa-regular fa-calendar mr-1"></i>Hari ini';
-            } else if (dueDateText.includes('Terlambat') || dueDateText.includes('hari lalu')) {
-                dueDateSpan.className =
-                    'px-2 py-1 rounded-full text-xs bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300';
-                dueDateSpan.innerHTML = '<i class="fa-regular fa-calendar mr-1"></i>' + dueDateText;
-            } else {
-                dueDateSpan.className =
-                    'px-2 py-1 rounded-full text-xs bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400';
-                dueDateSpan.innerHTML = '<i class="fa-regular fa-calendar mr-1"></i>' + dueDateText;
-            }
-        }
-
-        // Fungsi notifikasi sederhana
-        function showNotification(message, type = 'info') {
-            // Hapus notifikasi lama
-            const oldNotif = document.querySelector('.notification-toast');
-            if (oldNotif) oldNotif.remove();
-
-            // Buat notifikasi baru
-            const notification = document.createElement('div');
-            notification.className = `notification-toast fixed top-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 ${
-            type === 'success' ? 'bg-emerald-500 text-white' :
-            type === 'error' ? 'bg-red-500 text-white' :
-            type === 'info' ? 'bg-blue-500 text-white' :
-            'bg-stone-500 text-white'
-        }`;
-
-            notification.innerHTML = `
-            <div class="flex items-center">
-                <i class="fa-solid ${
-                    type === 'success' ? 'fa-check-circle' :
-                    type === 'error' ? 'fa-exclamation-circle' :
-                    'fa-info-circle'
-                } mr-2"></i>
-                <span>${message}</span>
-            </div>
-        `;
-
-            document.body.appendChild(notification);
-
-            // Auto hilang setelah 3 detik
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transition = 'opacity 0.3s';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-
-        // Tambah event listener untuk debug
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('General Tracker loaded');
-
-            // Debug: Cek semua checkbox
-            const checkboxes = document.querySelectorAll('.task-checkbox');
-            console.log('Found', checkboxes.length, 'checkboxes');
-
-            checkboxes.forEach((checkbox, index) => {
-                const taskId = checkbox.closest('.task-item')?.dataset?.taskId;
-                console.log(`Checkbox ${index}: taskId=${taskId}, checked=${checkbox.checked}`);
+        function filterGT(type) {
+            ['all', 'pending', 'done', 'today'].forEach(k => {
+                const b = document.getElementById('gtf-' + k);
+                b.className = k === type ? 'px-2.5 py-1 text-[11px] rounded-lg font-medium bg-stone-800 dark:bg-stone-700 text-white transition-colors' : 'px-2.5 py-1 text-[11px] rounded-lg font-medium bg-stone-100 dark:bg-stone-800 text-stone-500 hover:bg-stone-200 transition-colors';
             });
-        });
+            document.querySelectorAll('#gtask-list [data-status]').forEach(el => {
+                if (type === 'all') { el.style.display = ''; return; }
+                if (type === 'today') { el.style.display = el.dataset.today === '1' ? '' : 'none'; return; }
+                el.style.display = el.dataset.status === type ? '' : 'none';
+            });
+        }
+
+        const _csrf = document.querySelector('meta[name=csrf-token]')?.content || '';
+
+        function quickAddGT() {
+            const title = document.getElementById('qt-title').value.trim();
+            const cat = document.getElementById('qt-cat').value;
+            if (!title) return;
+            fetch('{{ route('tasks.store') }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': _csrf, 'Accept': 'application/json' },
+                body: JSON.stringify({ title, category: cat, priority: document.getElementById('qt-priority').value, due_date: new Date().toISOString().split('T')[0], status: 'todo' })
+            }).then(r => r.json()).then(() => { document.getElementById('qt-title').value = ''; location.reload(); });
+        }
+
+        function saveGTask() {
+            const title = document.getElementById('gta-title').value.trim();
+            if (!title) { alert('Isi judul dulu'); return; }
+            fetch('{{ route('tasks.store') }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': _csrf, 'Accept': 'application/json' },
+                body: JSON.stringify({ title, category: document.getElementById('gta-cat').value, priority: document.getElementById('gta-priority').value, estimated_time: document.getElementById('gta-time').value, due_date: document.getElementById('gta-date').value, status: 'todo' })
+            }).then(r => r.json()).then(() => { closeModal('modal-add-gtask'); location.reload(); });
+        }
+
+        function deleteGTask(id) {
+            if (!confirm('Hapus tugas ini?')) return;
+            fetch('{{ url('/tasks') }}/' + id, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': _csrf, 'Accept': 'application/json' } }).then(() => location.reload());
+        }
+
+        function toast(msg, ok = true) {
+            const t = document.createElement('div');
+            t.className = `fixed bottom-6 right-6 z-[9999] flex items-center gap-2 px-4 py-3 ${ok ? 'bg-emerald-500' : 'bg-rose-500'} text-white text-sm font-medium rounded-2xl shadow-xl`;
+            t.innerHTML = `<i class="fa-solid ${ok ? 'fa-check-circle' : 'fa-circle-xmark'}"></i> ${msg}`;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
+        }
     </script>
 @endpush

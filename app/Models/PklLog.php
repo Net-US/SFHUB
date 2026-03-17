@@ -12,6 +12,11 @@ class PklLog extends Model
     protected $fillable = [
         'user_id',
         'log_date',
+        'task',
+        'category',
+        'hours',
+        'status',
+        'notes',
         'attendance_status',
         'check_in',
         'check_out',
@@ -20,19 +25,19 @@ class PklLog extends Model
         'achievements',
         'challenges',
         'learnings',
-        'notes',
         'supervisor_name',
         'performance_rating',
         'is_approved',
     ];
 
     protected $casts = [
-        'log_date' => 'date',
-        'check_in' => 'datetime',
-        'check_out' => 'datetime',
-        'working_hours' => 'decimal:2',
+        'log_date'           => 'date',
+        'check_in'           => 'datetime',
+        'check_out'          => 'datetime',
+        'working_hours'      => 'decimal:2',
+        'hours'              => 'decimal:1',
         'performance_rating' => 'integer',
-        'is_approved' => 'boolean',
+        'is_approved'        => 'boolean',
     ];
 
     // Relationships

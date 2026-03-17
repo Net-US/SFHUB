@@ -5,6 +5,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard | Student-Freelancer Hub')</title>
 
     <!-- Tailwind CSS -->
@@ -26,7 +27,6 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -289,66 +289,33 @@
             </div>
         </nav>
 
-        {{-- ── User Profile Area + Dropdown ── --}}
         <div class="p-3 border-t border-stone-100 dark:border-stone-800 relative">
-            <button onclick="toggleUserMenu()"
+            <button onclick="toggleSidebarUserMenu()"
                 class="w-full flex items-center nav-item p-2 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer transition-colors group">
-                <div
-                    class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-500 flex items-center justify-center text-white text-xs font-bold shadow-md flex-shrink-0 flex-shrink-0">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-500 flex items-center justify-center text-white text-xs font-bold shadow-md flex-shrink-0">
                     {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                 </div>
                 <div class="ml-3 overflow-hidden nav-text flex-1 text-left">
-                    <p class="text-sm font-medium text-stone-700 dark:text-stone-200 truncate">
-                        {{ auth()->user()->name }}
-                    </p>
-                    <p class="text-[10px] text-stone-500 dark:text-stone-400 truncate">
-                        {{ auth()->user()->email ?? 'Pro Plan' }}
-                    </p>
+                    <p class="text-sm font-medium text-stone-700 dark:text-stone-200 truncate">{{ auth()->user()->name }}</p>
+                    <p class="text-[10px] text-stone-500 dark:text-stone-400 truncate">{{ ucfirst(auth()->user()->plan ?? 'Free') }} Plan</p>
                 </div>
-                <i
-                    class="fa-solid fa-ellipsis-vertical text-stone-400 nav-text text-xs group-hover:text-stone-600 dark:group-hover:text-stone-300"></i>
+                <i class="fa-solid fa-ellipsis-vertical text-stone-400 nav-text text-xs group-hover:text-stone-600"></i>
             </button>
-
-            {{-- Dropdown menu --}}
-            <div id="user-menu"
+            <div id="sidebar-user-menu"
                 class="hidden absolute bottom-full left-3 right-3 mb-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl shadow-xl z-50 overflow-hidden">
-                {{-- User info header --}}
-                <div
-                    class="px-4 py-3 border-b border-stone-100 dark:border-stone-700 bg-gradient-to-br from-orange-50 to-red-50 dark:from-stone-800 dark:to-stone-800">
-                    <p class="text-sm font-bold text-stone-800 dark:text-white truncate">{{ auth()->user()->name }}
-                    </p>
-                    <p class="text-xs text-stone-500 dark:text-stone-400 truncate">{{ auth()->user()->email ?? '' }}
-                    </p>
-                    <span
-                        class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-full text-[10px] font-medium">
-                        <i class="fa-solid fa-crown text-[8px]"></i>
-                        {{ ucfirst(auth()->user()->plan ?? 'Pro') }} Plan
-                    </span>
+                <div class="px-4 py-3 border-b border-stone-100 dark:border-stone-700 bg-gradient-to-br from-orange-50 to-red-50 dark:from-stone-800 dark:to-stone-800">
+                    <p class="text-sm font-bold text-stone-800 dark:text-white truncate">{{ auth()->user()->name }}</p>
+                    <p class="text-xs text-stone-400 truncate">{{ auth()->user()->email ?? '' }}</p>
                 </div>
-                {{-- Menu items --}}
                 <div class="py-1">
-                    <a href="{{ route('profile.edit') }}"
-                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors">
-                        <i class="fa-solid fa-user-circle w-4 text-center text-stone-400"></i>
-                        Edit Profil
-                    </a>
-                    <a href="{{ route('profile.edit') }}#preferences"
-                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors">
-                        <i class="fa-solid fa-sliders w-4 text-center text-stone-400"></i>
-                        Pengaturan
-                    </a>
-                    <a href="{{ route('donation.show') }}"
-                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors">
-                        <i class="fa-solid fa-heart w-4 text-center text-rose-400"></i>
-                        Dukung Kami
-                    </a>
+                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i class="fa-solid fa-user-circle w-4 text-center text-stone-400"></i>Edit Profil</a>
+                    <a href="{{ route('profile.edit') }}#pengaturan" class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i class="fa-solid fa-sliders w-4 text-center text-stone-400"></i>Pengaturan</a>
+                    <a href="{{ route('profile.edit') }}#notifikasi" class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i class="fa-solid fa-bell w-4 text-center text-stone-400"></i>Notifikasi</a>
                     <div class="border-t border-stone-100 dark:border-stone-700 my-1"></div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit"
-                            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors">
-                            <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>
-                            Keluar
+                        <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors">
+                            <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>Keluar
                         </button>
                     </form>
                 </div>
@@ -363,8 +330,7 @@
             class="bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 p-4 flex justify-between items-center z-10 sticky top-0">
             <!-- Mobile Menu Button -->
             <div class="flex items-center md:hidden">
-                <button onclick="toggleMobileMenu()"
-                    class="text-stone-600 dark:text-stone-300 focus:outline-none mr-3">
+                <button onclick="toggleMobileMenu()" class="text-stone-600 dark:text-stone-300 focus:outline-none mr-3">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
                 <span class="font-bold text-lg text-stone-800 dark:text-white">
@@ -395,52 +361,50 @@
                     <i id="theme-toggle-light-icon" class="hidden fa-solid fa-sun text-yellow-400"></i>
                 </button>
 
-                <!-- Notifications -->
-                <button
-                    class="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 relative transition-colors">
-                    <i class="fa-solid fa-bell"></i>
-                    <span
-                        class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-stone-900"></span>
-                </button>
+                <!-- Notifications Dropdown -->
+                <div class="relative" id="notif-dropdown-wrap">
+                    <button onclick="toggleNotifDropdown()" id="notif-btn"
+                        class="relative p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 transition-colors">
+                        <i class="fa-solid fa-bell"></i>
+                        <span id="notif-badge" class="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full border border-white dark:border-stone-900 items-center justify-center hidden flex">0</span>
+                    </button>
+                    <div id="notif-panel" class="hidden absolute right-0 top-full mt-2 w-80 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                        <div class="flex justify-between items-center px-4 py-3 border-b border-stone-100 dark:border-stone-800">
+                            <h4 class="font-bold text-stone-800 dark:text-white text-sm">Notifikasi</h4>
+                            <div class="flex gap-3">
+                                <button onclick="quickMarkAllRead()" class="text-[11px] text-blue-600 dark:text-blue-400 hover:underline">Baca semua</button>
+                                <a href="{{ route('profile.edit') }}#notifikasi" class="text-[11px] text-stone-400 hover:text-stone-600 dark:hover:text-stone-300">Kelola</a>
+                            </div>
+                        </div>
+                        <div id="notif-dropdown-list" class="max-h-72 overflow-y-auto">
+                            <p class="text-center py-6 text-stone-400 text-xs">Memuat...</p>
+                        </div>
+                        <a href="{{ route('profile.edit') }}#notifikasi" class="block text-center py-2.5 text-xs font-medium text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 border-t border-stone-100 dark:border-stone-800 transition-colors">Lihat Semua Notifikasi →</a>
+                    </div>
+                </div>
 
-                <!-- User Avatar Dropdown (header) -->
+                <!-- Header User Avatar -->
                 <div class="relative" id="header-user-wrap">
                     <button onclick="toggleHeaderUserMenu()"
-                        class="flex items-center gap-2 p-1 pr-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">
-                        <div
-                            class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-500 flex items-center justify-center text-white text-xs font-bold shadow-md">
+                        class="flex items-center gap-2 p-1 pl-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-500 flex items-center justify-center text-white text-xs font-bold shadow">
                             {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                         </div>
-                        <span
-                            class="hidden md:block text-sm font-medium text-stone-700 dark:text-stone-300 max-w-[100px] truncate">
-                            {{ auth()->user()->name }}
-                        </span>
                         <i class="fa-solid fa-chevron-down text-[10px] text-stone-400 hidden md:block"></i>
                     </button>
-                    {{-- Header dropdown --}}
                     <div id="header-user-menu"
                         class="hidden absolute right-0 top-full mt-2 w-52 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl shadow-xl z-50 overflow-hidden">
                         <div class="px-4 py-3 border-b border-stone-100 dark:border-stone-700">
-                            <p class="text-sm font-bold text-stone-800 dark:text-white truncate">
-                                {{ auth()->user()->name }}</p>
-                            <p class="text-xs text-stone-400 truncate">{{ auth()->user()->email ?? '' }}</p>
+                            <p class="text-sm font-bold text-stone-800 dark:text-white truncate">{{ auth()->user()->name }}</p>
+                            <p class="text-xs text-stone-400 truncate">{{ auth()->user()->email }}</p>
                         </div>
                         <div class="py-1">
-                            <a href="{{ route('profile.edit') }}"
-                                class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors">
-                                <i class="fa-solid fa-user-circle w-4 text-center text-stone-400"></i>Edit Profil
-                            </a>
-                            <a href="{{ route('profile.edit') }}#preferences"
-                                class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors">
-                                <i class="fa-solid fa-sliders w-4 text-center text-stone-400"></i>Pengaturan
-                            </a>
+                            <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i class="fa-solid fa-user-circle w-4 text-center text-stone-400"></i>Profil Saya</a>
+                            <a href="{{ route('profile.edit') }}#pengaturan" class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i class="fa-solid fa-sliders w-4 text-center text-stone-400"></i>Pengaturan</a>
                             <div class="border-t border-stone-100 dark:border-stone-700 my-1"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit"
-                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors">
-                                    <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>Keluar
-                                </button>
+                                <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"><i class="fa-solid fa-right-from-bracket w-4 text-center"></i>Keluar</button>
                             </form>
                         </div>
                     </div>
@@ -514,8 +478,6 @@
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
                         <i class="fa-solid fa-chart-line mr-2"></i>Investment Portfolio
                     </a>
-
-                    {{-- Profile & Logout --}}
                     <div class="border-t border-stone-100 dark:border-stone-800 my-2"></div>
                     <a href="{{ route('profile.edit') }}" onclick="toggleMobileMenu()"
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
@@ -523,8 +485,7 @@
                     </a>
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
-                        <button type="submit"
-                            class="w-full text-left p-3 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-600 dark:text-rose-400">
+                        <button type="submit" class="w-full text-left p-3 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-600 dark:text-rose-400">
                             <i class="fa-solid fa-right-from-bracket mr-2"></i>Keluar
                         </button>
                     </form>
@@ -543,39 +504,6 @@
     <script>
         // --- STATE & DATA ---
         let isSidebarCollapsed = false;
-
-        // ── User menu dropdowns ───────────────────────────────────────────
-        function toggleUserMenu() {
-            const menu = document.getElementById('user-menu');
-            const headerMenu = document.getElementById('header-user-menu');
-            if (menu) {
-                menu.classList.toggle('hidden');
-                if (headerMenu) headerMenu.classList.add('hidden');
-            }
-        }
-
-        function toggleHeaderUserMenu() {
-            const menu = document.getElementById('header-user-menu');
-            const sideMenu = document.getElementById('user-menu');
-            if (menu) {
-                menu.classList.toggle('hidden');
-                if (sideMenu) sideMenu.classList.add('hidden');
-            }
-        }
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', function(e) {
-            const sideMenu = document.getElementById('user-menu');
-            const headerMenu = document.getElementById('header-user-menu');
-            const sideBtn = e.target.closest('button[onclick="toggleUserMenu()"]');
-            const headerBtn = e.target.closest('button[onclick="toggleHeaderUserMenu()"]');
-            if (!sideBtn && sideMenu && !sideMenu.contains(e.target)) {
-                sideMenu.classList.add('hidden');
-            }
-            if (!headerBtn && headerMenu && !headerMenu.contains(e.target)) {
-                headerMenu.classList.add('hidden');
-            }
-        });
 
         // --- CORE FUNCTIONS ---
         function init() {
@@ -713,8 +641,108 @@
             }, 3000);
         }
 
+        // ── User dropdown toggles ────────────────────────────────────────
+        function toggleSidebarUserMenu() {
+            const m = document.getElementById('sidebar-user-menu');
+            const h = document.getElementById('header-user-menu');
+            if (m) { m.classList.toggle('hidden'); h?.classList.add('hidden'); }
+        }
+        function toggleHeaderUserMenu() {
+            const m = document.getElementById('header-user-menu');
+            const s = document.getElementById('sidebar-user-menu');
+            if (m) { m.classList.toggle('hidden'); s?.classList.add('hidden'); }
+        }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#sidebar-user-menu') && !e.target.closest('[onclick="toggleSidebarUserMenu()"]'))
+                document.getElementById('sidebar-user-menu')?.classList.add('hidden');
+            if (!e.target.closest('#header-user-menu') && !e.target.closest('#header-user-wrap'))
+                document.getElementById('header-user-menu')?.classList.add('hidden');
+        });
+
         // --- INIT ---
         window.addEventListener("DOMContentLoaded", init);
+
+        // ── Notification Dropdown ─────────────────────────────────────────
+        async function toggleNotifDropdown() {
+            const panel = document.getElementById('notif-panel');
+            const isHidden = panel.classList.toggle('hidden');
+            if (!isHidden) {
+                await loadNotifDropdown();
+            }
+        }
+
+        async function loadNotifDropdown() {
+            const list = document.getElementById('notif-dropdown-list');
+            list.innerHTML = '<p class="text-center py-6 text-stone-400 text-xs">Memuat...</p>';
+            try {
+                const res = await fetch('/notifications', { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '' } });
+                const data = await res.json();
+                if (!data.success || !data.notifications.length) {
+                    list.innerHTML = '<p class="text-center py-8 text-stone-400 text-sm"><i class="fa-solid fa-bell-slash block mb-2 text-2xl opacity-30"></i>Tidak ada notifikasi</p>';
+                    return;
+                }
+                // Update badge
+                const badge = document.getElementById('notif-badge');
+                if (data.unread_count > 0) {
+                    badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+                const iconMap = { system:'fa-gear text-blue-500', deadline:'fa-clock text-rose-500', reminder:'fa-bell text-amber-500', financial:'fa-wallet text-emerald-500', academic:'fa-graduation-cap text-purple-500', investment:'fa-chart-line text-emerald-500', budget:'fa-triangle-exclamation text-rose-500' };
+                list.innerHTML = data.notifications.slice(0, 8).map(n => `
+                    <div id="ndrop-${n.id}" class="flex items-start gap-3 px-4 py-3 ${n.is_read ? 'opacity-60' : 'bg-orange-50/50 dark:bg-orange-900/10'} hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors border-b border-stone-50 dark:border-stone-800 last:border-0 cursor-pointer" onclick="handleNotifClick(${n.id}, '${n.action_url || ''}')">
+                        <div class="w-8 h-8 rounded-full ${n.icon_bg} flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i class="fa-solid ${n.icon} ${n.icon_color} text-xs"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-semibold text-stone-800 dark:text-white truncate">${n.title}</p>
+                            <p class="text-[11px] text-stone-400 mt-0.5 line-clamp-2">${n.message}</p>
+                            <p class="text-[10px] text-stone-300 dark:text-stone-600 mt-1">${n.time_ago}</p>
+                        </div>
+                        ${!n.is_read ? '<div class="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0 mt-1"></div>' : ''}
+                    </div>`).join('');
+            } catch(e) {
+                list.innerHTML = '<p class="text-center py-6 text-rose-400 text-xs">Gagal memuat notifikasi</p>';
+            }
+        }
+
+        async function handleNotifClick(id, url) {
+            // Mark as read
+            await fetch(`/notifications/${id}/read`, { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '', 'Accept': 'application/json' } });
+            const el = document.getElementById('ndrop-' + id);
+            if (el) el.classList.add('opacity-60');
+            if (url) window.location.href = url;
+        }
+
+        async function quickMarkAllRead() {
+            await fetch('/notifications/read-all', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '', 'Accept': 'application/json' } });
+            document.getElementById('notif-badge')?.classList.add('hidden');
+            document.getElementById('notif-panel')?.classList.add('hidden');
+        }
+
+        // Load notif count on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/notifications', { headers: { 'Accept': 'application/json' } });
+                const data = await res.json();
+                if (data.unread_count > 0) {
+                    const badge = document.getElementById('notif-badge');
+                    if (badge) {
+                        badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                        badge.classList.remove('hidden');
+                    }
+                }
+            } catch(e) {}
+        });
+
+        // Close notif panel on outside click
+        document.addEventListener('click', e => {
+            const wrap = document.getElementById('notif-dropdown-wrap');
+            if (wrap && !wrap.contains(e.target)) {
+                document.getElementById('notif-panel')?.classList.add('hidden');
+            }
+        });
     </script>
 
     @stack('scripts')
