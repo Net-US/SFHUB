@@ -12,19 +12,75 @@ class AdminController extends Controller
     // ── DASHBOARD ─────────────────────────────────────────────────────────
     public function index()
     {
+        // User Statistics
         $totalUsers    = User::count();
         $activeUsers   = User::where('is_active', true)->count();
         $inactiveUsers = User::where('is_active', false)->count();
         $newThisMonth  = User::whereMonth('created_at', now()->month)->count();
 
-        $recentUsers = User::latest()->take(10)->get();
+        // Role Distribution
+        $adminCount     = User::where('role', 'admin')->count();
+        $studentCount   = User::where('role', 'student')->count();
+        $freelanceCount = User::where('role', 'freelancer')->count();
 
-        return view('admin.index', compact(
+        // Plan Distribution
+        $freeCount  = User::where('plan', 'free')->count();
+        $proCount   = User::where('plan', 'pro')->count();
+        $teamCount  = User::where('plan', 'team')->count();
+
+        // Platform Statistics
+        $totalWorkspaces = \App\Models\Workspace::count();
+        $totalTasks      = \App\Models\Task::count();
+        $totalSubjects   = \App\Models\Subject::count();
+        $totalEvents     = \App\Models\CalendarEvent::count();
+        $totalFinanceAccounts = \App\Models\FinanceAccount::count();
+        $totalTransactions   = \App\Models\Transaction::count();
+
+        // Task Statistics
+        $completedTasks = \App\Models\Task::where('status', 'done')->count();
+        $pendingTasks   = \App\Models\Task::where('status', 'todo')->count();
+        $doingTasks     = \App\Models\Task::where('status', 'doing')->count();
+
+        // Recent Activity
+        $recentUsers = User::latest()->take(5)->get();
+        $recentTasks = \App\Models\Task::latest()->take(5)->get();
+        $recentTransactions = \App\Models\Transaction::latest()->take(5)->get();
+
+        // Growth Data (Last 6 months)
+        $monthlyGrowth = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $monthlyGrowth[] = [
+                'month' => $month->format('M Y'),
+                'users' => User::whereMonth('created_at', $month->month)->whereYear('created_at', $month->year)->count(),
+                'tasks' => \App\Models\Task::whereMonth('created_at', $month->month)->whereYear('created_at', $month->year)->count(),
+            ];
+        }
+
+        return view('admin.dashboard', compact(
             'totalUsers',
             'activeUsers',
             'inactiveUsers',
             'newThisMonth',
-            'recentUsers'
+            'adminCount',
+            'studentCount',
+            'freelanceCount',
+            'freeCount',
+            'proCount',
+            'teamCount',
+            'totalWorkspaces',
+            'totalTasks',
+            'totalSubjects',
+            'totalEvents',
+            'totalFinanceAccounts',
+            'totalTransactions',
+            'completedTasks',
+            'pendingTasks',
+            'doingTasks',
+            'recentUsers',
+            'recentTasks',
+            'recentTransactions',
+            'monthlyGrowth'
         ));
     }
 
@@ -39,8 +95,8 @@ class AdminController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%$search%")
-                  ->orWhere('email', 'like', "%$search%")
-                  ->orWhere('username', 'like', "%$search%");
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('username', 'like', "%$search%");
             });
         }
 
@@ -114,10 +170,26 @@ class AdminController extends Controller
     public function landingContent()
     {
         $features     = LandingContent::bySection('features')->active()->orderBy('sort_order')->get();
-        $heroContent  = LandingContent::where('key', 'hero')->first();
+        $stats        = LandingContent::bySection('stats')->active()->orderBy('sort_order')->get();
+        $heroContent  = LandingContent::where('key', 'hero_title')->first();
+        $heroSubtitle = LandingContent::where('key', 'hero_subtitle')->first();
+        $heroDesc     = LandingContent::where('key', 'hero_description')->first();
+        $seoTitle     = LandingContent::where('key', 'seo_title')->first();
+        $seoDesc      = LandingContent::where('key', 'seo_description')->first();
+        $seoKeywords  = LandingContent::where('key', 'seo_keywords')->first();
         $allContent   = LandingContent::orderBy('section')->orderBy('sort_order')->get();
 
-        return view('admin.landing', compact('features', 'heroContent', 'allContent'));
+        return view('admin.landing', compact(
+            'features',
+            'stats',
+            'heroContent',
+            'heroSubtitle',
+            'heroDesc',
+            'seoTitle',
+            'seoDesc',
+            'seoKeywords',
+            'allContent'
+        ));
     }
 
     public function storeLandingContent(Request $request)

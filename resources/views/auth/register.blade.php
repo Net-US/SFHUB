@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-landing')
 
 @section('title', 'Daftar StudentHub')
 

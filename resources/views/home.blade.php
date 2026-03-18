@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-landing')
 
 @section('title', 'StudentHub | Platform All-in-One untuk Mahasiswa & Freelancer')
 

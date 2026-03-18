@@ -81,6 +81,12 @@ class FocusController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+
+        // Redirect admin ke dashboard admin
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.index');
+        }
+
         $today = now()->toDateString();
         $todayDow = Schedule::getIndonesianDayName(now()->dayOfWeek);
         $now = now()->timezone('Asia/Jakarta');

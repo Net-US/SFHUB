@@ -43,6 +43,12 @@ class AuthController extends Controller
                 return back()->withErrors(['login' => 'Akun Anda telah dinonaktifkan.'])->onlyInput('login');
             }
             $request->session()->regenerate();
+
+            // Redirect berdasarkan role
+            if ($user->role === 'admin') {
+                return redirect()->intended(route('admin.index'));
+            }
+
             return redirect()->intended(route('dashboard'));
         }
 

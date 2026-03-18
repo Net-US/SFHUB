@@ -1,0 +1,1653 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SFHUB Admin Panel | Student-Freelancer Hub</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              stone: {
+                850: "#1f1f1f",
+              },
+              primary: {
+                50: "#fef3e9",
+                100: "#fde4d3",
+                200: "#fbc8a7",
+                300: "#f9ab7b",
+                400: "#f78f4f",
+                500: "#f57223",
+                600: "#e65e0e",
+                700: "#c44b0b",
+                800: "#a23909",
+                900: "#802707",
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- TinyMCE for rich text editing -->
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #d6d3d1;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #a8a29e;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #4b5563;
+      }
+      .dark ::-webkit-scrollbar-thumb:hover {
+        background: #6b7280;
+      }
+
+      /* Sidebar Transitions */
+      .sidebar-transition {
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .nav-text {
+        transition:
+          opacity 0.2s ease,
+          transform 0.2s ease;
+        white-space: nowrap;
+        opacity: 1;
+      }
+
+      .sidebar-collapsed .nav-text {
+        opacity: 0;
+        transform: translateX(-10px);
+        pointer-events: none;
+        display: none;
+      }
+
+      .sidebar-collapsed .nav-header {
+        display: none;
+      }
+
+      .sidebar-collapsed .logo-text {
+        display: none;
+      }
+
+      .sidebar-collapsed .nav-item {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .sidebar-collapsed .nav-item i {
+        margin-right: 0;
+      }
+
+      /* Chart Container */
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 100%;
+        height: 300px;
+        max-height: 400px;
+        margin: 0 auto;
+      }
+
+      /* Animation for content */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-fade-in-up {
+        animation: fadeInUp 0.5s ease-out;
+      }
+
+      /* Table styles */
+      .table-hover tr:hover {
+        background-color: rgba(0,0,0,0.02);
+      }
+      .dark .table-hover tr:hover {
+        background-color: rgba(255,255,255,0.02);
+      }
+
+      /* Status badges */
+      .badge {
+        @apply px-2 py-1 rounded-full text-xs font-medium;
+      }
+      .badge-success {
+        @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300;
+      }
+      .badge-warning {
+        @apply bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300;
+      }
+      .badge-danger {
+        @apply bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300;
+      }
+      .badge-info {
+        @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300;
+      }
+    </style>
+  </head>
+  <body class="bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100 h-screen flex overflow-hidden transition-colors duration-300">
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="bg-white dark:bg-stone-900 border-r border-stone-200 dark:border-stone-800 hidden md:flex flex-col z-20 shadow-sm w-64 sidebar-transition relative">
+      <!-- Toggle Button -->
+      <button
+        onclick="toggleSidebar()"
+        class="absolute -right-3 top-8 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full w-6 h-6 flex items-center justify-center text-stone-500 hover:text-primary-500 shadow-sm z-30 transform transition-transform hover:scale-110 focus:outline-none"
+      >
+        <i id="sidebar-toggle-icon" class="fa-solid fa-chevron-left text-xs"></i>
+      </button>
+
+      <div class="p-6 border-b border-stone-100 dark:border-stone-800 flex items-center h-20">
+        <i class="fa-solid fa-layer-group text-primary-500 text-2xl mr-3 flex-shrink-0"></i>
+        <div class="logo-text overflow-hidden">
+          <h1 class="text-lg font-bold text-stone-900 dark:text-white tracking-tight">SF<span class="text-primary-500">HUB</span></h1>
+          <p class="text-[10px] text-stone-500 dark:text-stone-400">Admin Panel</p>
+        </div>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto py-4 custom-scrollbar">
+        <!-- Group: DASHBOARD -->
+        <div class="mb-6 px-3">
+          <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">Dashboard</p>
+          <ul class="space-y-1">
+            <li>
+              <button onclick="navigateTo('admin-dashboard')" id="nav-admin-dashboard" class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400 transition-all">
+                <i class="fa-solid fa-chart-pie w-5 text-center mr-3"></i>
+                <span class="nav-text">Overview</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onclick="navigateTo('admin-analytics')"
+                id="nav-admin-analytics"
+                class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group"
+              >
+                <i class="fa-solid fa-chart-line w-5 text-center mr-3 group-hover:text-primary-500"></i>
+                <span class="nav-text">Analytics</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Group: USER MANAGEMENT -->
+        <div class="mb-6 px-3">
+          <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">User Management</p>
+          <ul class="space-y-1">
+            <li>
+              <button
+                onclick="navigateTo('admin-users')"
+                id="nav-admin-users"
+                class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group"
+              >
+                <i class="fa-solid fa-users w-5 text-center mr-3 group-hover:text-primary-500"></i>
+                <span class="nav-text">All Users</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onclick="navigateTo('admin-roles')"
+                id="nav-admin-roles"
+                class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group"
+              >
+                <i class="fa-solid fa-user-tag w-5 text-center mr-3 group-hover:text-primary-500"></i>
+                <span class="nav-text">Roles & Permissions</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onclick="navigateTo('admin-subscriptions')"
+                id="nav-admin-subscriptions"
+                class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group"
+              >
+                <i class="fa-solid fa-crown w-5 text-center mr-3 group-hover:text-primary-500"></i>
+                <span class="nav-text">Subscriptions</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Group: CONTENT MANAGEMENT -->
+        <div class="mb-6 px-3">
+          <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">Content Management</p>
+          <ul class="space-y-1">
+            <li>
+              <button
+                onclick="navigateTo('admin-landing')"
+                id="nav-admin-landing"
+                class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group"
+              >
+                <i class="fa-solid fa-globe w-5 text-center mr-3 group-hover:text-primary-500"></i>
+                <span class="nav-text">Landing Page</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onclick="navigateTo('admin-blog')"
+                id="nav-admin-blog"
+                class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group"
+              >
+                <i class="fa-solid fa-newspaper w-5 text-center mr-3 group-hover:text-primary-500"></i>
+                <span class="nav-text">Blog & Articles</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onclick="navigateTo('admin-faq')"
+                id="nav-admin-faq"
+                class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group"
+              >
+                <i class="fa-solid fa-circle-question w-5 text-center mr-3 group-hover:text-primary-500"></i>
+                <span class="nav-text">FAQ & Help</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Group: SEO & SETTINGS -->
+        <div class="mb-6 px-3">
+          <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">SEO & Settings</p>
+          <ul class="space-y-1">
+            <li>
+              <button
+                onclick="navigateTo('admin-seo')"
+                id="nav-admin-seo"
+                class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group"
+              >
+                <i class="fa-solid fa-magnifying-glass w-5 text-center mr-3 group-hover:text-primary-500"></i>
+                <span class="nav-text">SEO Settings</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onclick="navigateTo('admin-meta')"
+                id="nav-admin-meta"
+                class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group"
+              >
+                <i class="fa-solid fa-tags w-5 text-center mr-3 group-hover:text-primary-500"></i>
+                <span class="nav-text">Meta Tags</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onclick="navigateTo('admin-sitemap')"
+                id="nav-admin-sitemap"
+                class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group"
+              >
+                <i class="fa-solid fa-sitemap w-5 text-center mr-3 group-hover:text-primary-500"></i>
+                <span class="nav-text">Sitemap</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onclick="navigateTo('admin-settings')"
+                id="nav-admin-settings"
+                class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group"
+              >
+                <i class="fa-solid fa-gear w-5 text-center mr-3 group-hover:text-primary-500"></i>
+                <span class="nav-text">System Settings</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Group: SYSTEM -->
+        <div class="mb-6 px-3">
+          <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">System</p>
+          <ul class="space-y-1">
+            <li>
+              <button
+                onclick="navigateTo('admin-logs')"
+                id="nav-admin-logs"
+                class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group"
+              >
+                <i class="fa-solid fa-history w-5 text-center mr-3 group-hover:text-primary-500"></i>
+                <span class="nav-text">Activity Logs</span>
+              </button>
+            </li>
+            <li>
+              <button
+                onclick="navigateTo('admin-backup')"
+                id="nav-admin-backup"
+                class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group"
+              >
+                <i class="fa-solid fa-database w-5 text-center mr-3 group-hover:text-primary-500"></i>
+                <span class="nav-text">Backup & Restore</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <div class="p-4 border-t border-stone-100 dark:border-stone-800">
+        <div class="flex items-center nav-item p-2 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer transition-colors">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-400 to-primary-600 flex items-center justify-center text-white text-xs font-bold shadow-md flex-shrink-0">SA</div>
+          <div class="ml-3 overflow-hidden nav-text">
+            <p class="text-sm font-medium text-stone-700 dark:text-stone-200 truncate">Super Admin</p>
+            <p class="text-[10px] text-stone-500 dark:text-stone-400 truncate">Administrator</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative bg-stone-50 dark:bg-stone-950 transition-colors duration-300">
+      <!-- Top Header -->
+      <header class="bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 p-4 flex justify-between items-center z-10 sticky top-0">
+        <!-- Mobile Menu Button -->
+        <div class="flex items-center md:hidden">
+          <button onclick="toggleMobileMenu()" class="text-stone-600 dark:text-stone-300 focus:outline-none mr-3">
+            <i class="fa-solid fa-bars text-xl"></i>
+          </button>
+          <span class="font-bold text-lg text-stone-800 dark:text-white"><i class="fa-solid fa-layer-group text-primary-500 mr-2"></i>SFHUB Admin</span>
+        </div>
+
+        <!-- Desktop Title/Breadcrumb -->
+        <div class="hidden md:block">
+          <h2 id="page-title" class="text-lg font-bold text-stone-800 dark:text-white">Admin Dashboard</h2>
+        </div>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-3">
+          <!-- Dark Mode Toggle -->
+          <button id="theme-toggle" class="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 transition-colors">
+            <i id="theme-toggle-dark-icon" class="hidden fa-solid fa-moon"></i>
+            <i id="theme-toggle-light-icon" class="hidden fa-solid fa-sun text-yellow-400"></i>
+          </button>
+
+          <button class="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 relative transition-colors">
+            <i class="fa-solid fa-bell"></i>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-stone-900"></span>
+          </button>
+
+          <div class="hidden md:flex items-center gap-2 ml-2 pl-2 border-l border-stone-200 dark:border-stone-700">
+            <span class="text-sm text-stone-600 dark:text-stone-400">v2.1.0</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Mobile Menu Overlay -->
+      <div id="mobile-menu" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 hidden md:hidden transition-opacity" onclick="toggleMobileMenu()">
+        <div class="absolute left-0 top-0 h-full w-64 bg-white dark:bg-stone-900 shadow-xl p-4 flex flex-col transform transition-transform duration-300" onclick="event.stopPropagation()">
+          <div class="flex justify-between items-center mb-6">
+            <span class="font-bold text-lg text-stone-900 dark:text-white">Menu</span>
+            <button onclick="toggleMobileMenu()" class="text-stone-500 hover:text-stone-800 dark:hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+          </div>
+          <nav class="space-y-1">
+            <button onclick="navigateTo('admin-dashboard'); toggleMobileMenu();" class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
+              <i class="fa-solid fa-chart-pie mr-2"></i>Overview
+            </button>
+            <button onclick="navigateTo('admin-users'); toggleMobileMenu();" class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
+              <i class="fa-solid fa-users mr-2"></i>Users
+            </button>
+            <button onclick="navigateTo('admin-landing'); toggleMobileMenu();" class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
+              <i class="fa-solid fa-globe mr-2"></i>Landing Page
+            </button>
+            <button onclick="navigateTo('admin-seo'); toggleMobileMenu();" class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
+              <i class="fa-solid fa-magnifying-glass mr-2"></i>SEO Settings
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Scrollable Content -->
+      <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar scroll-smooth">
+        <!-- Dynamic Content Injected Here -->
+      </div>
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+      // --- STATE & DATA ---
+      let isSidebarCollapsed = false;
+
+      // Admin Data Structure
+      const adminData = {
+        // System Info
+        system: {
+          version: "2.1.0",
+          phpVersion: "8.2.12",
+          laravelVersion: "10.x",
+          lastUpdate: "2024-03-17 10:30",
+          environment: "production",
+          debugMode: false,
+          maintenanceMode: false,
+        },
+
+        // User Statistics
+        users: {
+          total: 12458,
+          active: 10342,
+          suspended: 1245,
+          pendingVerification: 871,
+          newToday: 45,
+          byRole: {
+            admin: 8,
+            moderator: 24,
+            premium: 2345,
+            free: 10081,
+          },
+          byPlan: {
+            pro: 1890,
+            basic: 4567,
+            free: 6001,
+          },
+          recent: [
+            { id: 1001, name: "Budi Santoso", email: "budi@email.com", role: "premium", joined: "2024-03-17", status: "active" },
+            { id: 1002, name: "Siti Rahayu", email: "siti@email.com", role: "free", joined: "2024-03-17", status: "active" },
+            { id: 1003, name: "Ahmad Fauzi", email: "ahmad@email.com", role: "pro", joined: "2024-03-16", status: "active" },
+            { id: 1004, name: "Dewi Lestari", email: "dewi@email.com", role: "free", joined: "2024-03-16", status: "pending" },
+            { id: 1005, name: "Rizki Pratama", email: "rizki@email.com", role: "premium", joined: "2024-03-15", status: "active" },
+          ],
+        },
+
+        // Landing Page Content
+        landing: {
+          hero: {
+            title: "Student-Freelancer Hub",
+            subtitle: "Platform Terpadu untuk Mahasiswa & Freelancer",
+            ctaText: "Mulai Sekarang",
+            ctaLink: "/register",
+            imageUrl: "/assets/hero-image.png",
+          },
+          features: [
+            { id: 1, title: "Smart Calendar", description: "Atur jadwal kuliah dan proyek freelance", icon: "calendar", order: 1 },
+            { id: 2, title: "Finance Manager", description: "Kelola keuangan dan investasi", icon: "wallet", order: 2 },
+            { id: 3, title: "Creative Studio", description: "Tempat mengelola proyek kreatif", icon: "palette", order: 3 },
+            { id: 4, title: "Productivity Analytics", description: "Pantau produktivitas harian", icon: "chart-line", order: 4 },
+          ],
+          testimonials: [
+            { id: 1, name: "Mahasiswa A", content: "Sangat membantu mengatur jadwal kuliah dan freelance", rating: 5, role: "Mahasiswa" },
+            { id: 2, name: "Freelancer B", content: "Fitur finance manager sangat lengkap", rating: 5, role: "Freelancer" },
+          ],
+          stats: {
+            users: 12000,
+            tasks: 45000,
+            earnings: "2.5M",
+            partners: 150,
+          },
+          seo: {
+            title: "Student-Freelancer Hub - Platform Terpadu untuk Mahasiswa & Freelancer",
+            description: "Kelola jadwal kuliah, proyek freelance, keuangan, dan produktivitas dalam satu platform",
+            keywords: "mahasiswa, freelancer, manajemen waktu, keuangan, produktivitas",
+            ogImage: "/assets/og-image.jpg",
+          },
+        },
+
+        // SEO Settings
+        seo: {
+          global: {
+            title: "Student-Freelancer Hub",
+            description: "Platform terpadu untuk mahasiswa dan freelancer Indonesia",
+            keywords: "mahasiswa, freelancer, manajemen tugas, keuangan, kalender",
+            author: "SFHUB Team",
+            robots: "index, follow",
+          },
+          pages: [
+            { page: "home", title: "Beranda - Student-Freelancer Hub", description: "Platform terpadu untuk mahasiswa dan freelancer", priority: 1.0 },
+            { page: "features", title: "Fitur - Student-Freelancer Hub", description: "Lihat semua fitur yang tersedia", priority: 0.9 },
+            { page: "pricing", title: "Harga - Student-Freelancer Hub", description: "Pilih paket yang sesuai dengan kebutuhan", priority: 0.9 },
+            { page: "blog", title: "Blog - Student-Freelancer Hub", description: "Artikel dan tips produktivitas", priority: 0.8 },
+            { page: "contact", title: "Kontak - Student-Freelancer Hub", description: "Hubungi tim kami", priority: 0.7 },
+          ],
+          sitemap: {
+            lastGenerated: "2024-03-17",
+            urlCount: 45,
+            autoGenerate: true,
+          },
+          analytics: {
+            google: "UA-12345678-1",
+            facebook: "FB-PIXEL-123",
+            active: true,
+          },
+        },
+
+        // Blog & Articles
+        blog: {
+          posts: [
+            { id: 1, title: "Tips Manajemen Waktu untuk Mahasiswa", author: "Admin", date: "2024-03-15", views: 1245, status: "published" },
+            { id: 2, title: "Cara Memulai Freelance sebagai Mahasiswa", author: "Admin", date: "2024-03-14", views: 2341, status: "published" },
+            { id: 3, title: "Panduan Mengatur Keuangan untuk Freelancer", author: "Admin", date: "2024-03-13", views: 1876, status: "published" },
+            { id: 4, title: "Strategi Meningkatkan Produktivitas", author: "Admin", date: "2024-03-12", views: 987, status: "draft" },
+          ],
+          categories: [
+            { name: "Produktivitas", count: 12 },
+            { name: "Keuangan", count: 8 },
+            { name: "Karir", count: 15 },
+            { name: "Tips & Trik", count: 10 },
+          ],
+        },
+
+        // Analytics Data
+        analytics: {
+          dailyActiveUsers: [1240, 1345, 1432, 1523, 1489, 1678, 1789],
+          weeklyActiveUsers: [8900, 9123, 9345, 9567, 9789],
+          monthlyActiveUsers: [32450, 33123, 33987, 34892],
+          userGrowth: [10000, 10500, 11200, 11800, 12400, 13000, 13700, 14300, 14800, 15200, 15600, 16100],
+          taskCompletion: [450, 520, 480, 600, 550, 620, 580],
+          revenue: [15000000, 16500000, 18200000, 19800000, 21500000, 23400000],
+        },
+
+        // FAQ
+        faq: {
+          categories: [
+            {
+              name: "Akun & Registrasi",
+              items: [
+                { id: 1, question: "Bagaimana cara mendaftar?", answer: "Klik tombol Daftar di pojok kanan atas...", order: 1 },
+                { id: 2, question: "Apakah pendaftaran gratis?", answer: "Ya, pendaftaran gratis untuk paket Basic", order: 2 },
+              ],
+            },
+            {
+              name: "Pembayaran",
+              items: [
+                { id: 3, question: "Metode pembayaran apa saja?", answer: "Kami menerima transfer bank, kartu kredit, dan e-wallet", order: 1 },
+              ],
+            },
+          ],
+        },
+
+        // Activity Logs
+        logs: [
+          { id: 1, user: "Admin", action: "User update", target: "User #1234", timestamp: "2024-03-17 09:30", ip: "192.168.1.1" },
+          { id: 2, user: "Admin", action: "Content update", target: "Landing page", timestamp: "2024-03-17 09:15", ip: "192.168.1.1" },
+          { id: 3, user: "Moderator", action: "User suspend", target: "User #5678", timestamp: "2024-03-17 08:45", ip: "192.168.1.2" },
+        ],
+      };
+
+      // --- CORE FUNCTIONS ---
+
+      function init() {
+        // Theme Check
+        if (localStorage.getItem("color-theme") === "dark" || (!("color-theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.classList.add("dark");
+          document.getElementById("theme-toggle-light-icon").classList.remove("hidden");
+        } else {
+          document.documentElement.classList.remove("dark");
+          document.getElementById("theme-toggle-dark-icon").classList.remove("hidden");
+        }
+
+        navigateTo("admin-dashboard");
+      }
+
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const icon = document.getElementById("sidebar-toggle-icon");
+
+        isSidebarCollapsed = !isSidebarCollapsed;
+
+        if (isSidebarCollapsed) {
+          sidebar.classList.add("w-20", "sidebar-collapsed");
+          sidebar.classList.remove("w-64");
+          icon.classList.remove("fa-chevron-left");
+          icon.classList.add("fa-chevron-right");
+        } else {
+          sidebar.classList.remove("w-20", "sidebar-collapsed");
+          sidebar.classList.add("w-64");
+          icon.classList.remove("fa-chevron-right");
+          icon.classList.add("fa-chevron-left");
+        }
+      }
+
+      function navigateTo(viewName) {
+        // Update Sidebar Active State
+        document.querySelectorAll(".nav-item").forEach((el) => {
+          el.className = "nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all group";
+        });
+
+        const activeNav = document.getElementById(`nav-${viewName}`);
+        if (activeNav) {
+          activeNav.className = "nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400 transition-all";
+        }
+
+        // Set Page Title
+        const titles = {
+          "admin-dashboard": "Dashboard Overview",
+          "admin-analytics": "Analytics",
+          "admin-users": "User Management",
+          "admin-roles": "Roles & Permissions",
+          "admin-subscriptions": "Subscriptions",
+          "admin-landing": "Landing Page Editor",
+          "admin-blog": "Blog Management",
+          "admin-faq": "FAQ Management",
+          "admin-seo": "SEO Settings",
+          "admin-meta": "Meta Tags",
+          "admin-sitemap": "Sitemap Generator",
+          "admin-settings": "System Settings",
+          "admin-logs": "Activity Logs",
+          "admin-backup": "Backup & Restore",
+        };
+        document.getElementById("page-title").innerText = titles[viewName] || "Admin Dashboard";
+
+        // Render Content
+        const contentArea = document.getElementById("content-area");
+        contentArea.innerHTML = "";
+
+        switch (viewName) {
+          case "admin-dashboard":
+            renderAdminDashboard(contentArea);
+            break;
+          case "admin-analytics":
+            renderAdminAnalytics(contentArea);
+            break;
+          case "admin-users":
+            renderAdminUsers(contentArea);
+            break;
+          case "admin-roles":
+            renderAdminRoles(contentArea);
+            break;
+          case "admin-subscriptions":
+            renderAdminSubscriptions(contentArea);
+            break;
+          case "admin-landing":
+            renderAdminLanding(contentArea);
+            break;
+          case "admin-blog":
+            renderAdminBlog(contentArea);
+            break;
+          case "admin-faq":
+            renderAdminFAQ(contentArea);
+            break;
+          case "admin-seo":
+            renderAdminSEO(contentArea);
+            break;
+          case "admin-meta":
+            renderAdminMeta(contentArea);
+            break;
+          case "admin-sitemap":
+            renderAdminSitemap(contentArea);
+            break;
+          case "admin-settings":
+            renderAdminSettings(contentArea);
+            break;
+          case "admin-logs":
+            renderAdminLogs(contentArea);
+            break;
+          case "admin-backup":
+            renderAdminBackup(contentArea);
+            break;
+        }
+      }
+
+      function toggleMobileMenu() {
+        const menu = document.getElementById("mobile-menu");
+        menu.classList.toggle("hidden");
+      }
+
+      // --- THEME TOGGLE ---
+      const themeToggleBtn = document.getElementById("theme-toggle");
+      themeToggleBtn.addEventListener("click", function () {
+        const darkIcon = document.getElementById("theme-toggle-dark-icon");
+        const lightIcon = document.getElementById("theme-toggle-light-icon");
+
+        darkIcon.classList.toggle("hidden");
+        lightIcon.classList.toggle("hidden");
+
+        if (localStorage.getItem("color-theme")) {
+          if (localStorage.getItem("color-theme") === "light") {
+            document.documentElement.classList.add("dark");
+            localStorage.setItem("color-theme", "dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+            localStorage.setItem("color-theme", "light");
+          }
+        } else {
+          if (document.documentElement.classList.contains("dark")) {
+            document.documentElement.classList.remove("dark");
+            localStorage.setItem("color-theme", "light");
+          } else {
+            document.documentElement.classList.add("dark");
+            localStorage.setItem("color-theme", "dark");
+          }
+        }
+      });
+
+      // --- UTILITY FUNCTIONS ---
+      function formatCurrency(amount) {
+        return amount.toLocaleString("id-ID");
+      }
+
+      function formatNumber(num) {
+        return num.toLocaleString("id-ID");
+      }
+
+      function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+      }
+
+      function formatDateTime(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+      }
+
+      function formatDateShort(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+      }
+
+      function showNotification(message, type = "success") {
+        const notification = document.createElement("div");
+        notification.className = `fixed bottom-4 right-4 ${type === "success" ? "bg-emerald-500" : "bg-rose-500"} text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in-up`;
+        notification.innerHTML = `<i class="fa-solid ${type === "success" ? "fa-check-circle" : "fa-exclamation-circle"} mr-2"></i>${message}`;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+      }
+
+      // --- RENDER FUNCTIONS ---
+
+      function renderAdminDashboard(container) {
+        container.innerHTML = `
+          <div class="animate-fade-in-up space-y-8">
+            <!-- Welcome Banner -->
+            <div class="bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl p-8 text-white shadow-lg">
+              <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                  <h2 class="text-2xl font-bold mb-2">Selamat datang kembali, Super Admin!</h2>
+                  <p class="text-primary-100">Berikut ringkasan aktivitas Student-Freelancer Hub hari ini.</p>
+                </div>
+                <div class="mt-4 md:mt-0 flex gap-3">
+                  <span class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-sm">
+                    <i class="fa-solid fa-calendar mr-2"></i>${new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div class="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm">
+                <div class="flex items-center">
+                  <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mr-4">
+                    <i class="fa-solid fa-server text-emerald-600 dark:text-emerald-400"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm text-stone-500 dark:text-stone-400">System Status</p>
+                    <h3 class="text-xl font-bold text-stone-800 dark:text-white">
+                      <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>Online
+                    </h3>
+                    <p class="text-xs text-stone-400 mt-1">v${adminData.system.version}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm">
+                <div class="flex items-center">
+                  <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-4">
+                    <i class="fa-solid fa-users text-blue-600 dark:text-blue-400"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm text-stone-500 dark:text-stone-400">Total Users</p>
+                    <h3 class="text-xl font-bold text-stone-800 dark:text-white">${formatNumber(adminData.users.total)}</h3>
+                    <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1">+${adminData.users.newToday} hari ini</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm">
+                <div class="flex items-center">
+                  <div class="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mr-4">
+                    <i class="fa-solid fa-crown text-amber-600 dark:text-amber-400"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm text-stone-500 dark:text-stone-400">Premium Users</p>
+                    <h3 class="text-xl font-bold text-stone-800 dark:text-white">${formatNumber(adminData.users.byPlan.pro)}</h3>
+                    <p class="text-xs text-stone-400 mt-1">${Math.round(adminData.users.byPlan.pro / adminData.users.total * 100)}% of total</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm">
+                <div class="flex items-center">
+                  <div class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mr-4">
+                    <i class="fa-solid fa-chart-line text-purple-600 dark:text-purple-400"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm text-stone-500 dark:text-stone-400">Revenue (MTD)</p>
+                    <h3 class="text-xl font-bold text-stone-800 dark:text-white">Rp ${formatCurrency(adminData.analytics.revenue[adminData.analytics.revenue.length - 1])}</h3>
+                    <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1">+8.2% dari bulan lalu</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
+                <div class="flex justify-between items-center mb-4">
+                  <h3 class="font-bold text-stone-800 dark:text-white">User Growth (12 Bulan)</h3>
+                  <span class="text-xs bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded text-stone-500">YoY: +61%</span>
+                </div>
+                <div class="chart-container h-64">
+                  <canvas id="userGrowthChart"></canvas>
+                </div>
+              </div>
+
+              <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
+                <div class="flex justify-between items-center mb-4">
+                  <h3 class="font-bold text-stone-800 dark:text-white">User Distribution by Plan</h3>
+                  <span class="text-xs bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded text-stone-500">Total: ${formatNumber(adminData.users.total)}</span>
+                </div>
+                <div class="chart-container h-64">
+                  <canvas id="userDistributionChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Users -->
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
+              <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-stone-800 dark:text-white">Recent Users</h3>
+                <button onclick="navigateTo('admin-users')" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">
+                  View All <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="border-b border-stone-200 dark:border-stone-700">
+                      <th class="text-left py-3 text-stone-600 dark:text-stone-400 font-medium">User</th>
+                      <th class="text-left py-3 text-stone-600 dark:text-stone-400 font-medium">Role</th>
+                      <th class="text-left py-3 text-stone-600 dark:text-stone-400 font-medium">Joined</th>
+                      <th class="text-left py-3 text-stone-600 dark:text-stone-400 font-medium">Status</th>
+                      <th class="text-left py-3 text-stone-600 dark:text-stone-400 font-medium">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${adminData.users.recent.map(user => `
+                      <tr class="border-b border-stone-100 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800">
+                        <td class="py-3">
+                          <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xs font-bold mr-3">
+                              ${user.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase()}
+                            </div>
+                            <div>
+                              <p class="font-medium text-stone-800 dark:text-white">${user.name}</p>
+                              <p class="text-xs text-stone-500 dark:text-stone-400">${user.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="py-3">
+                          <span class="px-2 py-1 rounded-full text-xs font-medium ${user.role === 'pro' ? 'badge-success' : user.role === 'premium' ? 'badge-warning' : 'badge-info'}">
+                            ${user.role}
+                          </span>
+                        </td>
+                        <td class="py-3 text-stone-600 dark:text-stone-400">${formatDateShort(user.joined)}</td>
+                        <td class="py-3">
+                          <span class="px-2 py-1 rounded-full text-xs font-medium ${user.status === 'active' ? 'badge-success' : 'badge-warning'}">
+                            ${user.status}
+                          </span>
+                        </td>
+                        <td class="py-3">
+                          <button onclick="editUser(${user.id})" class="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 mr-2">
+                            <i class="fa-solid fa-edit"></i>
+                          </button>
+                          <button onclick="showUserDetail(${user.id})" class="text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-300">
+                            <i class="fa-solid fa-eye"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Quick Actions & System Info -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
+                <h3 class="font-bold text-stone-800 dark:text-white mb-4">Quick Actions</h3>
+                <div class="grid grid-cols-2 gap-3">
+                  <button onclick="showAddUserModal()" class="p-3 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/30 rounded-xl text-center transition-colors">
+                    <i class="fa-solid fa-user-plus text-primary-600 dark:text-primary-400 text-xl mb-1"></i>
+                    <p class="text-xs font-medium text-primary-800 dark:text-primary-300">Add User</p>
+                  </button>
+                  <button onclick="showEditLandingModal()" class="p-3 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-xl text-center transition-colors">
+                    <i class="fa-solid fa-pen-to-square text-emerald-600 dark:text-emerald-400 text-xl mb-1"></i>
+                    <p class="text-xs font-medium text-emerald-800 dark:text-emerald-300">Edit Landing</p>
+                  </button>
+                  <button onclick="showBackupModal()" class="p-3 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded-xl text-center transition-colors">
+                    <i class="fa-solid fa-database text-amber-600 dark:text-amber-400 text-xl mb-1"></i>
+                    <p class="text-xs font-medium text-amber-800 dark:text-amber-300">Backup Now</p>
+                  </button>
+                  <button onclick="clearCache()" class="p-3 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-xl text-center transition-colors">
+                    <i class="fa-solid fa-broom text-purple-600 dark:text-purple-400 text-xl mb-1"></i>
+                    <p class="text-xs font-medium text-purple-800 dark:text-purple-300">Clear Cache</p>
+                  </button>
+                </div>
+              </div>
+
+              <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
+                <h3 class="font-bold text-stone-800 dark:text-white mb-4">System Information</h3>
+                <div class="space-y-3">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-stone-500 dark:text-stone-400">Version</span>
+                    <span class="font-medium text-stone-800 dark:text-white">${adminData.system.version}</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-stone-500 dark:text-stone-400">PHP Version</span>
+                    <span class="font-medium text-stone-800 dark:text-white">${adminData.system.phpVersion}</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-stone-500 dark:text-stone-400">Laravel</span>
+                    <span class="font-medium text-stone-800 dark:text-white">${adminData.system.laravelVersion}</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-stone-500 dark:text-stone-400">Environment</span>
+                    <span class="font-medium ${adminData.system.environment === 'production' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}">${adminData.system.environment}</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-stone-500 dark:text-stone-400">Debug Mode</span>
+                    <span class="font-medium ${adminData.system.debugMode ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}">${adminData.system.debugMode ? 'On' : 'Off'}</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-stone-500 dark:text-stone-400">Maintenance</span>
+                    <span class="font-medium ${adminData.system.maintenanceMode ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}">${adminData.system.maintenanceMode ? 'On' : 'Off'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
+                <h3 class="font-bold text-stone-800 dark:text-white mb-4">Recent Activity</h3>
+                <div class="space-y-3">
+                  ${adminData.logs.slice(0, 3).map(log => `
+                    <div class="flex items-start gap-3 p-2 border-b border-stone-100 dark:border-stone-800 last:border-0">
+                      <div class="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center text-stone-500 flex-shrink-0">
+                        <i class="fa-solid fa-circle-user"></i>
+                      </div>
+                      <div>
+                        <p class="text-sm text-stone-800 dark:text-white"><span class="font-medium">${log.user}</span> ${log.action}</p>
+                        <p class="text-xs text-stone-500 dark:text-stone-400">${log.target} • ${log.timestamp}</p>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Initialize charts
+        setTimeout(() => {
+          initUserGrowthChart();
+          initUserDistributionChart();
+        }, 100);
+      }
+
+      function initUserGrowthChart() {
+        const ctx = document.getElementById("userGrowthChart");
+        if (!ctx) return;
+
+        const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+        new Chart(ctx.getContext("2d"), {
+          type: "line",
+          data: {
+            labels: months,
+            datasets: [{
+              label: "Total Users",
+              data: adminData.analytics.userGrowth,
+              borderColor: "#f57223",
+              backgroundColor: "rgba(245, 114, 35, 0.1)",
+              fill: true,
+              tension: 0.4,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: value => formatNumber(value)
+                }
+              }
+            }
+          }
+        });
+      }
+
+      function initUserDistributionChart() {
+        const ctx = document.getElementById("userDistributionChart");
+        if (!ctx) return;
+
+        new Chart(ctx.getContext("2d"), {
+          type: "doughnut",
+          data: {
+            labels: ["Pro", "Basic", "Free"],
+            datasets: [{
+              data: [adminData.users.byPlan.pro, adminData.users.byPlan.basic, adminData.users.byPlan.free],
+              backgroundColor: ["#f57223", "#3b82f6", "#94a3b8"],
+              borderWidth: 2,
+              borderColor: "#fff",
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: "bottom" }
+            }
+          }
+        });
+      }
+
+      function renderAdminUsers(container) {
+        container.innerHTML = `
+          <div class="animate-fade-in-up space-y-6">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h2 class="text-2xl font-bold text-stone-900 dark:text-white">User Management</h2>
+                <p class="text-stone-500 dark:text-stone-400 text-sm">Kelola semua pengguna Student-Freelancer Hub</p>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="showAddUserModal()" class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-colors">
+                  <i class="fa-solid fa-plus"></i> Add New User
+                </button>
+                <button onclick="exportUsers()" class="flex items-center gap-2 px-4 py-2 border border-stone-300 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl text-sm font-medium transition-colors">
+                  <i class="fa-solid fa-download"></i> Export
+                </button>
+              </div>
+            </div>
+
+            <!-- Filters & Search -->
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-4 border border-stone-200 dark:border-stone-800">
+              <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                  <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"></i>
+                    <input type="text" placeholder="Search users by name, email..." class="w-full pl-10 pr-4 py-2 border border-stone-300 dark:border-stone-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <select class="px-4 py-2 border border-stone-300 dark:border-stone-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                    <option value="">All Roles</option>
+                    <option value="admin">Admin</option>
+                    <option value="premium">Premium</option>
+                    <option value="free">Free</option>
+                  </select>
+                  <select class="px-4 py-2 border border-stone-300 dark:border-stone-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="bg-stone-50 dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
+                      <th class="text-left py-4 px-6 text-stone-600 dark:text-stone-400 font-medium">User</th>
+                      <th class="text-left py-4 px-6 text-stone-600 dark:text-stone-400 font-medium">Role</th>
+                      <th class="text-left py-4 px-6 text-stone-600 dark:text-stone-400 font-medium">Plan</th>
+                      <th class="text-left py-4 px-6 text-stone-600 dark:text-stone-400 font-medium">Joined</th>
+                      <th class="text-left py-4 px-6 text-stone-600 dark:text-stone-400 font-medium">Last Active</th>
+                      <th class="text-left py-4 px-6 text-stone-600 dark:text-stone-400 font-medium">Status</th>
+                      <th class="text-left py-4 px-6 text-stone-600 dark:text-stone-400 font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${Array(10).fill().map((_, i) => `
+                      <tr class="border-b border-stone-100 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800">
+                        <td class="py-4 px-6">
+                          <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-bold mr-3">
+                              ${['BS', 'SR', 'AF', 'DL', 'RP'][i % 5]}
+                            </div>
+                            <div>
+                              <p class="font-medium text-stone-800 dark:text-white">${['Budi Santoso', 'Siti Rahayu', 'Ahmad Fauzi', 'Dewi Lestari', 'Rizki Pratama'][i % 5]}</p>
+                              <p class="text-xs text-stone-500 dark:text-stone-400">user${i+1}@email.com</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="py-4 px-6">${['Member', 'Moderator', 'Admin'][i % 3]}</td>
+                        <td class="py-4 px-6">
+                          <span class="px-2 py-1 rounded-full text-xs font-medium ${['Pro', 'Basic', 'Free'][i % 3] === 'Pro' ? 'badge-success' : ['Pro', 'Basic', 'Free'][i % 3] === 'Basic' ? 'badge-info' : 'badge-warning'}">
+                            ${['Pro', 'Basic', 'Free'][i % 3]}
+                          </span>
+                        </td>
+                        <td class="py-4 px-6 text-stone-600 dark:text-stone-400">${['2024-03-17', '2024-03-16', '2024-03-15', '2024-03-14', '2024-03-13'][i % 5]}</td>
+                        <td class="py-4 px-6 text-stone-600 dark:text-stone-400">${['2 jam lalu', '5 jam lalu', '1 hari lalu', '2 hari lalu', '3 hari lalu'][i % 5]}</td>
+                        <td class="py-4 px-6">
+                          <span class="px-2 py-1 rounded-full text-xs font-medium ${['active', 'pending', 'suspended'][i % 3] === 'active' ? 'badge-success' : ['active', 'pending', 'suspended'][i % 3] === 'pending' ? 'badge-warning' : 'badge-danger'}">
+                            ${['Active', 'Pending', 'Suspended'][i % 3]}
+                          </span>
+                        </td>
+                        <td class="py-4 px-6">
+                          <div class="flex gap-2">
+                            <button onclick="editUser(${i+1})" class="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300" title="Edit">
+                              <i class="fa-solid fa-edit"></i>
+                            </button>
+                            <button onclick="toggleUserStatus(${i+1})" class="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300" title="Toggle Status">
+                              <i class="fa-solid fa-ban"></i>
+                            </button>
+                            <button onclick="deleteUser(${i+1})" class="text-rose-600 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-300" title="Delete">
+                              <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination -->
+              <div class="px-6 py-4 border-t border-stone-200 dark:border-stone-700 flex justify-between items-center">
+                <p class="text-sm text-stone-500 dark:text-stone-400">Showing 1-10 of 12,458 users</p>
+                <div class="flex gap-2">
+                  <button class="px-3 py-1 border border-stone-300 dark:border-stone-700 rounded-lg text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800">Previous</button>
+                  <button class="px-3 py-1 bg-primary-600 text-white rounded-lg">1</button>
+                  <button class="px-3 py-1 border border-stone-300 dark:border-stone-700 rounded-lg text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800">2</button>
+                  <button class="px-3 py-1 border border-stone-300 dark:border-stone-700 rounded-lg text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800">3</button>
+                  <button class="px-3 py-1 border border-stone-300 dark:border-stone-700 rounded-lg text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800">Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderAdminLanding(container) {
+        container.innerHTML = `
+          <div class="animate-fade-in-up space-y-6">
+            <!-- Header -->
+            <div class="flex justify-between items-center">
+              <div>
+                <h2 class="text-2xl font-bold text-stone-900 dark:text-white">Landing Page Editor</h2>
+                <p class="text-stone-500 dark:text-stone-400 text-sm">Kelola konten halaman utama Student-Freelancer Hub</p>
+              </div>
+              <button onclick="saveLandingChanges()" class="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium transition-colors">
+                <i class="fa-solid fa-save"></i> Save Changes
+              </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="border-b border-stone-200 dark:border-stone-700">
+              <div class="flex gap-6">
+                <button class="tab-btn active px-4 py-2 text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 font-medium">Hero Section</button>
+                <button class="tab-btn px-4 py-2 text-stone-600 dark:text-stone-400 hover:text-primary-600 dark:hover:text-primary-400">Features</button>
+                <button class="tab-btn px-4 py-2 text-stone-600 dark:text-stone-400 hover:text-primary-600 dark:hover:text-primary-400">Testimonials</button>
+                <button class="tab-btn px-4 py-2 text-stone-600 dark:text-stone-400 hover:text-primary-600 dark:hover:text-primary-400">Stats</button>
+                <button class="tab-btn px-4 py-2 text-stone-600 dark:text-stone-400 hover:text-primary-600 dark:hover:text-primary-400">SEO</button>
+              </div>
+            </div>
+
+            <!-- Hero Section Editor -->
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800">
+              <h3 class="font-bold text-stone-800 dark:text-white mb-6">Hero Section</h3>
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Title</label>
+                    <input type="text" value="${adminData.landing.hero.title}" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Subtitle</label>
+                    <textarea rows="3" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">${adminData.landing.hero.subtitle}</textarea>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">CTA Text</label>
+                      <input type="text" value="${adminData.landing.hero.ctaText}" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">CTA Link</label>
+                      <input type="text" value="${adminData.landing.hero.ctaLink}" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-stone-100 dark:bg-stone-800 rounded-xl p-4 flex items-center justify-center">
+                  <div class="text-center">
+                    <i class="fa-solid fa-image text-4xl text-stone-400 mb-2"></i>
+                    <p class="text-sm text-stone-500 dark:text-stone-400">Hero Image Preview</p>
+                    <p class="text-xs text-stone-400 mt-2">${adminData.landing.hero.imageUrl}</p>
+                    <button class="mt-4 px-4 py-2 bg-stone-800 dark:bg-stone-700 text-white rounded-lg text-sm">Change Image</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Features List -->
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800">
+              <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-stone-800 dark:text-white">Features</h3>
+                <button onclick="addFeature()" class="px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm">
+                  <i class="fa-solid fa-plus mr-1"></i> Add Feature
+                </button>
+              </div>
+
+              <div class="space-y-3">
+                ${adminData.landing.features.map(feature => `
+                  <div class="flex items-center gap-4 p-3 border border-stone-200 dark:border-stone-700 rounded-lg">
+                    <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                      <i class="fa-solid fa-${feature.icon}"></i>
+                    </div>
+                    <div class="flex-1">
+                      <input type="text" value="${feature.title}" class="w-full border-0 bg-transparent font-medium text-stone-800 dark:text-white focus:outline-none focus:ring-0" placeholder="Feature title">
+                      <input type="text" value="${feature.description}" class="w-full border-0 bg-transparent text-sm text-stone-500 dark:text-stone-400 focus:outline-none focus:ring-0" placeholder="Feature description">
+                    </div>
+                    <div class="flex gap-2">
+                      <button onclick="moveFeature(${feature.id}, 'up')" class="text-stone-500 hover:text-stone-700 dark:text-stone-400"><i class="fa-solid fa-arrow-up"></i></button>
+                      <button onclick="moveFeature(${feature.id}, 'down')" class="text-stone-500 hover:text-stone-700 dark:text-stone-400"><i class="fa-solid fa-arrow-down"></i></button>
+                      <button onclick="deleteFeature(${feature.id})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800">
+              <h3 class="font-bold text-stone-800 dark:text-white mb-6">Statistics Numbers</h3>
+
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Total Users</label>
+                  <input type="number" value="${adminData.landing.stats.users}" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Tasks Completed</label>
+                  <input type="number" value="${adminData.landing.stats.tasks}" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Total Earnings</label>
+                  <input type="text" value="${adminData.landing.stats.earnings}" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Partners</label>
+                  <input type="number" value="${adminData.landing.stats.partners}" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderAdminSEO(container) {
+        container.innerHTML = `
+          <div class="animate-fade-in-up space-y-6">
+            <!-- Header -->
+            <div class="flex justify-between items-center">
+              <div>
+                <h2 class="text-2xl font-bold text-stone-900 dark:text-white">SEO Settings</h2>
+                <p class="text-stone-500 dark:text-stone-400 text-sm">Optimasi mesin pencari untuk Student-Freelancer Hub</p>
+              </div>
+              <button onclick="saveSEOSettings()" class="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium transition-colors">
+                <i class="fa-solid fa-save"></i> Save Settings
+              </button>
+            </div>
+
+            <!-- Global SEO Settings -->
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800">
+              <h3 class="font-bold text-stone-800 dark:text-white mb-6">Global SEO Settings</h3>
+
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Default Meta Title</label>
+                  <input type="text" value="${adminData.seo.global.title}" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                  <p class="text-xs text-stone-500 mt-1">Recommended length: 50-60 characters</p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Default Meta Description</label>
+                  <textarea rows="3" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">${adminData.seo.global.description}</textarea>
+                  <p class="text-xs text-stone-500 mt-1">Recommended length: 150-160 characters</p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Meta Keywords</label>
+                  <input type="text" value="${adminData.seo.global.keywords}" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                  <p class="text-xs text-stone-500 mt-1">Separate keywords with commas</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Author</label>
+                    <input type="text" value="${adminData.seo.global.author}" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Robots Meta</label>
+                    <input type="text" value="${adminData.seo.global.robots}" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Page-specific SEO -->
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800">
+              <h3 class="font-bold text-stone-800 dark:text-white mb-6">Page-specific SEO</h3>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="border-b border-stone-200 dark:border-stone-700">
+                      <th class="text-left py-3 text-stone-600 dark:text-stone-400 font-medium">Page</th>
+                      <th class="text-left py-3 text-stone-600 dark:text-stone-400 font-medium">Title</th>
+                      <th class="text-left py-3 text-stone-600 dark:text-stone-400 font-medium">Description</th>
+                      <th class="text-left py-3 text-stone-600 dark:text-stone-400 font-medium">Priority</th>
+                      <th class="text-left py-3 text-stone-600 dark:text-stone-400 font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${adminData.seo.pages.map(page => `
+                      <tr class="border-b border-stone-100 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800">
+                        <td class="py-3 font-medium text-stone-800 dark:text-white">${page.page}</td>
+                        <td class="py-3">
+                          <input type="text" value="${page.title}" class="w-full border-0 bg-transparent text-sm focus:outline-none focus:ring-0">
+                        </td>
+                        <td class="py-3">
+                          <input type="text" value="${page.description}" class="w-full border-0 bg-transparent text-sm focus:outline-none focus:ring-0">
+                        </td>
+                        <td class="py-3">
+                          <input type="number" step="0.1" min="0" max="1" value="${page.priority}" class="w-20 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-sm">
+                        </td>
+                        <td class="py-3">
+                          <button onclick="updatePageSEO('${page.page}')" class="text-primary-600 hover:text-primary-800 dark:text-primary-400">
+                            <i class="fa-solid fa-save"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Analytics Settings -->
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800">
+              <h3 class="font-bold text-stone-800 dark:text-white mb-6">Analytics & Tracking</h3>
+
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Google Analytics ID</label>
+                  <input type="text" value="${adminData.seo.analytics.google}" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Facebook Pixel ID</label>
+                  <input type="text" value="${adminData.seo.analytics.facebook}" class="w-full border border-stone-300 dark:border-stone-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-stone-800 dark:text-white">
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" id="analytics-active" ${adminData.seo.analytics.active ? 'checked' : ''} class="rounded border-stone-300 text-primary-600 focus:ring-primary-500">
+                  <label for="analytics-active" class="text-sm text-stone-700 dark:text-stone-300">Enable Analytics Tracking</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sitemap Settings -->
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800">
+              <h3 class="font-bold text-stone-800 dark:text-white mb-6">Sitemap Settings</h3>
+
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="font-medium text-stone-800 dark:text-white">Last Generated</p>
+                    <p class="text-sm text-stone-500">${adminData.seo.sitemap.lastGenerated}</p>
+                  </div>
+                  <div>
+                    <p class="font-medium text-stone-800 dark:text-white">URL Count</p>
+                    <p class="text-sm text-stone-500">${adminData.seo.sitemap.urlCount}</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input type="checkbox" id="auto-generate" ${adminData.seo.sitemap.autoGenerate ? 'checked' : ''} class="rounded border-stone-300 text-primary-600 focus:ring-primary-500">
+                    <label for="auto-generate" class="text-sm text-stone-700 dark:text-stone-300">Auto-generate daily</label>
+                  </div>
+                </div>
+
+                <div class="flex gap-3">
+                  <button onclick="generateSitemap()" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm">
+                    <i class="fa-solid fa-sync-alt mr-2"></i>Generate Now
+                  </button>
+                  <button onclick="downloadSitemap()" class="px-4 py-2 border border-stone-300 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-lg text-sm">
+                    <i class="fa-solid fa-download mr-2"></i>Download
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderAdminAnalytics(container) {
+        container.innerHTML = `
+          <div class="animate-fade-in-up space-y-6">
+            <h2 class="text-2xl font-bold text-stone-900 dark:text-white">Analytics Dashboard</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="font-bold text-stone-800 dark:text-white">Daily Active Users</h3>
+                  <span class="text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-1 rounded">+5.2%</span>
+                </div>
+                <p class="text-3xl font-bold text-stone-800 dark:text-white mb-2">${formatNumber(adminData.analytics.dailyActiveUsers[adminData.analytics.dailyActiveUsers.length-1])}</p>
+                <div class="h-32">
+                  <canvas id="dailyActiveChart"></canvas>
+                </div>
+              </div>
+
+              <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="font-bold text-stone-800 dark:text-white">Weekly Active Users</h3>
+                  <span class="text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-1 rounded">+3.8%</span>
+                </div>
+                <p class="text-3xl font-bold text-stone-800 dark:text-white mb-2">${formatNumber(adminData.analytics.weeklyActiveUsers[adminData.analytics.weeklyActiveUsers.length-1])}</p>
+                <div class="h-32">
+                  <canvas id="weeklyActiveChart"></canvas>
+                </div>
+              </div>
+
+              <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="font-bold text-stone-800 dark:text-white">Monthly Active Users</h3>
+                  <span class="text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-1 rounded">+2.3%</span>
+                </div>
+                <p class="text-3xl font-bold text-stone-800 dark:text-white mb-2">${formatNumber(adminData.analytics.monthlyActiveUsers[adminData.analytics.monthlyActiveUsers.length-1])}</p>
+                <div class="h-32">
+                  <canvas id="monthlyActiveChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800">
+              <h3 class="font-bold text-stone-800 dark:text-white mb-6">Task Completion Rate</h3>
+              <div class="h-64">
+                <canvas id="taskCompletionChart"></canvas>
+              </div>
+            </div>
+          </div>
+        `;
+
+        setTimeout(() => {
+          initActiveCharts();
+          initTaskCompletionChart();
+        }, 100);
+      }
+
+      function initActiveCharts() {
+        const dailyCtx = document.getElementById("dailyActiveChart");
+        if (dailyCtx) {
+          new Chart(dailyCtx.getContext("2d"), {
+            type: "line",
+            data: {
+              labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+              datasets: [{
+                data: adminData.analytics.dailyActiveUsers,
+                borderColor: "#f57223",
+                backgroundColor: "rgba(245, 114, 35, 0.1)",
+                fill: true,
+                tension: 0.4,
+                pointRadius: 2,
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true } }
+            }
+          });
+        }
+
+        const weeklyCtx = document.getElementById("weeklyActiveChart");
+        if (weeklyCtx) {
+          new Chart(weeklyCtx.getContext("2d"), {
+            type: "line",
+            data: {
+              labels: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5"],
+              datasets: [{
+                data: adminData.analytics.weeklyActiveUsers,
+                borderColor: "#3b82f6",
+                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                fill: true,
+                tension: 0.4,
+                pointRadius: 2,
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true } }
+            }
+          });
+        }
+
+        const monthlyCtx = document.getElementById("monthlyActiveChart");
+        if (monthlyCtx) {
+          new Chart(monthlyCtx.getContext("2d"), {
+            type: "line",
+            data: {
+              labels: ["Jan", "Feb", "Mar", "Apr"],
+              datasets: [{
+                data: adminData.analytics.monthlyActiveUsers,
+                borderColor: "#10b981",
+                backgroundColor: "rgba(16, 185, 129, 0.1)",
+                fill: true,
+                tension: 0.4,
+                pointRadius: 2,
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true } }
+            }
+          });
+        }
+      }
+
+      function initTaskCompletionChart() {
+        const ctx = document.getElementById("taskCompletionChart");
+        if (!ctx) return;
+
+        new Chart(ctx.getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            datasets: [{
+              label: "Tasks Completed",
+              data: adminData.analytics.taskCompletion,
+              backgroundColor: "#f57223",
+              borderRadius: 6,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+      }
+
+      // Placeholder functions for actions
+      function showAddUserModal() { showNotification("Add user modal would open here"); }
+      function showEditLandingModal() { showNotification("Edit landing modal would open here"); }
+      function showBackupModal() { showNotification("Backup modal would open here"); }
+      function clearCache() { showNotification("Cache cleared successfully!"); }
+      function exportUsers() { showNotification("Exporting users..."); }
+      function editUser(id) { showNotification(`Edit user ${id}`); }
+      function toggleUserStatus(id) { showNotification(`Toggle user ${id} status`); }
+      function deleteUser(id) {
+        if(confirm("Are you sure you want to delete this user?")) {
+          showNotification(`User ${id} deleted`);
+        }
+      }
+      function saveLandingChanges() { showNotification("Landing page changes saved!"); }
+      function saveSEOSettings() { showNotification("SEO settings saved!"); }
+      function generateSitemap() { showNotification("Sitemap generated successfully!"); }
+      function downloadSitemap() { showNotification("Downloading sitemap..."); }
+      function addFeature() { showNotification("Add feature clicked"); }
+      function moveFeature(id, direction) { showNotification(`Move feature ${id} ${direction}`); }
+      function deleteFeature(id) { showNotification(`Delete feature ${id}`); }
+      function updatePageSEO(page) { showNotification(`Update SEO for ${page}`); }
+
+      // Render functions for other pages (simplified placeholders)
+      function renderAdminRoles(container) { container.innerHTML = "<div class='p-8 text-center'>Roles & Permissions Management (Coming Soon)</div>"; }
+      function renderAdminSubscriptions(container) { container.innerHTML = "<div class='p-8 text-center'>Subscription Management (Coming Soon)</div>"; }
+      function renderAdminBlog(container) { container.innerHTML = "<div class='p-8 text-center'>Blog Management (Coming Soon)</div>"; }
+      function renderAdminFAQ(container) { container.innerHTML = "<div class='p-8 text-center'>FAQ Management (Coming Soon)</div>"; }
+      function renderAdminMeta(container) { container.innerHTML = "<div class='p-8 text-center'>Meta Tags Management (Coming Soon)</div>"; }
+      function renderAdminSitemap(container) { container.innerHTML = "<div class='p-8 text-center'>Sitemap Generator (Coming Soon)</div>"; }
+      function renderAdminSettings(container) { container.innerHTML = "<div class='p-8 text-center'>System Settings (Coming Soon)</div>"; }
+      function renderAdminLogs(container) { container.innerHTML = "<div class='p-8 text-center'>Activity Logs (Coming Soon)</div>"; }
+      function renderAdminBackup(container) { container.innerHTML = "<div class='p-8 text-center'>Backup & Restore (Coming Soon)</div>"; }
+
+      // --- INIT ---
+      window.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
