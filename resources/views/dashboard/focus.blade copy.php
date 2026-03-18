@@ -305,9 +305,10 @@
     @php
         $currentHour = now()->hour;
         $currentMinute = now()->minute;
-        $timelineStart = 6;
-        $timelineEnd = 23;
-        $timelineHours = 17;
+        // GANTT TIMELINE SETUP
+        $timelineStart = 0; // Mulai jam 00:00 (Sebelumnya 6)
+        $timelineEnd = 24; // Sampai jam 24:00 (Sebelumnya 23)
+        $timelineHours = $timelineEnd - $timelineStart;
         $nowDecimal = $currentHour + $currentMinute / 60;
         $needlePct = max(0, min(100, (($nowDecimal - $timelineStart) / $timelineHours) * 100));
         $headerHours = range($timelineStart, $timelineEnd);
@@ -344,8 +345,6 @@
     @endphp
 
     <div class="fade-up space-y-5">
-
-        {{-- ─── HERO CARD ─────────────────────────────────────────────────────── --}}
         <div
             class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-stone-800 via-stone-900 to-black text-white shadow-2xl">
             <div class="absolute inset-0 opacity-15"
@@ -416,124 +415,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- ─── MULTIPLE COUNTDOWN TARGETS ────────────────────────────────────────────── --}}
-        @if (count($countdowns) > 0)
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-{{ min(count($countdowns), 4) }} gap-4 mb-6">
-                @foreach ($countdowns as $countdown)
-                    @php
-                        $deadline = $countdown['deadline'];
-                        $now = now();
-
-                        // Calculate time remaining
-                        $totalSeconds = $deadline->diffInSeconds($now, false);
-                        $isPast = $totalSeconds < 0;
-                        $totalSeconds = abs($totalSeconds);
-
-                        $days = floor($totalSeconds / 86400);
-                        $hours = floor(($totalSeconds % 86400) / 3600);
-                        $minutes = floor(($totalSeconds % 3600) / 60);
-                        $seconds = $totalSeconds % 60;
-
-                        // Determine urgency
-                        $daysRemaining = $deadline->diffInDays($now, false);
-                        $isVeryUrgent = $daysRemaining <= 1 && $daysRemaining >= 0;
-                        $isUrgent = $daysRemaining <= 7 && $daysRemaining > 1;
-                    @endphp
-
-                    <div
-                        class="countdown-card bg-gradient-to-br from-stone-900 to-stone-950 rounded-2xl p-5 shadow-lg border {{ $isPast ? 'border-red-500/50' : ($isVeryUrgent ? 'border-orange-500/50' : 'border-stone-700') }} text-white relative overflow-hidden group hover:scale-[1.02] transition-transform">
-                        {{-- Background effect --}}
-                        <div class="absolute inset-0 opacity-10"
-                            style="background: radial-gradient(circle at 30% 40%, {{ $countdown['color'] }} 0%, transparent 70%)">
-                        </div>
-
-                        <div class="relative z-10">
-                            {{-- Header --}}
-                            <div class="flex items-start justify-between mb-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg {{ $isPast ? 'bg-red-500/20 text-red-400' : 'bg-white/10' }}"
-                                        style="{{ !$isPast ? 'background: ' . $countdown['color'] . '20; color: ' . $countdown['color'] : '' }}">
-                                        <i class="fa-solid {{ $countdown['icon'] }}"></i>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-xs text-stone-400 uppercase tracking-wide mb-0.5">
-                                            {{ $countdown['type'] === 'thesis'
-                                                ? 'Deadline Skripsi'
-                                                : ($countdown['type'] === 'urgent'
-                                                    ? 'Tugas Mendesak'
-                                                    : ($countdown['type'] === 'academic'
-                                                        ? 'Tugas Akademik'
-                                                        : 'Tugas Konten')) }}
-                                        </p>
-                                        <h4 class="text-sm font-bold text-white truncate">
-                                            {{ Str::limit($countdown['label'], 25) }}</h4>
-                                    </div>
-                                </div>
-
-                                @if ($isVeryUrgent && !$isPast)
-                                    <span
-                                        class="px-2 py-1 bg-red-500 text-white text-[10px] font-bold rounded-full animate-pulse">
-                                        URGENT
-                                    </span>
-                                @endif
-                            </div>
-
-                            {{-- Countdown Display --}}
-                            @if ($isPast)
-                                <div class="text-center py-6">
-                                    <i class="fa-solid fa-circle-exclamation text-4xl text-red-400 mb-2"></i>
-                                    <p class="text-sm font-bold text-red-400">Deadline Terlewat!</p>
-                                    <p class="text-xs text-stone-400 mt-1">{{ abs($daysRemaining) }} hari yang lalu</p>
-                                </div>
-                            @else
-                                <div class="grid grid-cols-4 gap-2 mb-3">
-                                    {{-- Days --}}
-                                    <div class="countdown-unit bg-white/5 rounded-xl p-2">
-                                        <div class="countdown-num {{ $isVeryUrgent ? 'text-red-400' : 'text-white' }}"
-                                            data-countdown-days="{{ $days }}">{{ $days }}</div>
-                                        <div class="countdown-lbl text-stone-500">Hari</div>
-                                    </div>
-
-                                    {{-- Hours --}}
-                                    <div class="countdown-unit bg-white/5 rounded-xl p-2">
-                                        <div class="countdown-num {{ $isVeryUrgent ? 'text-red-400' : 'text-white' }}"
-                                            data-countdown-hours="{{ $hours }}">
-                                            {{ str_pad($hours, 2, '0', STR_PAD_LEFT) }}</div>
-                                        <div class="countdown-lbl text-stone-500">Jam</div>
-                                    </div>
-
-                                    {{-- Minutes --}}
-                                    <div class="countdown-unit bg-white/5 rounded-xl p-2">
-                                        <div class="countdown-num {{ $isVeryUrgent ? 'text-red-400' : 'text-white' }}"
-                                            data-countdown-minutes="{{ $minutes }}">
-                                            {{ str_pad($minutes, 2, '0', STR_PAD_LEFT) }}</div>
-                                        <div class="countdown-lbl text-stone-500">Mnt</div>
-                                    </div>
-
-                                    {{-- Seconds --}}
-                                    <div class="countdown-unit bg-white/5 rounded-xl p-2">
-                                        <div class="countdown-num {{ $isVeryUrgent ? 'text-red-400' : 'text-white' }}"
-                                            data-countdown-seconds="{{ $seconds }}">
-                                            {{ str_pad($seconds, 2, '0', STR_PAD_LEFT) }}</div>
-                                        <div class="countdown-lbl text-stone-500">Dtk</div>
-                                    </div>
-                                </div>
-
-                                {{-- Deadline Date --}}
-                                <div class="text-center pt-3 border-t border-white/10">
-                                    <p class="text-xs text-stone-400">Target: <span
-                                            class="font-semibold text-white">{{ $deadline->isoFormat('dddd, D MMMM Y') }}</span>
-                                    </p>
-                                    <p class="text-[10px] text-stone-500 mt-0.5">{{ $deadline->format('H:i') }} WIB</p>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
-
         {{-- ─── GANTT TIMELINE ─────────────────────────────────────────────────── --}}
         <div
             class="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm overflow-hidden">
@@ -854,7 +735,7 @@
                     class="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm p-5">
                     <h3 class="font-bold text-stone-800 dark:text-white text-sm mb-3">Akses Cepat</h3>
                     <div class="grid grid-cols-2 gap-2">
-                        @foreach ([[route('dashboard.finance'), 'fa-wallet', 'Finance', 'bg-amber-50 dark:bg-amber-900/20 text-amber-600'], [route('dashboard.academic.index'), 'fa-graduation-cap', 'Akademik', 'bg-blue-50 dark:bg-blue-900/20 text-blue-600'], [route('dashboard.pkl'), 'fa-briefcase', 'PKL', 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600'], [route('dashboard.productivity'), 'fa-chart-line', 'Analytics', 'bg-purple-50 dark:bg-purple-900/20 text-purple-600']] as [$url, $icon, $label, $cls])
+                        @foreach ([[route('dashboard.finance'), 'fa-wallet', 'Finance', 'bg-amber-50 dark:bg-amber-900/20 text-amber-600'], [route('dashboard.academic'), 'fa-graduation-cap', 'Akademik', 'bg-blue-50 dark:bg-blue-900/20 text-blue-600'], [route('dashboard.pkl'), 'fa-briefcase', 'PKL', 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600'], [route('dashboard.productivity'), 'fa-chart-line', 'Analytics', 'bg-purple-50 dark:bg-purple-900/20 text-purple-600']] as [$url, $icon, $label, $cls])
                             <a href="{{ $url }}"
                                 class="flex items-center gap-2.5 p-3 {{ $cls }} rounded-xl hover:opacity-80 transition-opacity text-sm font-medium">
                                 <i class="fa-solid {{ $icon }} text-sm"></i> {{ $label }}
@@ -930,50 +811,6 @@
 
 @push('scripts')
     <script>
-        // ── Countdown deadline data ──────────────────────────────────────────────
-        const countdownTargets = {
-            thesis: {{ $thesisDeadline ? '"' . $thesisDeadline->toISOString() . '"' : 'null' }},
-            urgent: {{ $urgentTask && $urgentTask->due_date ? '"' . $urgentTask->due_date->endOfDay()->toISOString() . '"' : 'null' }},
-        };
-
-        function updateCountdowns() {
-            const now = Date.now();
-
-            for (const [key, isoStr] of Object.entries(countdownTargets)) {
-                if (!isoStr) continue;
-                const target = new Date(isoStr).getTime();
-                const diff = target - now;
-
-                if (diff <= 0) {
-                    ['days', 'hours', 'minutes', 'seconds'].forEach(u => {
-                        const el = document.getElementById(`${key}-${u}`);
-                        if (el) el.textContent = '00';
-                    });
-                    continue;
-                }
-
-                const days = Math.floor(diff / 86400000);
-                const hours = Math.floor((diff % 86400000) / 3600000);
-                const minutes = Math.floor((diff % 3600000) / 60000);
-                const seconds = Math.floor((diff % 60000) / 1000);
-
-                const pad = n => String(n).padStart(2, '0');
-                const els = {
-                    days,
-                    hours,
-                    minutes,
-                    seconds
-                };
-                for (const [unit, val] of Object.entries(els)) {
-                    const el = document.getElementById(`${key}-${unit}`);
-                    if (el) el.textContent = pad(val);
-                }
-            }
-        }
-
-        setInterval(updateCountdowns, 1000);
-        updateCountdowns();
-
         // ── Live clock + needle ──────────────────────────────────────────────────
         (function tickClock() {
             const el = document.getElementById('live-clock');
@@ -984,7 +821,7 @@
                 el.textContent = ts;
                 if (nl) nl.textContent = ts;
                 const h = n.getHours() + n.getMinutes() / 60;
-                const pct = Math.max(0, Math.min(100, ((h - 6) / 17) * 100));
+                const pct = Math.max(0, Math.min(100, ((h - 0) / 24) * 100));
                 const need = document.getElementById('now-needle');
                 if (need) need.style.left = pct + '%';
             }

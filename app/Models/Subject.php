@@ -45,6 +45,11 @@ class Subject extends Model
         return $this->hasMany(Task::class, 'linked_subject_id');
     }
 
+    public function sessions()
+    {
+        return $this->hasMany(SubjectSession::class)->orderBy('session_number');
+    }
+    
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

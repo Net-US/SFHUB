@@ -3,112 +3,63 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\SubTask;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class CreativeStudioController extends Controller
 {
-    /**
-     * Display Creative Studio Kanban Board
-     */
+    // ─────────────────────────────────────────────────────────────────────────
+    // INDEX
+    // ─────────────────────────────────────────────────────────────────────────
     public function index(Request $request)
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Filter parameters
-        $status = $request->get('status', 'all');
-        $projectType = $request->get('project_type', 'all');
-        $priority = $request->get('priority', 'all');
-
-        // Base query for creative projects
-        $query = $user->tasks()
+        // Ambil semua proyek kreatif dengan subtasks
+        $allTasks = $user->tasks()
             ->where('category', 'Creative')
-            ->with('workspace');
+            ->whereNotIn('status', ['archived'])
+            ->with('subtasks')
+            ->latest()
+            ->get();
 
-        // Apply filters
-        if ($status !== 'all') {
-            $query->where('status', $status);
-        }
-
-        if ($projectType !== 'all') {
-            $query->where('project_type', $projectType);
-        }
-
-        if ($priority !== 'all') {
-            $query->where('priority', $priority);
-        }
-
-        // Get creative projects grouped by status
-        $todoTasks = (clone $query)->where('status', 'todo')->get();
-        $doingTasks = (clone $query)->where('status', 'doing')->get();
-        $doneTasks = (clone $query)->where('status', 'done')->get();
-
-        // Get statistics
-        $stats = [
-            'total_projects' => $user->tasks()->where('category', 'Creative')->count(),
-            'active_projects' => $user->tasks()->where('category', 'Creative')
-                ->whereIn('status', ['todo', 'doing'])
-                ->count(),
-            'completed_projects' => $user->tasks()->where('category', 'Creative')
-                ->where('status', 'done')
-                ->count(),
-            'overdue_projects' => $user->tasks()->where('category', 'Creative')
-                ->whereDate('due_date', '<', today())
-                ->where('status', '!=', 'done')
-                ->count(),
-        ];
-
-        // Get project type distribution
-        $projectTypes = [
-            'video_editing' => 'Video Editing',
-            'graphic_design' => 'Graphic Design',
-            'motion_graphics' => 'Motion Graphics',
-            'audio_production' => 'Audio Production',
-            'script_writing' => 'Script Writing',
-            'ui_ux_design' => 'UI/UX Design',
-            'animation' => 'Animation',
-            'photography' => 'Photography',
-            'illustration' => 'Illustration',
-            'branding' => 'Branding',
-            'social_media' => 'Social Media',
-        ];
-
-        // Get project type counts
-        $projectTypeCounts = [];
-        foreach ($projectTypes as $key => $label) {
-            $projectTypeCounts[$key] = [
-                'label' => $label,
-                'count' => $user->tasks()
-                    ->where('category', 'Creative')
-                    ->where('project_type', $key)
-                    ->count(),
-                'active' => $user->tasks()
-                    ->where('category', 'Creative')
-                    ->where('project_type', $key)
-                    ->whereIn('status', ['todo', 'doing'])
-                    ->count(),
-            ];
-        }
-
-        // Build $projects array in the format the blade Kanban expects
         $stageColorBorder = [
             'script'     => 'border-l-4 border-slate-500',
             'production' => 'border-l-4 border-orange-500',
             'revision'   => 'border-l-4 border-amber-500',
             'done'       => 'border-l-4 border-emerald-500',
         ];
-        $allProjects = $user->tasks()
-            ->where('category', 'Creative')
-            ->whereNotIn('status', ['archived'])
-            ->get();
 
         $stageMap = ['todo' => 'script', 'doing' => 'production', 'done' => 'done'];
 
-        $projects = $allProjects->map(function ($t) use ($stageMap, $stageColorBorder) {
-            $stage    = $t->workflow_stage && $t->workflow_stage !== 'none' ? $t->workflow_stage : ($stageMap[$t->status] ?? 'script');
+        // TAMBAHKAN KODE INI: Mapping stage detail ke kolom utama Kanban
+        $kanbanColumnMap = [
+            'planning'  => 'script',
+            'script'    => 'script',
+            'concept'   => 'script',
+            'recording' => 'production',
+            'design'    => 'production',
+            'animation' => 'production',
+            'editing'   => 'production',
+            'doing'     => 'production',
+            'review'    => 'revision',
+            'revision'  => 'revision',
+            'finalize'  => 'revision',
+            'publish'   => 'done',
+            'done'      => 'done',
+        ];
+
+        $projects = $allTasks->map(function ($t) use ($stageMap, $stageColorBorder, $kanbanColumnMap) {
+            $rawStage = ($t->workflow_stage && $t->workflow_stage !== 'none')
+                ? $t->workflow_stage
+                : ($stageMap[$t->status] ?? 'script');
+
+            // UBAH VARIABEL STAGE DI BAWAH INI: Gunakan mapping
+            $stage = $kanbanColumnMap[$rawStage] ?? 'script'; // Default ke script jika tidak terdaftar
+
             $priority = match ($t->priority) {
                 'urgent-important'         => 'high',
                 'important-not-urgent'     => 'medium',
@@ -116,376 +67,572 @@ class CreativeStudioController extends Controller
                 'not-urgent-not-important' => 'low',
                 default                    => $t->priority ?? 'medium',
             };
-            return [
-                'id'       => $t->id,
-                'title'    => $t->title,
-                'stage'    => $stage,
-                'type'     => $t->project_type ?? 'Personal',
-                'progress' => $t->progress ?? 0,
-                'deadline' => $t->due_date ? $t->due_date->format('d M') : 'Flexible',
-                'tags'     => $t->tags ?? [],
-                'color'    => $stageColorBorder[$stage] ?? 'border-l-4 border-stone-400',
-                'priority' => $priority,
-            ];
-        })->toArray();
 
-        return view('dashboard.creative-studio', compact(
-            'projects',
-            'stats',
-            'status',
-            'projectType',
-            'priority'
-        ));
+            $projectMode = $t->project_mode ?? ($t->total_subtasks > 0 ? 'sequential' : 'simple');
+
+            return [
+                'id'           => $t->id,
+                'title'        => $t->title,
+                'stage'        => $stage, // Sekarang stage akan selalu bernilai salah satu dari 4 kolom utama
+                'type'         => $t->project_type ?? 'Personal',
+                'project_mode' => $projectMode,
+                'progress'     => $t->progress ?? 0,
+                'deadline'     => $t->due_date ? $t->due_date->format('d M Y') : 'Flexible',
+                'due_date_raw' => $t->due_date?->format('Y-m-d'),
+                'tags'         => $t->tags ?? [],
+                'color'        => $stageColorBorder[$stage] ?? 'border-l-4 border-stone-400',
+                'priority'     => $priority,
+                'description'  => $t->description ?? '',
+                'drive_link'   => $t->drive_link ?? '',
+                'total_subtasks'    => $t->total_subtasks ?? $t->subtasks->count(),
+                'completed_subtasks' => $t->completed_subtasks ?? $t->subtasks->where('status', 'completed')->count(),
+                'subtasks'     => $t->subtasks->map(fn($s) => [
+                    'id'          => $s->id,
+                    'title'       => $s->title,
+                    'status'      => $s->status,
+                    'progress'    => $s->progress ?? 0,
+                    'stage_key'   => $s->stage_key ?? '',
+                    'stage_label' => $s->stage_label ?? $s->title,
+                    'order'       => $s->order ?? 0,
+                ])->sortBy('order')->values()->toArray(),
+            ];
+        })->values()->toArray();
+
+        // Stats
+        $stats = [
+            'total_projects'     => count($projects),
+            'active_projects'    => collect($projects)->whereIn('stage', ['script', 'production', 'revision'])->count(),
+            'completed_projects' => collect($projects)->where('stage', 'done')->count(),
+            'overdue_projects'   => $user->tasks()
+                ->where('category', 'Creative')
+                ->whereDate('due_date', '<', today())
+                ->where('status', '!=', 'done')
+                ->count(),
+        ];
+
+        return view('dashboard.creative-studio', compact('projects', 'stats'));
     }
 
-    /**
-     * Store a new creative project
-     */
+    // ─────────────────────────────────────────────────────────────────────────
+    // STORE PROJECT
+    // ─────────────────────────────────────────────────────────────────────────
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title'          => 'required|string|max:255',
-            'description'    => 'nullable|string',
+            'description'    => 'nullable|string|max:2000',
             'project_type'   => 'nullable|string|max:100',
-            'priority'       => 'nullable|string',
+            'project_mode'   => 'required|in:sequential,simple',
+            'priority'       => 'nullable|in:high,medium,low',
             'workflow_stage' => 'nullable|string',
             'due_date'       => 'nullable|date',
             'tags'           => 'nullable|array',
-            'tags.*'         => 'string',
+            'tags.*'         => 'string|max:50',
+            'drive_link'     => 'nullable|url|max:500',
+            'client'         => 'nullable|string|max:255',
         ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Map simple priority to internal format
-        $priorityMap = ['high' => 'urgent-important', 'medium' => 'important-not-urgent', 'low' => 'not-urgent-not-important'];
+        $priorityMap = [
+            'high'   => 'urgent-important',
+            'medium' => 'important-not-urgent',
+            'low'    => 'not-urgent-not-important',
+        ];
         $stageStatusMap = ['script' => 'todo', 'production' => 'doing', 'revision' => 'doing', 'done' => 'done'];
-        $stage    = $request->input('workflow_stage', 'script');
-        $priority = $priorityMap[$request->input('priority', 'medium')] ?? $request->input('priority', 'important-not-urgent');
+        $stage    = $validated['workflow_stage'] ?? 'script';
+        $priority = $priorityMap[$validated['priority'] ?? 'medium'] ?? 'important-not-urgent';
 
         $task = $user->tasks()->create([
-            'title'          => $request->title,
-            'description'    => $request->description,
+            'title'          => $validated['title'],
+            'description'    => $validated['description'] ?? null,
             'category'       => 'Creative',
-            'project_type'   => $request->project_type,
+            'project_type'   => $validated['project_type'] ?? 'other',
+            'project_mode'   => $validated['project_mode'],
             'priority'       => $priority,
             'status'         => $stageStatusMap[$stage] ?? 'todo',
             'workflow_stage' => $stage,
-            'due_date'       => $request->due_date,
-            'tags'           => $request->tags,
+            'due_date'       => $validated['due_date'] ? Carbon::parse($validated['due_date']) : null,
+            'tags'           => $validated['tags'] ?? [],
+            'drive_link'     => $validated['drive_link'] ?? null,
+            'client'         => $validated['client'] ?? null,
             'progress'       => 0,
+            'total_subtasks' => 0,
+            'completed_subtasks' => 0,
         ]);
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'Proyek berhasil dibuat!', 'task' => $task]);
+        // Tipe A (sequential): buat default subtasks otomatis
+        if ($validated['project_mode'] === 'sequential') {
+            $this->createDefaultSubtasksForType($task);
         }
 
-        return redirect()->route('dashboard.creative')
-            ->with('success', 'Project kreatif berhasil ditambahkan!');
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Proyek berhasil dibuat!',
+                'task_id' => $task->id,
+            ]);
+        }
+        return redirect()->route('dashboard.creative.index')->with('success', 'Proyek berhasil ditambahkan!');
     }
 
-    /**
-     * Update creative project
-     */
+    // ─────────────────────────────────────────────────────────────────────────
+    // UPDATE PROJECT
+    // ─────────────────────────────────────────────────────────────────────────
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'project_type' => 'required|in:video_editing,graphic_design,motion_graphics,audio_production,script_writing,ui_ux_design,animation,photography,illustration,branding,social_media',
-            'priority' => 'required|in:urgent-important,important-not-urgent,urgent-not-important,not-urgent-not-important',
-            'due_date' => 'required|date',
-            'estimated_time' => 'nullable|string',
-            'status' => 'required|in:todo,doing,done',
-            'progress' => 'required|integer|min:0|max:100',
-            'tags' => 'nullable|array',
-            'tags.*' => 'string',
-            'links' => 'nullable|array',
-            'links.*.type' => 'required|string',
-            'links.*.url' => 'required|url',
-            'links.*.label' => 'nullable|string',
-        ]);
-
         /** @var \App\Models\User $user */
         $user = Auth::user();
-
         $task = $user->tasks()->findOrFail($id);
 
-        $task->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'project_type' => $request->project_type,
-            'priority' => $request->priority,
-            'status' => $request->status,
-            'due_date' => $request->due_date,
-            'estimated_time' => $request->estimated_time,
-            'progress' => $request->progress,
-            'tags' => $request->tags,
-            'links' => $request->links,
+        $validated = $request->validate([
+            'title'          => 'required|string|max:255',
+            'description'    => 'nullable|string|max:2000',
+            'project_type'   => 'nullable|string|max:100',
+            'priority'       => 'nullable|in:high,medium,low,urgent-important,important-not-urgent,urgent-not-important,not-urgent-not-important',
+            'due_date'       => 'nullable|date',
+            'workflow_stage' => 'nullable|string',
+            'drive_link'     => 'nullable|url|max:500',
+            'client'         => 'nullable|string|max:255',
+            'tags'           => 'nullable|array',
         ]);
 
-        // Update actual time if task is completed
-        if ($request->status === 'done' && $task->actual_time === null) {
-            $task->update(['actual_time' => now()->format('H:i:s')]);
+        $stageStatusMap = ['script' => 'todo', 'production' => 'doing', 'revision' => 'doing', 'done' => 'done'];
+        $newStage = $validated['workflow_stage'] ?? $task->workflow_stage;
+        $newStatus = $stageStatusMap[$newStage] ?? $task->status;
+
+        // Auto complete if stage = done
+        if ($newStage === 'done' && $task->status !== 'done') {
+            $validated['status']       = 'done';
+            $validated['progress']     = 100;
+            $validated['completed_at'] = now();
+        } else {
+            $validated['status'] = $newStatus;
         }
+        $validated['workflow_stage'] = $newStage;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Project berhasil diperbarui!',
-        ]);
+        $task->update($validated);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Proyek diperbarui!', 'task' => $task->fresh()]);
+        }
+        return back()->with('success', 'Proyek berhasil diperbarui!');
     }
 
-    /**
-     * Update task status via drag & drop
-     */
+    // ─────────────────────────────────────────────────────────────────────────
+    // UPDATE STATUS (move card antar kolom Kanban)
+    // ─────────────────────────────────────────────────────────────────────────
     public function updateStatus(Request $request, $id)
     {
-        $request->validate([
-            'status' => 'required|in:todo,doing,done',
-            'progress' => 'nullable|integer|min:0|max:100',
-        ]);
+        $request->validate(['stage' => 'required|in:script,production,revision,done']);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
-
         $task = $user->tasks()->findOrFail($id);
 
-        $oldStatus = $task->status;
-        $task->status = $request->status;
+        $stageStatusMap = ['script' => 'todo', 'production' => 'doing', 'revision' => 'doing', 'done' => 'done'];
+        $newStage  = $request->stage;
+        $newStatus = $stageStatusMap[$newStage];
 
-        // Update progress based on status
-        if ($request->status === 'done') {
-            $task->progress = 100;
-            $task->actual_time = now()->format('H:i:s');
-        } elseif ($request->status === 'doing') {
-            $task->progress = $request->progress ?? max(50, $task->progress);
-        } elseif ($request->status === 'todo') {
-            $task->progress = $request->progress ?? 0;
+        $updates = [
+            'workflow_stage' => $newStage,
+            'status'         => $newStatus,
+        ];
+
+        if ($newStage === 'done' && $task->status !== 'done') {
+            $updates['progress']     = 100;
+            $updates['completed_at'] = now();
+            // Selesaikan semua subtask yang belum done
+            $task->subtasks()->where('status', '!=', 'completed')->update([
+                'status'       => 'completed',
+                'progress'     => 100,
+                'completed_at' => now(),
+            ]);
+            $task->update(['completed_subtasks' => $task->subtasks()->count()]);
+        } elseif ($newStage !== 'done' && $task->status === 'done') {
+            $updates['completed_at'] = null;
         }
 
-        $task->save();
+        $task->update($updates);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Status project berhasil diperbarui',
-            'task' => $task->fresh(),
+            'success'  => true,
+            'message'  => 'Status diperbarui!',
+            'task'     => $task->fresh(),
         ]);
     }
 
-    /**
-     * Add link to creative project
-     */
-    public function addLink(Request $request, $id)
-    {
-        $request->validate([
-            'type' => 'required|string|in:drive,canva,figma,adobe,notion,miro,milanote,github,dropbox,other',
-            'url' => 'required|url',
-            'label' => 'nullable|string|max:50',
-        ]);
-
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
-        $task = $user->tasks()->findOrFail($id);
-
-        $task->addLink($request->type, $request->url, $request->label);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Link berhasil ditambahkan',
-            'links' => $task->links,
-        ]);
-    }
-
-    /**
-     * Delete creative project
-     */
-    public function destroy($id)
+    // ─────────────────────────────────────────────────────────────────────────
+    // MARK AS DONE
+    // ─────────────────────────────────────────────────────────────────────────
+    public function markDone(Request $request, $id)
     {
         /** @var \App\Models\User $user */
-        $user = Auth::user();
-
-        $task = $user->tasks()->findOrFail($id);
-        $task->delete();
-
-        return redirect()->route('dashboard.creative')
-            ->with('success', 'Project berhasil dihapus!');
-    }
-
-    /**
-     * Get link icon based on type
-     */
-    private function getLinkIcon($type)
-    {
-        $icons = [
-            'drive' => 'fa-google-drive',
-            'canva' => 'fa-palette',
-            'figma' => 'fa-figma',
-            'adobe' => 'fa-adobe',
-            'notion' => 'fa-book',
-            'miro' => 'fa-chalkboard',
-            'milanote' => 'fa-sticky-note',
-            'github' => 'fa-github',
-            'dropbox' => 'fa-dropbox',
-            'other' => 'fa-link',
-        ];
-
-        return $icons[$type] ?? 'fa-link';
-    }
-
-    /**
-     * Get link color based on type
-     */
-    private function getLinkColor($type)
-    {
-        $colors = [
-            'drive' => 'text-blue-500 bg-blue-50 dark:bg-blue-900/20',
-            'canva' => 'text-pink-500 bg-pink-50 dark:bg-pink-900/20',
-            'figma' => 'text-purple-500 bg-purple-50 dark:bg-purple-900/20',
-            'adobe' => 'text-red-500 bg-red-50 dark:bg-red-900/20',
-            'notion' => 'text-stone-700 bg-stone-100 dark:bg-stone-800',
-            'miro' => 'text-amber-500 bg-amber-50 dark:bg-amber-900/20',
-            'milanote' => 'text-rose-500 bg-rose-50 dark:bg-rose-900/20',
-            'github' => 'text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-800',
-            'dropbox' => 'text-blue-600 bg-blue-50 dark:bg-blue-900/20',
-            'other' => 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20',
-        ];
-
-        return $colors[$type] ?? 'text-gray-500 bg-gray-100 dark:bg-gray-800';
-    }
-    // Tambahkan method ini ke CreativeStudioController
-    public function showTaskDetail($id)
-    {
         $user = Auth::user();
         $task = $user->tasks()->with('subtasks')->findOrFail($id);
 
+        $task->update([
+            'status'         => 'done',
+            'workflow_stage' => 'done',
+            'progress'       => 100,
+            'completed_at'   => now(),
+        ]);
+
+        // Selesaikan semua subtask
+        $task->subtasks()->update([
+            'status'       => 'completed',
+            'progress'     => 100,
+            'completed_at' => now(),
+        ]);
+        $task->update(['completed_subtasks' => $task->subtasks()->count()]);
+
         return response()->json([
             'success' => true,
-            'task' => [
-                'id' => $task->id,
-                'title' => $task->title,
-                'description' => $task->description,
-                'project_type' => $task->project_type,
-                'priority' => $task->priority,
-                'status' => $task->status,
-                'workflow_stage' => $task->workflow_stage,
-                'progress' => $task->progress,
-                'due_date' => $task->due_date?->format('Y-m-d'),
-                'tags' => $task->tags ?? [],
-                'links' => $task->links ?? [],
-                'subtasks' => $task->subtasks->map(fn($s) => [
-                    'id' => $s->id,
-                    'title' => $s->title,
-                    'status' => $s->status,
-                    'progress' => $s->progress,
-                    'stage_key' => $s->stage_key,
-                    'stage_label' => $s->stage_label,
-                ]),
-                'workflow_stages' => $task->getWorkflowStages(),
-            ]
+            'message' => 'Proyek ditandai selesai! 🎉',
         ]);
     }
 
-    public function createDefaultSubtasks(Request $request, $taskId)
+    // ─────────────────────────────────────────────────────────────────────────
+    // RESCHEDULE (Tipe B: simple/recurring — geser ke minggu depan)
+    // ─────────────────────────────────────────────────────────────────────────
+    public function reschedule(Request $request, $id)
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $task = $user->tasks()->findOrFail($id);
+
+        if ($task->project_mode !== 'simple') {
+            return response()->json(['success' => false, 'message' => 'Hanya proyek mandiri (simple) yang bisa dijadwal ulang.'], 422);
+        }
+
+        $newDueDate = $task->due_date
+            ? Carbon::parse($task->due_date)->addWeek()
+            : Carbon::now()->addWeek();
+
+        $task->update(['due_date' => $newDueDate]);
+
+        return response()->json([
+            'success'    => true,
+            'message'    => 'Tugas dijadwalkan ulang ke ' . $newDueDate->isoFormat('D MMM YYYY') . '.',
+            'new_due_date' => $newDueDate->format('Y-m-d'),
+        ]);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // DESTROY PROJECT (dengan konfirmasi sudah dari FE, BE hanya validasi owner)
+    // ─────────────────────────────────────────────────────────────────────────
+    public function destroy(Request $request, $id)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $task = $user->tasks()->findOrFail($id);
+
+        // Hard delete subtasks dulu
+        $task->subtasks()->forceDelete();
+        $task->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Proyek berhasil dihapus.']);
+        }
+        return redirect()->route('dashboard.creative.index')->with('success', 'Proyek dihapus!');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // SUBTASK CRUD
+    // ─────────────────────────────────────────────────────────────────────────
+    public function storeSubtask(Request $request, $taskId)
+    {
+        $request->validate([
+            'title'             => 'required|string|max:255',
+            'stage_key'         => 'nullable|string|max:50',
+            'stage_label'       => 'nullable|string|max:100',
+            'estimated_minutes' => 'nullable|integer|min:1|max:9999',
+        ]);
+
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $task = $user->tasks()->findOrFail($taskId);
 
-        // Hanya buat jika belum ada subtasks
-        if ($task->subtasks()->count() === 0) {
-            $subtasks = $task->createDefaultSubtasks();
-            return response()->json([
-                'success' => true,
-                'message' => 'Workflow stages created!',
-                'subtasks' => $subtasks
-            ]);
-        }
+        $subtask = $task->subtasks()->create([
+            'user_id'           => $user->id,
+            'title'             => $request->title,
+            'stage_key'         => $request->stage_key ?? 'custom',
+            'stage_label'       => $request->stage_label ?? $request->title,
+            'type'              => 'stage',
+            'estimated_minutes' => $request->estimated_minutes ?? 60,
+            'order'             => $task->subtasks()->count(),
+            'status'            => 'pending',
+            'progress'          => 0,
+        ]);
+
+        // Update parent counter
+        $total = $task->subtasks()->count();
+        $task->update(['total_subtasks' => $total]);
 
         return response()->json([
-            'success' => false,
-            'message' => 'Subtasks already exist'
+            'success' => true,
+            'message' => 'Sub-tugas berhasil ditambahkan',
+            'subtask' => $subtask,
         ]);
     }
 
     public function updateSubtask(Request $request, $taskId, $subtaskId)
     {
         $request->validate([
-            'status' => 'required|in:pending,in_progress,completed',
+            'status'   => 'required|in:pending,in_progress,completed',
             'progress' => 'nullable|integer|min:0|max:100',
         ]);
 
-        $user = Auth::user();
-        $task = $user->tasks()->findOrFail($taskId);
+        /** @var \App\Models\User $user */
+        $user    = Auth::user();
+        $task    = $user->tasks()->findOrFail($taskId);
         $subtask = $task->subtasks()->findOrFail($subtaskId);
 
         if ($request->status === 'completed') {
-            $subtask->markAsComplete();
+            $subtask->update([
+                'status'       => 'completed',
+                'progress'     => 100,
+                'completed_at' => now(),
+                'started_at'   => $subtask->started_at ?? now(),
+            ]);
         } else {
             $subtask->update([
-                'status' => $request->status,
-                'progress' => $request->progress ?? $subtask->progress
+                'status'     => $request->status,
+                'progress'   => $request->progress ?? $subtask->progress,
+                'started_at' => ($request->status === 'in_progress' && !$subtask->started_at) ? now() : $subtask->started_at,
             ]);
-
-            if ($request->status === 'in_progress' && !$subtask->started_at) {
-                $subtask->start();
-            }
         }
 
-        // Update parent task progress
-        $task->updateProgressFromSubtasks();
+        // ── Recalculate parent task progress (Tipe A: auto progress) ──────
+        $totalSubs    = $task->subtasks()->count();
+        $completedSubs = $task->subtasks()->where('status', 'completed')->count();
+        $newProgress  = $totalSubs > 0 ? round(($completedSubs / $totalSubs) * 100) : 0;
+
+        $parentUpdates = [
+            'completed_subtasks' => $completedSubs,
+            'progress'           => $newProgress,
+        ];
+
+        // Jika semua subtask selesai → parent task otomatis done
+        if ($completedSubs === $totalSubs && $totalSubs > 0) {
+            $parentUpdates['status']         = 'done';
+            $parentUpdates['workflow_stage'] = 'done';
+            $parentUpdates['completed_at']   = now();
+        } elseif ($newProgress > 0 && $task->status === 'todo') {
+            $parentUpdates['status']       = 'doing';
+            $parentUpdates['started_at']   = $task->started_at ?? now();
+            $parentUpdates['workflow_stage'] = 'production';
+        }
+
+        $task->update($parentUpdates);
+
+        // ── Auto-advance workflow stage berdasarkan subtask yang selesai ───
+        if ($request->status === 'completed') {
+            $this->advanceWorkflowStageIfNeeded($task);
+        }
 
         return response()->json([
-            'success' => true,
-            'message' => 'Subtask berhasil diperbarui',
+            'success'       => true,
+            'message'       => 'Sub-tugas diperbarui!',
             'task_progress' => $task->fresh()->progress,
-            'subtask' => $subtask->fresh()
+            'task_status'   => $task->fresh()->status,
+            'subtask'       => $subtask->fresh(),
         ]);
     }
 
-    public function storeSubtask(Request $request, $taskId)
+    public function destroySubtask(Request $request, $taskId, $subtaskId)
+    {
+        /** @var \App\Models\User $user */
+        $user    = Auth::user();
+        $task    = $user->tasks()->findOrFail($taskId);
+        $subtask = $task->subtasks()->findOrFail($subtaskId);
+        $subtask->forceDelete();
+
+        // Recalculate
+        $total     = $task->subtasks()->count();
+        $completed = $task->subtasks()->where('status', 'completed')->count();
+        $progress  = $total > 0 ? round(($completed / $total) * 100) : 0;
+        $task->update(['total_subtasks' => $total, 'completed_subtasks' => $completed, 'progress' => $progress]);
+
+        return response()->json(['success' => true, 'message' => 'Sub-tugas dihapus.']);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // SHOW TASK DETAIL (JSON untuk modal)
+    // ─────────────────────────────────────────────────────────────────────────
+    public function showTaskDetail($id)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $task = $user->tasks()->with('subtasks')->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'task' => [
+                'id'            => $task->id,
+                'title'         => $task->title,
+                'description'   => $task->description,
+                'project_type'  => $task->project_type,
+                'project_mode'  => $task->project_mode ?? 'simple',
+                'priority'      => $task->priority,
+                'status'        => $task->status,
+                'workflow_stage' => $task->workflow_stage,
+                'progress'      => $task->progress ?? 0,
+                'due_date'      => $task->due_date?->format('Y-m-d'),
+                'due_date_fmt'  => $task->due_date?->isoFormat('D MMM Y') ?? 'Flexible',
+                'tags'          => $task->tags ?? [],
+                'links'         => $task->links ?? [],
+                'drive_link'    => $task->drive_link ?? '',
+                'client'        => $task->client ?? '',
+                'total_subtasks'     => $task->total_subtasks ?? 0,
+                'completed_subtasks' => $task->completed_subtasks ?? 0,
+                'subtasks'      => $task->subtasks->map(fn($s) => [
+                    'id'          => $s->id,
+                    'title'       => $s->title,
+                    'status'      => $s->status,
+                    'progress'    => $s->progress ?? 0,
+                    'stage_key'   => $s->stage_key ?? '',
+                    'stage_label' => $s->stage_label ?? $s->title,
+                    'order'       => $s->order ?? 0,
+                ])->sortBy('order')->values(),
+                'workflow_stages' => $task->getWorkflowStages(),
+            ],
+        ]);
+    }
+
+    public function createDefaultSubtasks(Request $request, $taskId)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $task = $user->tasks()->findOrFail($taskId);
+
+        if ($task->subtasks()->count() > 0) {
+            return response()->json(['success' => false, 'message' => 'Sub-tugas sudah ada.']);
+        }
+
+        $subtasks = $this->createDefaultSubtasksForType($task);
+
+        return response()->json([
+            'success'  => true,
+            'message'  => 'Workflow stages dibuat!',
+            'subtasks' => $subtasks,
+        ]);
+    }
+
+    public function addLink(Request $request, $id)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'estimated_minutes' => 'nullable|integer|min:1',
+            'type'  => 'required|string|in:drive,canva,figma,adobe,notion,miro,github,dropbox,other',
+            'url'   => 'required|url',
+            'label' => 'nullable|string|max:50',
         ]);
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        $task = $user->tasks()->findOrFail($taskId);
+        $task = $user->tasks()->findOrFail($id);
+        $task->addLink($request->type, $request->url, $request->label);
 
-        $subtask = $task->subtasks()->create([
-            'user_id' => $user->id,
-            'title' => $request->title,
-            'estimated_minutes' => $request->estimated_minutes ?? 60,
-            'order' => $task->subtasks()->count()
-        ]);
-
-        // Update parent task counters
-        $task->update([
-            'total_subtasks' => $task->subtasks()->count(),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Subtask berhasil ditambahkan',
-            'subtask' => $subtask
-        ]);
+        return response()->json(['success' => true, 'message' => 'Link ditambahkan', 'links' => $task->links]);
     }
 
-    public function destroySubtask($taskId, $subtaskId)
+    // ─────────────────────────────────────────────────────────────────────────
+    // PRIVATE HELPERS
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Buat default subtasks untuk Tipe A (sequential) berdasarkan project_type
+     */
+    private function createDefaultSubtasksForType(Task $task): array
     {
-        $user = Auth::user();
-        $task = $user->tasks()->findOrFail($taskId);
-        $subtask = $task->subtasks()->findOrFail($subtaskId);
-        $subtask->delete();
+        $workflowMap = [
+            'video_editing'    => [
+                ['key' => 'planning',  'label' => '📋 Perencanaan & Brief',     'mins' => 30],
+                ['key' => 'script',    'label' => '✍️ Naskah & Script',         'mins' => 120],
+                ['key' => 'recording', 'label' => '🎙️ Rekaman / Shooting',     'mins' => 180],
+                ['key' => 'editing',   'label' => '✂️ Editing Video',           'mins' => 240],
+                ['key' => 'review',    'label' => '👁️ Review & QC',            'mins' => 60],
+                ['key' => 'publish',   'label' => '🚀 Publish / Deliver',       'mins' => 30],
+            ],
+            'animation'        => [
+                ['key' => 'script',    'label' => '✍️ Script & Storyboard',     'mins' => 120],
+                ['key' => 'design',    'label' => '🎨 Character & Asset Design', 'mins' => 180],
+                ['key' => 'animation', 'label' => '🎬 Animasi',                 'mins' => 360],
+                ['key' => 'editing',   'label' => '🎵 Sound & Editing',         'mins' => 120],
+                ['key' => 'review',    'label' => '👁️ Review',                 'mins' => 60],
+                ['key' => 'publish',   'label' => '📤 Render & Delivery',       'mins' => 60],
+            ],
+            'motion_graphics'  => [
+                ['key' => 'concept',   'label' => '💡 Konsep & Moodboard',      'mins' => 60],
+                ['key' => 'design',    'label' => '🎨 Desain Aset',             'mins' => 180],
+                ['key' => 'animation', 'label' => '🎬 Motion & Animasi',        'mins' => 240],
+                ['key' => 'review',    'label' => '👁️ Review',                 'mins' => 60],
+                ['key' => 'publish',   'label' => '📤 Export & Deliver',        'mins' => 30],
+            ],
+            'graphic_design'   => [
+                ['key' => 'planning',  'label' => '📋 Brief & Research',        'mins' => 45],
+                ['key' => 'concept',   'label' => '💡 Konsep & Moodboard',      'mins' => 60],
+                ['key' => 'design',    'label' => '🎨 Desain',                  'mins' => 180],
+                ['key' => 'review',    'label' => '👁️ Review Client',          'mins' => 30],
+                ['key' => 'revision',  'label' => '🔄 Revisi',                  'mins' => 60],
+                ['key' => 'finalize',  'label' => '✅ Finalisasi & Deliver',    'mins' => 30],
+            ],
+            'social_media'     => [
+                ['key' => 'concept',   'label' => '💡 Konsep Konten',           'mins' => 30],
+                ['key' => 'design',    'label' => '🎨 Buat Visual / Caption',   'mins' => 60],
+                ['key' => 'review',    'label' => '👁️ Review',                 'mins' => 15],
+                ['key' => 'publish',   'label' => '📱 Publish ke Platform',     'mins' => 15],
+            ],
+        ];
 
-        // Update parent task counters
-        $completed = $task->subtasks()->where('status', 'completed')->count();
+        $stages = $workflowMap[$task->project_type] ?? [
+            ['key' => 'planning',  'label' => '📋 Perencanaan',  'mins' => 60],
+            ['key' => 'doing',     'label' => '🔨 Pengerjaan',   'mins' => 120],
+            ['key' => 'review',    'label' => '👁️ Review',      'mins' => 30],
+            ['key' => 'finalize',  'label' => '✅ Finalisasi',  'mins' => 30],
+        ];
+
+        $created = [];
+        foreach ($stages as $idx => $stage) {
+            $sub = $task->subtasks()->create([
+                'user_id'           => $task->user_id,
+                'title'             => $stage['label'],
+                'type'              => 'stage',
+                'stage_key'         => $stage['key'],
+                'stage_label'       => $stage['label'],
+                'order'             => $idx,
+                'estimated_minutes' => $stage['mins'],
+                'status'            => 'pending',
+                'progress'          => 0,
+            ]);
+            $created[] = $sub->toArray();
+        }
+
         $task->update([
-            'total_subtasks' => $task->subtasks()->count(),
-            'completed_subtasks' => $completed,
+            'total_subtasks'     => count($stages),
+            'completed_subtasks' => 0,
+            'workflow_stage'     => $stages[0]['key'],
         ]);
-        $task->updateProgressFromSubtasks();
 
-        return response()->json(['success' => true, 'message' => 'Subtask dihapus']);
+        return $created;
+    }
+
+    /**
+     * Auto-advance workflow_stage saat subtask tertentu selesai
+     */
+    private function advanceWorkflowStageIfNeeded(Task $task): void
+    {
+        $task->refresh();
+        if ($task->status === 'done') return;
+
+        // Cari subtask pertama yang belum completed → itu stage aktif berikutnya
+        $nextPending = $task->subtasks()
+            ->whereNotIn('status', ['completed'])
+            ->orderBy('order')
+            ->first();
+
+        if ($nextPending) {
+            $task->update(['workflow_stage' => $nextPending->stage_key ?? $task->workflow_stage]);
+        }
     }
 }

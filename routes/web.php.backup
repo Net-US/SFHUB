@@ -55,43 +55,50 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/{id}/read',   [ProfileController::class, 'markRead'])->name('notifications.read');
     Route::delete('/notifications/{id}',      [ProfileController::class, 'destroyNotification'])->name('notifications.destroy');
 
+
     // Dashboard utama
     Route::get('/dashboard', [FocusController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/tracker', [GeneralTrackerController::class, 'index'])->name('dashboard.tracker');
 
     // ════════════════════════════════════════════════════════════════════════
     // GENERAL TRACKER - UPDATED dengan route yang lebih bersih
-    // ════════════════════════════════════════════════════════════════════════
+    // ══════════════════════════════════
     Route::post('/tasks',             [GeneralTrackerController::class, 'store'])->name('tasks.store');
     Route::post('/tasks/quick-add',   [GeneralTrackerController::class, 'quickAdd'])->name('tasks.quick-add');
+    // STATUS: harus pakai POST + body JSON {status: 'done'|'todo'|'doing'}
     Route::post('/tasks/{id}/status', [GeneralTrackerController::class, 'updateStatus'])->name('tasks.update-status');
+    // DELETE: menggunakan method DELETE atau POST + _method=DELETE
     Route::delete('/tasks/{id}',      [GeneralTrackerController::class, 'destroy'])->name('tasks.destroy');
-    Route::post('/tasks/{id}/complete', [GeneralTrackerController::class, 'completeTask'])->name('tasks.complete');
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // CREATIVE STUDIO (Content Creator Tasks)
-    // ═══════════════════════════════════════════════════════════════════════
+    Route::prefix('tasks')->group(function () {
+        Route::post('/{id}/status', [GeneralTrackerController::class, 'updateStatus'])->name('tasks.status.update');
+        Route::post('/{id}/complete', [GeneralTrackerController::class, 'completeTask'])->name('tasks.complete');
+    });
+
+    // Creative Studio Routes
+    Route::prefix('dashboard/creative')->middleware('verified')->group(function () {
+        Route::get('/', [CreativeStudioController::class, 'index'])->name('dashboard.creative');
+        Route::post('/', [CreativeStudioController::class, 'store'])->name('dashboard.creative.store');
+        Route::get('/task/{id}', [CreativeStudioController::class, 'showTaskDetail'])->name('dashboard.creative.task.show');
+        Route::post('/task/{taskId}/subtask', [CreativeStudioController::class, 'storeSubtask'])->name('dashboard.creative.subtask.store');
+        Route::put('/task/{taskId}/subtask/{subtaskId}', [CreativeStudioController::class, 'updateSubtask'])->name('dashboard.creative.subtask.update');
+        Route::delete('/task/{taskId}/subtask/{subtaskId}', [CreativeStudioController::class, 'destroySubtask'])->name('dashboard.creative.subtask.destroy');
+        Route::post('/task/{taskId}/create-default-subtasks', [CreativeStudioController::class, 'createDefaultSubtasks']);
+        Route::post('/{id}/status', [CreativeStudioController::class, 'updateStatus'])->name('dashboard.creative.status.update');
+        Route::post('/{id}/links', [CreativeStudioController::class, 'addLink'])->name('dashboard.creative.links.add');
+
+        // TAMBAHKAN ROUTE INI DI SINI:
+        Route::post('/{id}/done', [CreativeStudioController::class, 'markDone'])->name('dashboard.creative.mark-done');
+        Route::post('/{id}/status', [CreativeStudioController::class, 'updateStatus'])->name('dashboard.creative.status.update');
+        Route::post('/{id}/links', [CreativeStudioController::class, 'addLink'])->name('dashboard.creative.links.add');
+    });
+
     Route::prefix('dashboard/creative')->name('dashboard.creative.')->group(function () {
-        // Halaman utama
         Route::get('/', [CreativeStudioController::class, 'index'])->name('index');
-
-        // Task Management
         Route::post('/', [CreativeStudioController::class, 'store'])->name('store');
-        Route::get('/task/{id}', [CreativeStudioController::class, 'showTaskDetail'])->name('task.show');
-        Route::put('/{id}', [CreativeStudioController::class, 'update'])->name('update');
-        Route::delete('/{id}', [CreativeStudioController::class, 'destroy'])->name('destroy');
-
-        // Status & Actions
-        Route::post('/{id}/status', [CreativeStudioController::class, 'updateStatus'])->name('status.update');
-        Route::post('/{id}/done', [CreativeStudioController::class, 'markDone'])->name('mark-done');
-        Route::post('/{id}/reschedule', [CreativeStudioController::class, 'reschedule'])->name('reschedule');
-        Route::post('/{id}/links', [CreativeStudioController::class, 'addLink'])->name('add-link');
-
-        // Subtasks
-        Route::post('/task/{taskId}/subtask', [CreativeStudioController::class, 'storeSubtask'])->name('subtask.store');
-        Route::put('/task/{taskId}/subtask/{subtaskId}', [CreativeStudioController::class, 'updateSubtask'])->name('subtask.update');
-        Route::delete('/task/{taskId}/subtask/{subtaskId}', [CreativeStudioController::class, 'destroySubtask'])->name('subtask.destroy');
-        Route::post('/task/{taskId}/create-default-subtasks', [CreativeStudioController::class, 'createDefaultSubtasks'])->name('subtask.create-default');
+        Route::post('/{task}/status', [CreativeStudioController::class, 'updateStatus'])->name('update-status');
+        Route::post('/{task}/links', [CreativeStudioController::class, 'addLink'])->name('add-link');
+        Route::put('/{task}', [CreativeStudioController::class, 'update'])->name('update');
+        Route::delete('/{task}', [CreativeStudioController::class, 'destroy'])->name('destroy');
     });
 
     // ════════════════════════════════════════════════════════════════════════
@@ -104,13 +111,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/calendar/events',          [SmartCalendarController::class, 'storeEvent'])->name('calendar.events.store');
     Route::delete('/calendar/events/{id}',   [SmartCalendarController::class, 'destroyEvent'])->name('calendar.events.destroy');
 
-    // Schedules (recurring)
+    // Schedules (recurring) — UPDATE endpoint ditambahkan
     Route::post('/calendar/schedules',       [SmartCalendarController::class, 'storeSchedule'])->name('calendar.schedules.store');
     Route::put('/calendar/schedules/{id}',   [SmartCalendarController::class, 'updateSchedule'])->name('calendar.schedules.update');
     Route::delete('/calendar/schedules/{id}', [SmartCalendarController::class, 'destroySchedule'])->name('calendar.schedules.destroy');
 
-    // Calendar Tasks
+    // Tasks
     Route::post('/calendar/tasks',           [SmartCalendarController::class, 'storeTask'])->name('calendar.tasks.store');
+    Route::post('/tasks/{id}/complete',      [SmartCalendarController::class, 'markTaskComplete'])->name('tasks.complete');
 
     // Productivity
     Route::get('/dashboard/productivity', [ProductivityController::class, 'index'])->name('dashboard.productivity');

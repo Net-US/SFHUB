@@ -24,8 +24,9 @@ class Task extends Model
         'status',
         'deadline',
         'notes',
-        'subject_id',
+        'linked_subject_id',
         'project_type',
+        'project_mode',
         'due_date',
         'estimated_time',
         'actual_time',
@@ -143,6 +144,7 @@ class Task extends Model
             $this->status !== 'archived';
     }
 
+    
     /**
      * Check if task is due today
      */

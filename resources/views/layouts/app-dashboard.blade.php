@@ -175,7 +175,7 @@
                 <ul class="space-y-1">
                     <li>
                         <a href="{{ route('dashboard') }}" id="nav-dashboard"
-                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('dashboard') ? 'nav-active' : '' }}">
+                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('dashboard') || request()->path() === '/' ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-bolt w-5 text-center mr-3"></i>
                             <span class="nav-text">Focus Today</span>
                         </a>
@@ -292,29 +292,41 @@
         <div class="p-3 border-t border-stone-100 dark:border-stone-800 relative">
             <button onclick="toggleSidebarUserMenu()"
                 class="w-full flex items-center nav-item p-2 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 cursor-pointer transition-colors group">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-500 flex items-center justify-center text-white text-xs font-bold shadow-md flex-shrink-0">
+                <div
+                    class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-500 flex items-center justify-center text-white text-xs font-bold shadow-md flex-shrink-0">
                     {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                 </div>
                 <div class="ml-3 overflow-hidden nav-text flex-1 text-left">
-                    <p class="text-sm font-medium text-stone-700 dark:text-stone-200 truncate">{{ auth()->user()->name }}</p>
-                    <p class="text-[10px] text-stone-500 dark:text-stone-400 truncate">{{ ucfirst(auth()->user()->plan ?? 'Free') }} Plan</p>
+                    <p class="text-sm font-medium text-stone-700 dark:text-stone-200 truncate">
+                        {{ auth()->user()->name }}</p>
+                    <p class="text-[10px] text-stone-500 dark:text-stone-400 truncate">
+                        {{ ucfirst(auth()->user()->plan ?? 'Free') }} Plan</p>
                 </div>
                 <i class="fa-solid fa-ellipsis-vertical text-stone-400 nav-text text-xs group-hover:text-stone-600"></i>
             </button>
             <div id="sidebar-user-menu"
                 class="hidden absolute bottom-full left-3 right-3 mb-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl shadow-xl z-50 overflow-hidden">
-                <div class="px-4 py-3 border-b border-stone-100 dark:border-stone-700 bg-gradient-to-br from-orange-50 to-red-50 dark:from-stone-800 dark:to-stone-800">
-                    <p class="text-sm font-bold text-stone-800 dark:text-white truncate">{{ auth()->user()->name }}</p>
+                <div
+                    class="px-4 py-3 border-b border-stone-100 dark:border-stone-700 bg-gradient-to-br from-orange-50 to-red-50 dark:from-stone-800 dark:to-stone-800">
+                    <p class="text-sm font-bold text-stone-800 dark:text-white truncate">{{ auth()->user()->name }}
+                    </p>
                     <p class="text-xs text-stone-400 truncate">{{ auth()->user()->email ?? '' }}</p>
                 </div>
                 <div class="py-1">
-                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i class="fa-solid fa-user-circle w-4 text-center text-stone-400"></i>Edit Profil</a>
-                    <a href="{{ route('profile.edit') }}#pengaturan" class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i class="fa-solid fa-sliders w-4 text-center text-stone-400"></i>Pengaturan</a>
-                    <a href="{{ route('profile.edit') }}#notifikasi" class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i class="fa-solid fa-bell w-4 text-center text-stone-400"></i>Notifikasi</a>
+                    <a href="{{ route('profile.edit') }}"
+                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i
+                            class="fa-solid fa-user-circle w-4 text-center text-stone-400"></i>Edit Profil</a>
+                    <a href="{{ route('profile.edit') }}#pengaturan"
+                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i
+                            class="fa-solid fa-sliders w-4 text-center text-stone-400"></i>Pengaturan</a>
+                    <a href="{{ route('profile.edit') }}#notifikasi"
+                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i
+                            class="fa-solid fa-bell w-4 text-center text-stone-400"></i>Notifikasi</a>
                     <div class="border-t border-stone-100 dark:border-stone-700 my-1"></div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors">
+                        <button type="submit"
+                            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors">
                             <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>Keluar
                         </button>
                     </form>
@@ -330,7 +342,8 @@
             class="bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 p-4 flex justify-between items-center z-10 sticky top-0">
             <!-- Mobile Menu Button -->
             <div class="flex items-center md:hidden">
-                <button onclick="toggleMobileMenu()" class="text-stone-600 dark:text-stone-300 focus:outline-none mr-3">
+                <button onclick="toggleMobileMenu()"
+                    class="text-stone-600 dark:text-stone-300 focus:outline-none mr-3">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
                 <span class="font-bold text-lg text-stone-800 dark:text-white">
@@ -366,20 +379,28 @@
                     <button onclick="toggleNotifDropdown()" id="notif-btn"
                         class="relative p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 transition-colors">
                         <i class="fa-solid fa-bell"></i>
-                        <span id="notif-badge" class="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full border border-white dark:border-stone-900 items-center justify-center hidden flex">0</span>
+                        <span id="notif-badge"
+                            class="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full border border-white dark:border-stone-900 items-center justify-center hidden flex">0</span>
                     </button>
-                    <div id="notif-panel" class="hidden absolute right-0 top-full mt-2 w-80 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
-                        <div class="flex justify-between items-center px-4 py-3 border-b border-stone-100 dark:border-stone-800">
+                    <div id="notif-panel"
+                        class="hidden absolute right-0 top-full mt-2 w-80 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                        <div
+                            class="flex justify-between items-center px-4 py-3 border-b border-stone-100 dark:border-stone-800">
                             <h4 class="font-bold text-stone-800 dark:text-white text-sm">Notifikasi</h4>
                             <div class="flex gap-3">
-                                <button onclick="quickMarkAllRead()" class="text-[11px] text-blue-600 dark:text-blue-400 hover:underline">Baca semua</button>
-                                <a href="{{ route('profile.edit') }}#notifikasi" class="text-[11px] text-stone-400 hover:text-stone-600 dark:hover:text-stone-300">Kelola</a>
+                                <button onclick="quickMarkAllRead()"
+                                    class="text-[11px] text-blue-600 dark:text-blue-400 hover:underline">Baca
+                                    semua</button>
+                                <a href="{{ route('profile.edit') }}#notifikasi"
+                                    class="text-[11px] text-stone-400 hover:text-stone-600 dark:hover:text-stone-300">Kelola</a>
                             </div>
                         </div>
                         <div id="notif-dropdown-list" class="max-h-72 overflow-y-auto">
                             <p class="text-center py-6 text-stone-400 text-xs">Memuat...</p>
                         </div>
-                        <a href="{{ route('profile.edit') }}#notifikasi" class="block text-center py-2.5 text-xs font-medium text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 border-t border-stone-100 dark:border-stone-800 transition-colors">Lihat Semua Notifikasi →</a>
+                        <a href="{{ route('profile.edit') }}#notifikasi"
+                            class="block text-center py-2.5 text-xs font-medium text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 border-t border-stone-100 dark:border-stone-800 transition-colors">Lihat
+                            Semua Notifikasi →</a>
                     </div>
                 </div>
 
@@ -387,7 +408,8 @@
                 <div class="relative" id="header-user-wrap">
                     <button onclick="toggleHeaderUserMenu()"
                         class="flex items-center gap-2 p-1 pl-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-500 flex items-center justify-center text-white text-xs font-bold shadow">
+                        <div
+                            class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-500 flex items-center justify-center text-white text-xs font-bold shadow">
                             {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                         </div>
                         <i class="fa-solid fa-chevron-down text-[10px] text-stone-400 hidden md:block"></i>
@@ -395,16 +417,23 @@
                     <div id="header-user-menu"
                         class="hidden absolute right-0 top-full mt-2 w-52 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl shadow-xl z-50 overflow-hidden">
                         <div class="px-4 py-3 border-b border-stone-100 dark:border-stone-700">
-                            <p class="text-sm font-bold text-stone-800 dark:text-white truncate">{{ auth()->user()->name }}</p>
+                            <p class="text-sm font-bold text-stone-800 dark:text-white truncate">
+                                {{ auth()->user()->name }}</p>
                             <p class="text-xs text-stone-400 truncate">{{ auth()->user()->email }}</p>
                         </div>
                         <div class="py-1">
-                            <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i class="fa-solid fa-user-circle w-4 text-center text-stone-400"></i>Profil Saya</a>
-                            <a href="{{ route('profile.edit') }}#pengaturan" class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i class="fa-solid fa-sliders w-4 text-center text-stone-400"></i>Pengaturan</a>
+                            <a href="{{ route('profile.edit') }}"
+                                class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i
+                                    class="fa-solid fa-user-circle w-4 text-center text-stone-400"></i>Profil Saya</a>
+                            <a href="{{ route('profile.edit') }}#pengaturan"
+                                class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i
+                                    class="fa-solid fa-sliders w-4 text-center text-stone-400"></i>Pengaturan</a>
                             <div class="border-t border-stone-100 dark:border-stone-700 my-1"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"><i class="fa-solid fa-right-from-bracket w-4 text-center"></i>Keluar</button>
+                                <button type="submit"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"><i
+                                        class="fa-solid fa-right-from-bracket w-4 text-center"></i>Keluar</button>
                             </form>
                         </div>
                     </div>
@@ -416,7 +445,7 @@
         <div id="mobile-menu"
             class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 hidden md:hidden transition-opacity"
             onclick="toggleMobileMenu()">
-            <div class="absolute left-0 top-0 h-full w-64 bg-white dark:bg-stone-900 shadow-xl p-4 flex flex-col transform transition-transform duration-300"
+            <div class="absolute left-0 top-0 h-full w-72 max-w-[80vw] bg-white dark:bg-stone-900 shadow-xl p-4 flex flex-col transform transition-transform duration-300 ease-out"
                 onclick="event.stopPropagation()">
                 <div class="flex justify-between items-center mb-6">
                     <span class="font-bold text-lg text-stone-900 dark:text-white">Menu</span>
@@ -428,11 +457,11 @@
                 <nav class="space-y-1">
                     <!-- Main Focus -->
                     <a href="{{ route('dashboard') }}" onclick="toggleMobileMenu()"
-                        class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
+                        class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 {{ request()->routeIs('dashboard') || request()->path() === '/' ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400' : 'text-stone-700 dark:text-stone-300' }}">
                         <i class="fa-solid fa-bolt mr-2"></i>Focus Today
                     </a>
                     <a href="{{ route('dashboard.smartcalendar') }}" onclick="toggleMobileMenu()"
-                        class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
+                        class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 {{ request()->routeIs('calendar.*') ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400' : 'text-stone-700 dark:text-stone-300' }}">
                         <i class="fa-solid fa-calendar-day mr-2"></i>Smart Calendar
                     </a>
 
@@ -485,7 +514,8 @@
                     </a>
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
-                        <button type="submit" class="w-full text-left p-3 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-600 dark:text-rose-400">
+                        <button type="submit"
+                            class="w-full text-left p-3 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-600 dark:text-rose-400">
                             <i class="fa-solid fa-right-from-bracket mr-2"></i>Keluar
                         </button>
                     </form>
@@ -499,6 +529,9 @@
             @yield('content')
         </div>
     </main>
+
+    {{-- Stack untuk modal --}}
+    @stack('modals')
 
     <!-- JavaScript Logic -->
     <script>
@@ -645,12 +678,19 @@
         function toggleSidebarUserMenu() {
             const m = document.getElementById('sidebar-user-menu');
             const h = document.getElementById('header-user-menu');
-            if (m) { m.classList.toggle('hidden'); h?.classList.add('hidden'); }
+            if (m) {
+                m.classList.toggle('hidden');
+                h?.classList.add('hidden');
+            }
         }
+
         function toggleHeaderUserMenu() {
             const m = document.getElementById('header-user-menu');
             const s = document.getElementById('sidebar-user-menu');
-            if (m) { m.classList.toggle('hidden'); s?.classList.add('hidden'); }
+            if (m) {
+                m.classList.toggle('hidden');
+                s?.classList.add('hidden');
+            }
         }
         document.addEventListener('click', e => {
             if (!e.target.closest('#sidebar-user-menu') && !e.target.closest('[onclick="toggleSidebarUserMenu()"]'))
@@ -675,10 +715,16 @@
             const list = document.getElementById('notif-dropdown-list');
             list.innerHTML = '<p class="text-center py-6 text-stone-400 text-xs">Memuat...</p>';
             try {
-                const res = await fetch('/notifications', { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '' } });
+                const res = await fetch('/notifications', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? ''
+                    }
+                });
                 const data = await res.json();
                 if (!data.success || !data.notifications.length) {
-                    list.innerHTML = '<p class="text-center py-8 text-stone-400 text-sm"><i class="fa-solid fa-bell-slash block mb-2 text-2xl opacity-30"></i>Tidak ada notifikasi</p>';
+                    list.innerHTML =
+                        '<p class="text-center py-8 text-stone-400 text-sm"><i class="fa-solid fa-bell-slash block mb-2 text-2xl opacity-30"></i>Tidak ada notifikasi</p>';
                     return;
                 }
                 // Update badge
@@ -689,7 +735,15 @@
                 } else {
                     badge.classList.add('hidden');
                 }
-                const iconMap = { system:'fa-gear text-blue-500', deadline:'fa-clock text-rose-500', reminder:'fa-bell text-amber-500', financial:'fa-wallet text-emerald-500', academic:'fa-graduation-cap text-purple-500', investment:'fa-chart-line text-emerald-500', budget:'fa-triangle-exclamation text-rose-500' };
+                const iconMap = {
+                    system: 'fa-gear text-blue-500',
+                    deadline: 'fa-clock text-rose-500',
+                    reminder: 'fa-bell text-amber-500',
+                    financial: 'fa-wallet text-emerald-500',
+                    academic: 'fa-graduation-cap text-purple-500',
+                    investment: 'fa-chart-line text-emerald-500',
+                    budget: 'fa-triangle-exclamation text-rose-500'
+                };
                 list.innerHTML = data.notifications.slice(0, 8).map(n => `
                     <div id="ndrop-${n.id}" class="flex items-start gap-3 px-4 py-3 ${n.is_read ? 'opacity-60' : 'bg-orange-50/50 dark:bg-orange-900/10'} hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors border-b border-stone-50 dark:border-stone-800 last:border-0 cursor-pointer" onclick="handleNotifClick(${n.id}, '${n.action_url || ''}')">
                         <div class="w-8 h-8 rounded-full ${n.icon_bg} flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -702,21 +756,33 @@
                         </div>
                         ${!n.is_read ? '<div class="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0 mt-1"></div>' : ''}
                     </div>`).join('');
-            } catch(e) {
+            } catch (e) {
                 list.innerHTML = '<p class="text-center py-6 text-rose-400 text-xs">Gagal memuat notifikasi</p>';
             }
         }
 
         async function handleNotifClick(id, url) {
             // Mark as read
-            await fetch(`/notifications/${id}/read`, { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '', 'Accept': 'application/json' } });
+            await fetch(`/notifications/${id}/read`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                    'Accept': 'application/json'
+                }
+            });
             const el = document.getElementById('ndrop-' + id);
             if (el) el.classList.add('opacity-60');
             if (url) window.location.href = url;
         }
 
         async function quickMarkAllRead() {
-            await fetch('/notifications/read-all', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '', 'Accept': 'application/json' } });
+            await fetch('/notifications/read-all', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                    'Accept': 'application/json'
+                }
+            });
             document.getElementById('notif-badge')?.classList.add('hidden');
             document.getElementById('notif-panel')?.classList.add('hidden');
         }
@@ -724,7 +790,11 @@
         // Load notif count on page load
         window.addEventListener('DOMContentLoaded', async () => {
             try {
-                const res = await fetch('/notifications', { headers: { 'Accept': 'application/json' } });
+                const res = await fetch('/notifications', {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
                 const data = await res.json();
                 if (data.unread_count > 0) {
                     const badge = document.getElementById('notif-badge');
@@ -733,7 +803,7 @@
                         badge.classList.remove('hidden');
                     }
                 }
-            } catch(e) {}
+            } catch (e) {}
         });
 
         // Close notif panel on outside click

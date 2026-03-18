@@ -9,7 +9,7 @@ class PklLog extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+  protected $fillable = [
         'user_id',
         'log_date',
         'task',
@@ -28,6 +28,11 @@ class PklLog extends Model
         'supervisor_name',
         'performance_rating',
         'is_approved',
+        // ✅ TAMBAHKAN 4 BARIS INI (Penyelamat Database Lama):
+        'start_time',
+        'end_time',
+        'activity',
+        'description'
     ];
 
     protected $casts = [
