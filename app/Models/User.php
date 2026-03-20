@@ -199,4 +199,41 @@ class User extends Authenticatable
     {
         return $this->workspaces()->where('is_default', true)->first();
     }
+
+    /**
+     * Relationship with UserSubscription
+     */
+    public function subscriptions()
+    {
+        return $this->hasMany(UserSubscription::class);
+    }
+
+    /**
+     * Relationship with Role
+     */
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'role_user');
+    }
+
+    /**
+     * Check if user has a specific role
+     */
+    public function hasRole(string $roleSlug): bool
+    {
+        return $this->roles()->where('slug', $roleSlug)->exists();
+    }
+
+    /**
+     * Check if user has a specific permission
+     */
+    public function hasPermission(string $permissionSlug): bool
+    {
+        foreach ($this->roles as $role) {
+            if ($role->hasPermission($permissionSlug)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

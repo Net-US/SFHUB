@@ -2,6 +2,17 @@
 
 use App\Http\Controllers\AcademicController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminMediaController;
+use App\Http\Controllers\Admin\AdminRoleController;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Admin\FaqController;
+use App\Http\Controllers\Admin\LandingPageController;
+use App\Http\Controllers\Admin\LogController;
+use App\Http\Controllers\Admin\SeoController;
+use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CreativeStudioController;
@@ -269,18 +280,147 @@ Route::middleware('auth')->group(function () {
 
 // Admin Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/',                             [AdminController::class, 'index'])->name('index');
+    // Dashboard & Analytics
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('index');
+    Route::get('/analytics', [AdminDashboardController::class, 'analytics'])->name('analytics');
 
-    // User Management
-    Route::get('/users',                        [AdminController::class, 'users'])->name('users');
-    Route::get('/users/create',                 [AdminController::class, 'createUser'])->name('users.create');
-    Route::post('/users',                       [AdminController::class, 'storeUser'])->name('users.store');
-    Route::post('/users/{user}/toggle-active',  [AdminController::class, 'toggleUserActive'])->name('users.toggle');
-    Route::delete('/users/{user}',              [AdminController::class, 'destroyUser'])->name('users.destroy');
+    // User Management (using new AdminUserController)
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users');
+    Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+    Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+    Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
+    Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+    Route::post('/users/{user}/toggle-status', [AdminUserController::class, 'toggleStatus'])->name('users.toggle');
+    Route::get('/users-export', [AdminUserController::class, 'export'])->name('users.export');
 
-    // Landing Content Management
-    Route::get('/landing',                          [AdminController::class, 'landingContent'])->name('landing');
-    Route::post('/landing',                         [AdminController::class, 'storeLandingContent'])->name('landing.store');
-    Route::patch('/landing/{content}',              [AdminController::class, 'updateLandingContent'])->name('landing.update');
-    Route::delete('/landing/{content}',             [AdminController::class, 'destroyLandingContent'])->name('landing.destroy');
+    // Subscriptions
+    Route::get('/subscriptions', [SubscriptionController::class, 'getSubscriptions'])->name('subscriptions');
+    Route::post('/subscriptions', [SubscriptionController::class, 'store'])->name('subscriptions.store');
+    Route::get('/subscription-plans', [SubscriptionController::class, 'getPlans'])->name('subscriptions.plans');
+    Route::post('/subscription-plans', [SubscriptionController::class, 'storePlan'])->name('subscriptions.plans.store');
+    Route::put('/subscription-plans/{plan}', [SubscriptionController::class, 'updatePlan'])->name('subscriptions.plans.update');
+    Route::delete('/subscription-plans/{plan}', [SubscriptionController::class, 'destroyPlan'])->name('subscriptions.plans.destroy');
+    Route::get('/subscriptions/stats', [SubscriptionController::class, 'getStats'])->name('subscriptions.stats');
+    Route::post('/subscriptions/{subscription}/cancel', [SubscriptionController::class, 'cancelSubscription'])->name('subscriptions.cancel');
+    Route::post('/subscriptions/{subscription}/extend', [SubscriptionController::class, 'extendSubscription'])->name('subscriptions.extend');
+
+    // Blog Management
+    Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+    Route::post('/blog', [BlogController::class, 'store'])->name('blog.store');
+    Route::get('/blog/{post}', [BlogController::class, 'show'])->name('blog.show');
+    Route::put('/blog/{post}', [BlogController::class, 'update'])->name('blog.update');
+    Route::delete('/blog/{post}', [BlogController::class, 'destroy'])->name('blog.destroy');
+    Route::get('/blog-categories', [BlogController::class, 'getCategories'])->name('blog.categories');
+    Route::post('/blog-categories', [BlogController::class, 'storeCategory'])->name('blog.categories.store');
+    Route::put('/blog-categories/{category}', [BlogController::class, 'updateCategory'])->name('blog.categories.update');
+    Route::delete('/blog-categories/{category}', [BlogController::class, 'destroyCategory'])->name('blog.categories.destroy');
+    Route::get('/blog-tags', [BlogController::class, 'getTags'])->name('blog.tags');
+    Route::post('/blog-tags', [BlogController::class, 'storeTag'])->name('blog.tags.store');
+    Route::get('/blog/comments', [BlogController::class, 'getComments'])->name('blog.comments');
+    Route::post('/blog/comments', [BlogController::class, 'storeComment'])->name('blog.comments.store');
+    Route::delete('/blog/comments/{comment}', [BlogController::class, 'destroyComment'])->name('blog.comments.destroy');
+
+    // FAQ Management
+    Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
+    Route::post('/faq', [FaqController::class, 'store'])->name('faq.store');
+    Route::get('/faq/{faq}', [FaqController::class, 'show'])->name('faq.show');
+    Route::put('/faq/{faq}', [FaqController::class, 'update'])->name('faq.update');
+    Route::delete('/faq/{faq}', [FaqController::class, 'destroy'])->name('faq.destroy');
+    Route::post('/faq-categories', [FaqController::class, 'storeCategory'])->name('faq.categories.store');
+    Route::put('/faq-categories/{category}', [FaqController::class, 'updateCategory'])->name('faq.categories.update');
+    Route::delete('/faq-categories/{category}', [FaqController::class, 'destroyCategory'])->name('faq.categories.destroy');
+
+    // Landing Page Management
+    Route::get('/landing', [LandingPageController::class, 'index'])->name('landing');
+    Route::post('/landing/save-all', [LandingPageController::class, 'saveAll'])->name('landing.save');
+    Route::get('/landing/heroes', [LandingPageController::class, 'getHeroes'])->name('landing.heroes');
+    Route::post('/landing/heroes', [LandingPageController::class, 'storeHero'])->name('landing.heroes.store');
+    Route::put('/landing/heroes/{hero}', [LandingPageController::class, 'updateHero'])->name('landing.heroes.update');
+    Route::delete('/landing/heroes/{hero}', [LandingPageController::class, 'destroyHero'])->name('landing.heroes.destroy');
+    Route::get('/landing/features', [LandingPageController::class, 'getFeatures'])->name('landing.features');
+    Route::post('/landing/features', [LandingPageController::class, 'storeFeature'])->name('landing.features.store');
+    Route::put('/landing/features/{feature}', [LandingPageController::class, 'updateFeature'])->name('landing.features.update');
+    Route::delete('/landing/features/{feature}', [LandingPageController::class, 'destroyFeature'])->name('landing.features.destroy');
+    Route::post('/landing/features/reorder', [LandingPageController::class, 'reorderFeatures'])->name('landing.features.reorder');
+    Route::get('/landing/testimonials', [LandingPageController::class, 'getTestimonials'])->name('landing.testimonials');
+    Route::post('/landing/testimonials', [LandingPageController::class, 'storeTestimonial'])->name('landing.testimonials.store');
+    Route::put('/landing/testimonials/{testimonial}', [LandingPageController::class, 'updateTestimonial'])->name('landing.testimonials.update');
+    Route::delete('/landing/testimonials/{testimonial}', [LandingPageController::class, 'destroyTestimonial'])->name('landing.testimonials.destroy');
+    Route::get('/landing/stats', [LandingPageController::class, 'getStats'])->name('landing.stats');
+    Route::post('/landing/stats', [LandingPageController::class, 'storeStat'])->name('landing.stats.store');
+    Route::put('/landing/stats/{stat}', [LandingPageController::class, 'updateStat'])->name('landing.stats.update');
+    Route::delete('/landing/stats/{stat}', [LandingPageController::class, 'destroyStat'])->name('landing.stats.destroy');
+
+    // SEO Management
+    Route::get('/seo', [SeoController::class, 'index'])->name('seo.index');
+    Route::put('/seo/global', [SeoController::class, 'updateGlobalSettings'])->name('seo.global.update');
+    Route::get('/seo/pages', [SeoController::class, 'getPageSettings'])->name('seo.pages');
+    Route::put('/seo/pages/{seoSetting}', [SeoController::class, 'updatePageSettings'])->name('seo.pages.update');
+    Route::get('/seo/meta-tags', [SeoController::class, 'getMetaTags'])->name('seo.meta');
+    Route::post('/seo/meta-tags', [SeoController::class, 'storeMetaTag'])->name('seo.meta.store');
+    Route::put('/seo/meta-tags/{metaTag}', [SeoController::class, 'updateMetaTag'])->name('seo.meta.update');
+    Route::delete('/seo/meta-tags/{metaTag}', [SeoController::class, 'destroyMetaTag'])->name('seo.meta.destroy');
+    Route::get('/seo/sitemap', [SeoController::class, 'getSitemapSettings'])->name('seo.sitemap');
+    Route::put('/seo/sitemap', [SeoController::class, 'updateSitemapSettings'])->name('seo.sitemap.update');
+    Route::post('/seo/sitemap/generate', [SeoController::class, 'generateSitemap'])->name('seo.sitemap.generate');
+    Route::get('/seo/sitemap/download', [SeoController::class, 'downloadSitemap'])->name('seo.sitemap.download');
+
+    // System Settings
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SettingController::class, 'store'])->name('settings.store');
+    Route::put('/settings/{setting}', [SettingController::class, 'update'])->name('settings.update');
+    Route::delete('/settings/{setting}', [SettingController::class, 'destroy'])->name('settings.destroy');
+    Route::get('/settings/group/{group}', [SettingController::class, 'getByGroup'])->name('settings.group');
+    Route::post('/settings/clear-cache', [SettingController::class, 'clearCache'])->name('settings.cache.clear');
+    Route::get('/settings/system-info', [SettingController::class, 'getSystemInfo'])->name('settings.system-info');
+    Route::post('/settings/save', [SettingController::class, 'saveSettings'])->name('settings.save');
+    Route::post('/settings/test-email', [SettingController::class, 'testEmail'])->name('settings.test-email');
+
+    // Backup Management
+    Route::get('/settings/backups', [SettingController::class, 'backups'])->name('settings.backups');
+    Route::get('/backups/create', [SettingController::class, 'createBackup'])->name('backups.create');
+    Route::get('/settings/backups/create', [SettingController::class, 'createBackup'])->name('settings.backups.create');
+    Route::post('/settings/backups', [SettingController::class, 'createBackup'])->name('settings.backups.store');
+    Route::get('/settings/backups/{backup}/download', [SettingController::class, 'downloadBackup'])->name('settings.backups.download');
+    Route::delete('/settings/backups/{backup}', [SettingController::class, 'destroyBackup'])->name('settings.backups.destroy');
+    Route::post('/backups/config', [SettingController::class, 'configBackup'])->name('backups.config');
+
+    // Activity Logs
+    Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
+    Route::get('/logs/system', [LogController::class, 'getSystemLogs'])->name('logs.system');
+    Route::delete('/logs/activity', [LogController::class, 'clearActivityLogs'])->name('logs.activity.clear');
+    Route::delete('/logs/system', [LogController::class, 'clearSystemLogs'])->name('logs.system.clear');
+    Route::get('/logs/stats', [LogController::class, 'getLogStats'])->name('logs.stats');
+    Route::get('/logs/export', [LogController::class, 'exportLogs'])->name('logs.export');
+    Route::post('/logs/clear', [LogController::class, 'clearAllLogs'])->name('logs.clear');
+
+    // Roles & Permissions Management
+    Route::get('/roles', [AdminRoleController::class, 'index'])->name('roles.index');
+    Route::get('/roles/list', [AdminRoleController::class, 'getRoles'])->name('roles.list');
+    Route::post('/roles', [AdminRoleController::class, 'storeRole'])->name('roles.store');
+    Route::put('/roles/{role}', [AdminRoleController::class, 'updateRole'])->name('roles.update');
+    Route::delete('/roles/{role}', [AdminRoleController::class, 'deleteRole'])->name('roles.destroy');
+    Route::post('/roles/seed', [AdminRoleController::class, 'seedDefaults'])->name('roles.seed');
+
+    // Permissions
+    Route::get('/permissions', [AdminRoleController::class, 'getPermissions'])->name('permissions.list');
+    Route::post('/permissions', [AdminRoleController::class, 'storePermission'])->name('permissions.store');
+    Route::put('/permissions/{permission}', [AdminRoleController::class, 'updatePermission'])->name('permissions.update');
+    Route::delete('/permissions/{permission}', [AdminRoleController::class, 'deletePermission'])->name('permissions.destroy');
+
+    // User Role Assignment
+    Route::get('/users/{user}/roles', [AdminRoleController::class, 'getUserRoles'])->name('users.roles');
+    Route::post('/users/{user}/roles', [AdminRoleController::class, 'assignRoleToUser'])->name('users.roles.assign');
+
+    // Media / File Manager
+    Route::get('/media', [AdminMediaController::class, 'index'])->name('media.index');
+    Route::get('/media/list', [AdminMediaController::class, 'getMedia'])->name('media.list');
+    Route::post('/media/upload', [AdminMediaController::class, 'upload'])->name('media.upload');
+    Route::put('/media/{media}', [AdminMediaController::class, 'update'])->name('media.update');
+    Route::delete('/media/{media}', [AdminMediaController::class, 'destroy'])->name('media.destroy');
+    Route::post('/media/bulk-delete', [AdminMediaController::class, 'bulkDestroy'])->name('media.bulk-destroy');
+    Route::get('/media/folders', [AdminMediaController::class, 'getFolders'])->name('media.folders');
+    Route::post('/media/folders', [AdminMediaController::class, 'createFolder'])->name('media.folders.store');
+    Route::get('/media/stats', [AdminMediaController::class, 'getStats'])->name('media.stats');
 });

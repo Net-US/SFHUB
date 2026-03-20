@@ -2,365 +2,275 @@
 
 @section('title', 'Admin Dashboard | SFHUB')
 
+@section('page-title', 'Dashboard Overview')
+
 @section('content')
-<div class="min-h-screen bg-stone-50 dark:bg-stone-900">
-    <!-- Admin Header -->
-    <div class="bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-6">
+    <div class="animate-fade-in-up space-y-8">
+        <!-- Welcome Banner -->
+        <div class="bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl p-8 text-white shadow-lg">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-stone-900 dark:text-white">Admin Dashboard</h1>
-                    <p class="text-stone-600 dark:text-stone-400 mt-1">Kelola sistem dan pantau performa platform SFHUB</p>
+                    <h2 class="text-2xl font-bold mb-2">Selamat datang kembali, {{ auth()->user()->name }}!</h2>
+                    <p class="text-primary-100">Berikut ringkasan aktivitas Student-Freelancer Hub hari ini.</p>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <div class="text-right">
-                        <p class="text-sm text-stone-600 dark:text-stone-400">Welcome back,</p>
-                        <p class="font-semibold text-stone-900 dark:text-white">{{ Auth::user()->name }}</p>
-                    </div>
-                    <div class="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">
-                        {{ substr(Auth::user()->name, 0, 1) }}
-                    </div>
+                <div class="mt-4 md:mt-0 flex gap-3">
+                    <span class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-sm">
+                        <i class="fa-solid fa-calendar mr-2"></i>{{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
+                    </span>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Flash Messages -->
-        @if(session('success'))
-            <div class="mb-6 p-4 bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-xl">
+        <!-- System Status Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm">
                 <div class="flex items-center">
-                    <i class="fa-solid fa-check-circle text-emerald-600 dark:text-emerald-400 mr-3"></i>
-                    <p class="text-emerald-800 dark:text-emerald-200">{{ session('success') }}</p>
+                    <div
+                        class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mr-4">
+                        <i class="fa-solid fa-server text-emerald-600 dark:text-emerald-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-stone-500 dark:text-stone-400">System Status</p>
+                        <h3 class="text-xl font-bold text-stone-800 dark:text-white">
+                            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>Online
+                        </h3>
+                        <p class="text-xs text-stone-400 mt-1">v{{ $stats['system']['version'] ?? '2.1.0' }}</p>
+                    </div>
                 </div>
             </div>
-        @endif
 
-        <!-- Quick Actions -->
-        <div class="mb-8 flex flex-wrap gap-3">
-            <a href="{{ route('admin.users.create') }}" class="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors">
-                <i class="fa-solid fa-user-plus mr-2"></i>
-                Tambah User Baru
-            </a>
-            <a href="{{ route('admin.landing') }}" class="inline-flex items-center px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors">
-                <i class="fa-solid fa-palette mr-2"></i>
-                Kelola Landing
-            </a>
-            <a href="{{ route('admin.users') }}" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors">
-                <i class="fa-solid fa-users mr-2"></i>
-                Manajemen User
-            </a>
-        </div>
-
-        <!-- Statistics Overview -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Total Users -->
-            <div class="bg-white dark:bg-stone-800 rounded-xl p-6 border border-stone-200 dark:border-stone-700 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-2xl font-bold text-stone-900 dark:text-white">{{ $totalUsers }}</p>
-                        <p class="text-sm text-stone-600 dark:text-stone-400">Total Users</p>
-                        <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">+{{ $newThisMonth }} bulan ini</p>
-                    </div>
-                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm">
+                <div class="flex items-center">
+                    <div
+                        class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-4">
                         <i class="fa-solid fa-users text-blue-600 dark:text-blue-400"></i>
                     </div>
-                </div>
-            </div>
-
-            <!-- Active Users -->
-            <div class="bg-white dark:bg-stone-800 rounded-xl p-6 border border-stone-200 dark:border-stone-700 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-2xl font-bold text-stone-900 dark:text-white">{{ $activeUsers }}</p>
-                        <p class="text-sm text-stone-600 dark:text-stone-400">Active Users</p>
-                        <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">{{ $totalUsers > 0 ? round(($activeUsers / $totalUsers) * 100, 1) : 0 }}% dari total</p>
-                    </div>
-                    <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center">
-                        <i class="fa-solid fa-user-check text-emerald-600 dark:text-emerald-400"></i>
+                        <p class="text-sm text-stone-500 dark:text-stone-400">Total Users</p>
+                        <h3 class="text-xl font-bold text-stone-800 dark:text-white">
+                            {{ number_format($stats['users']['total'] ?? 0) }}</h3>
+                        <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                            +{{ $stats['users']['new_today'] ?? 0 }} hari ini</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Total Tasks -->
-            <div class="bg-white dark:bg-stone-800 rounded-xl p-6 border border-stone-200 dark:border-stone-700 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-2xl font-bold text-stone-900 dark:text-white">{{ $totalTasks }}</p>
-                        <p class="text-sm text-stone-600 dark:text-stone-400">Total Tasks</p>
-                        <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">{{ $completedTasks }} selesai</p>
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm">
+                <div class="flex items-center">
+                    <div
+                        class="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mr-4">
+                        <i class="fa-solid fa-crown text-amber-600 dark:text-amber-400"></i>
                     </div>
-                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-                        <i class="fa-solid fa-tasks text-purple-600 dark:text-purple-400"></i>
+                    <div>
+                        <p class="text-sm text-stone-500 dark:text-stone-400">Premium Users</p>
+                        <h3 class="text-xl font-bold text-stone-800 dark:text-white">
+                            {{ number_format($stats['users']['by_plan']['pro'] ?? 0) }}</h3>
+                        <p class="text-xs text-stone-400 mt-1">
+                            {{ $stats['users']['total'] > 0 ? round(($stats['users']['by_plan']['pro'] / $stats['users']['total']) * 100, 1) : 0 }}%
+                            of total</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Workspaces -->
-            <div class="bg-white dark:bg-stone-800 rounded-xl p-6 border border-stone-200 dark:border-stone-700 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-2xl font-bold text-stone-900 dark:text-white">{{ $totalWorkspaces }}</p>
-                        <p class="text-sm text-stone-600 dark:text-stone-400">Workspaces</p>
-                        <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">{{ $totalFinanceAccounts }} akun keuangan</p>
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm">
+                <div class="flex items-center">
+                    <div
+                        class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mr-4">
+                        <i class="fa-solid fa-chart-line text-purple-600 dark:text-purple-400"></i>
                     </div>
-                    <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
-                        <i class="fa-solid fa-layer-group text-orange-600 dark:text-orange-400"></i>
+                    <div>
+                        <p class="text-sm text-stone-500 dark:text-stone-400">Revenue (MTD)</p>
+                        <h3 class="text-xl font-bold text-stone-800 dark:text-white">Rp
+                            {{ number_format($stats['revenue']['month_to_date'] ?? 0, 0, ',', '.') }}</h3>
+                        <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1">+8.2% dari bulan lalu</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <!-- User Growth Chart -->
-            <div class="bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 p-6">
-                <h3 class="text-lg font-semibold text-stone-900 dark:text-white mb-4">Pertumbuhan Pengguna</h3>
-                <div class="h-64 flex items-end justify-between space-x-2">
-                    @foreach($monthlyGrowth as $growth)
-                    <div class="flex flex-col items-center flex-1">
-                        <div class="w-full bg-blue-500 dark:bg-blue-400 rounded-t" style="height: {{ $growth['users'] > 0 ? min(($growth['users'] / max(array_column($monthlyGrowth, 'users'))) * 100, 100) : 0 }}%; min-height: 20px;"></div>
-                        <span class="text-xs text-stone-600 dark:text-stone-400 mt-2">{{ $growth['month'] }}</span>
-                        <span class="text-xs font-medium text-stone-900 dark:text-white">{{ $growth['users'] }}</span>
-                    </div>
-                    @endforeach
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-stone-800 dark:text-white">User Growth</h3>
+                    <span class="text-xs bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded text-stone-500">Last 6
+                        Months</span>
+                </div>
+                <div class="chart-container h-64">
+                    <canvas id="userGrowthChart"></canvas>
                 </div>
             </div>
 
-            <!-- Task Distribution Chart -->
-            <div class="bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 p-6">
-                <h3 class="text-lg font-semibold text-stone-900 dark:text-white mb-4">Distribusi Tasks</h3>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                            <span class="text-sm text-stone-700 dark:text-stone-300">Selesai</span>
-                        </div>
-                        <span class="text-sm font-medium text-emerald-600 dark:text-emerald-400">{{ $completedTasks }}</span>
-                    </div>
-                    <div class="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-2">
-                        <div class="bg-emerald-500 h-2 rounded-full" style="width: {{ $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0 }}%"></div>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-                            <span class="text-sm text-stone-700 dark:text-stone-300">In Progress</span>
-                        </div>
-                        <span class="text-sm font-medium text-blue-600 dark:text-blue-400">{{ $doingTasks }}</span>
-                    </div>
-                    <div class="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-2">
-                        <div class="bg-blue-500 h-2 rounded-full" style="width: {{ $totalTasks > 0 ? ($doingTasks / $totalTasks) * 100 : 0 }}%"></div>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
-                            <span class="text-sm text-stone-700 dark:text-stone-300">Pending</span>
-                        </div>
-                        <span class="text-sm font-medium text-orange-600 dark:text-orange-400">{{ $pendingTasks }}</span>
-                    </div>
-                    <div class="w-full bg-stone-200 dark:bg-stone-700 rounded-full h-2">
-                        <div class="bg-orange-500 h-2 rounded-full" style="width: {{ $totalTasks > 0 ? ($pendingTasks / $totalTasks) * 100 : 0 }}%"></div>
-                    </div>
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-stone-800 dark:text-white">User Distribution by Plan</h3>
+                    <span class="text-xs bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded text-stone-500">Total:
+                        {{ number_format($stats['users']['total'] ?? 0) }}</span>
+                </div>
+                <div class="chart-container h-64">
+                    <canvas id="userDistributionChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Detailed Statistics -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <!-- User Distribution by Role -->
-            <div class="bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 p-6">
-                <h3 class="text-lg font-semibold text-stone-900 dark:text-white mb-4">Distribusi User per Role</h3>
-                <div class="space-y-3">
-                    @foreach([
-                        ['Admin', $adminCount, 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'],
-                        ['Student', $studentCount, 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'],
-                        ['Freelancer', $freelanceCount, 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400']
-                    ] as $role)
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-stone-600 dark:text-stone-400">{{ $role[0] }}</span>
-                        <span class="text-sm font-medium {{ $role[2] }}">{{ $role[1] }}</span>
-                    </div>
-                    @endforeach
-                </div>
+        <!-- Recent Users -->
+        <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-stone-800 dark:text-white">Recent Users</h3>
+                <a href="{{ route('admin.users') }}"
+                    class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">View All →</a>
             </div>
-
-            <!-- User Distribution by Plan -->
-            <div class="bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 p-6">
-                <h3 class="text-lg font-semibold text-stone-900 dark:text-white mb-4">Distribusi User per Plan</h3>
-                <div class="space-y-3">
-                    @foreach([
-                        ['Free', $freeCount, 'bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400'],
-                        ['Pro', $proCount, 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'],
-                        ['Team', $teamCount, 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400']
-                    ] as $plan)
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-stone-600 dark:text-stone-400">{{ $plan[0] }}</span>
-                        <span class="text-sm font-medium {{ $plan[2] }}">{{ $plan[1] }}</span>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Platform Statistics -->
-            <div class="bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 p-6">
-                <h3 class="text-lg font-semibold text-stone-900 dark:text-white mb-4">Statistik Platform</h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-stone-600 dark:text-stone-400">Subjects</span>
-                        <span class="text-sm font-medium text-blue-600 dark:text-blue-400">{{ $totalSubjects }}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-stone-600 dark:text-stone-400">Events</span>
-                        <span class="text-sm font-medium text-purple-600 dark:text-purple-400">{{ $totalEvents }}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-stone-600 dark:text-stone-400">Transactions</span>
-                        <span class="text-sm font-medium text-orange-600 dark:text-orange-400">{{ $totalTransactions }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <!-- Recent Users -->
-            <div class="bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700">
-                <div class="p-6 border-b border-stone-200 dark:border-stone-700">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-stone-900 dark:text-white">User Terbaru</h3>
-                        <a href="{{ route('admin.users') }}" class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
-                            View All →
-                        </a>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div class="space-y-4">
-                        @foreach($recentUsers as $recentUser)
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-gradient-to-br from-stone-400 to-stone-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                    {{ substr($recentUser->name, 0, 1) }}
-                                </div>
-                                <div>
-                                    <p class="font-medium text-stone-900 dark:text-white">{{ $recentUser->name }}</p>
-                                    <p class="text-sm text-stone-600 dark:text-stone-400">{{ $recentUser->email }}</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    {{ $recentUser->is_active ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400' }}">
-                                    {{ $recentUser->is_active ? 'Active' : 'Inactive' }}
-                                </span>
-                                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">
-                                    {{ $recentUser->created_at->diffForHumans() }}
-                                </p>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Tasks -->
-            <div class="bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700">
-                <div class="p-6 border-b border-stone-200 dark:border-stone-700">
-                    <h3 class="text-lg font-semibold text-stone-900 dark:text-white">Task Terbaru</h3>
-                </div>
-                <div class="p-6">
-                    <div class="space-y-4">
-                        @foreach($recentTasks as $task)
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                                    <i class="fa-solid fa-tasks text-purple-600 dark:text-purple-400 text-sm"></i>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-stone-900 dark:text-white">{{ $task->title }}</p>
-                                    <p class="text-sm text-stone-600 dark:text-stone-400">{{ $task->category }}</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    @if($task->status === 'done') bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400
-                                    @elseif($task->status === 'doing') bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400
-                                    @else bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-400 @endif">
-                                    {{ ucfirst($task->status) }}
-                                </span>
-                                <p class="text-xs text-stone-500 dark:text-stone-400 mt-1">
-                                    {{ $task->created_at->diffForHumans() }}
-                                </p>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr
+                            class="text-left text-xs text-stone-500 dark:text-stone-400 border-b border-stone-200 dark:border-stone-700">
+                            <th class="pb-3 font-medium">User</th>
+                            <th class="pb-3 font-medium">Role</th>
+                            <th class="pb-3 font-medium">Joined</th>
+                            <th class="pb-3 font-medium">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        @forelse($recentUsers as $user)
+                            <tr class="border-b border-stone-100 dark:border-stone-800 last:border-0">
+                                <td class="py-3">
+                                    <div class="flex items-center space-x-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-400 to-primary-600 flex items-center justify-center text-white text-xs font-bold">
+                                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-stone-900 dark:text-white">{{ $user->name }}</p>
+                                            <p class="text-xs text-stone-500">{{ $user->email }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                {{ ($user->subscriptions->first()?->plan->slug ?? 'free') === 'pro' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400' : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400' }}">
+                                        {{ ucfirst($user->subscriptions->first()?->plan->slug ?? 'free') }}
+                                    </span>
+                                </td>
+                                <td class="py-3 text-stone-600 dark:text-stone-400">
+                                    {{ $user->created_at->format('Y-m-d') }}
+                                </td>
+                                <td class="py-3">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                {{ $user->status === 'active' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400' }}">
+                                        {{ ucfirst($user->status ?? 'active') }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="py-4 text-center text-stone-500">No users found</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- System Information -->
-        <div class="bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700">
-            <div class="p-6 border-b border-stone-200 dark:border-stone-700">
-                <h3 class="text-lg font-semibold text-stone-900 dark:text-white">Informasi Sistem</h3>
+        <!-- System Logs -->
+        <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 shadow-sm border border-stone-200 dark:border-stone-800">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-stone-800 dark:text-white">Recent System Activity</h3>
+                <a href="{{ route('admin.logs.index') }}"
+                    class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">View All Logs →</a>
             </div>
-            <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <h4 class="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Environment</h4>
-                        <dl class="space-y-1">
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-stone-600 dark:text-stone-400">Application:</dt>
-                                <dd class="text-sm font-medium text-stone-900 dark:text-white">SFHUB</dd>
-                            </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-stone-600 dark:text-stone-400">Version:</dt>
-                                <dd class="text-sm font-medium text-stone-900 dark:text-white">1.0.0</dd>
-                            </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-stone-600 dark:text-stone-400">Environment:</dt>
-                                <dd class="text-sm font-medium text-stone-900 dark:text-white">{{ config('app.env') }}</dd>
-                            </div>
-                        </dl>
+            <div class="space-y-3">
+                @forelse($recentLogs as $log)
+                    <div class="flex items-center space-x-3 p-3 bg-stone-50 dark:bg-stone-800/50 rounded-lg">
+                        <div
+                            class="w-8 h-8 rounded-full flex items-center justify-center
+                    {{ $log->level === 'error' ? 'bg-red-100 dark:bg-red-900/30 text-red-600' : ($log->level === 'warning' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600') }}">
+                            <i class="fa-solid fa-circle-info text-xs"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-stone-900 dark:text-white">{{ $log->message }}</p>
+                            <p class="text-xs text-stone-500">{{ $log->logged_at->diffForHumans() }}</p>
+                        </div>
+                        <span class="text-xs text-stone-400 uppercase">{{ $log->level }}</span>
                     </div>
-                    <div>
-                        <h4 class="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Database</h4>
-                        <dl class="space-y-1">
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-stone-600 dark:text-stone-400">Connection:</dt>
-                                <dd class="text-sm font-medium text-stone-900 dark:text-white">{{ config('database.default') }}</dd>
-                            </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-stone-600 dark:text-stone-400">Database:</dt>
-                                <dd class="text-sm font-medium text-stone-900 dark:text-white">{{ config('database.connections.mysql.database') }}</dd>
-                            </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-stone-600 dark:text-stone-400">Status:</dt>
-                                <dd class="text-sm font-medium text-emerald-600 dark:text-emerald-400">Connected</dd>
-                            </div>
-                        </dl>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Server</h4>
-                        <dl class="space-y-1">
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-stone-600 dark:text-stone-400">PHP Version:</dt>
-                                <dd class="text-sm font-medium text-stone-900 dark:text-white">{{ PHP_VERSION }}</dd>
-                            </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-stone-600 dark:text-stone-400">Laravel:</dt>
-                                <dd class="text-sm font-medium text-stone-900 dark:text-white">{{ app()->version() }}</dd>
-                            </div>
-                            <div class="flex justify-between">
-                                <dt class="text-sm text-stone-600 dark:text-stone-400">Server Time:</dt>
-                                <dd class="text-sm font-medium text-stone-900 dark:text-white">{{ now()->format('Y-m-d H:i:s') }}</dd>
-                            </div>
-                        </dl>
-                    </div>
-                </div>
+                @empty
+                    <p class="text-center text-stone-500 py-4">No recent activity</p>
+                @endforelse
             </div>
         </div>
     </div>
-</div>
 @endsection
+
+@push('scripts')
+    <script>
+        const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+        new Chart(userGrowthCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Total Users',
+                    data: [10000, 11000, 12500, 14000, 15000, {{ $stats['users']['total'] ?? 16000 }}],
+                    borderColor: '#f57223',
+                    backgroundColor: 'rgba(245, 114, 35, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        const userDistCtx = document.getElementById('userDistributionChart').getContext('2d');
+        new Chart(userDistCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Free', 'Basic', 'Pro'],
+                datasets: [{
+                    data: [{{ $stats['users']['by_plan']['free'] ?? 0 }},
+                        {{ $stats['users']['by_plan']['basic'] ?? 0 }},
+                        {{ $stats['users']['by_plan']['pro'] ?? 0 }}
+                    ],
+                    backgroundColor: ['#d6d3d1', '#3b82f6', '#f57223'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+@endpush
+

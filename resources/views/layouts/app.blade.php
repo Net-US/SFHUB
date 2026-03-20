@@ -17,7 +17,19 @@
                 extend: {
                     colors: {
                         stone: {
-                            850: "#1f1f1f", // Custom dark background
+                            850: "#1f1f1f",
+                        },
+                        primary: {
+                            50: "#fef3e9",
+                            100: "#fde4d3",
+                            200: "#fbc8a7",
+                            300: "#f9ab7b",
+                            400: "#f78f4f",
+                            500: "#f57223",
+                            600: "#e65e0e",
+                            700: "#c44b0b",
+                            800: "#a23909",
+                            900: "#802707",
                         },
                     },
                 },
@@ -106,13 +118,13 @@
 
         /* Active State */
         .nav-active {
-            background-color: rgb(254 252 232) !important;
-            color: rgb(180 83 9) !important;
+            background-color: rgb(254 243 233) !important;
+            color: rgb(229 88 35) !important;
         }
 
         .dark .nav-active {
-            background-color: rgb(120 53 15 / 0.2) !important;
-            color: rgb(254 215 170) !important;
+            background-color: rgb(229 88 35 / 0.15) !important;
+            color: rgb(249 171 123) !important;
         }
 
         /* Modal Styles */
@@ -154,37 +166,59 @@
         class="bg-white dark:bg-stone-900 border-r border-stone-200 dark:border-stone-800 hidden md:flex flex-col z-20 shadow-sm w-64 sidebar-transition relative">
         <!-- Toggle Button -->
         <button onclick="toggleSidebar()"
-            class="absolute -right-3 top-8 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full w-6 h-6 flex items-center justify-center text-stone-500 hover:text-orange-500 shadow-sm z-30 transform transition-transform hover:scale-110 focus:outline-none">
+            class="absolute -right-3 top-8 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full w-6 h-6 flex items-center justify-center text-stone-500 hover:text-primary-500 shadow-sm z-30 transform transition-transform hover:scale-110 focus:outline-none">
             <i id="sidebar-toggle-icon" class="fa-solid fa-chevron-left text-xs"></i>
         </button>
 
         <div class="p-6 border-b border-stone-100 dark:border-stone-800 flex items-center h-20">
-            <i class="fa-solid fa-shield-alt text-orange-500 text-2xl mr-3 flex-shrink-0"></i>
+            <i class="fa-solid fa-layer-group text-primary-500 text-2xl mr-3 flex-shrink-0"></i>
             <div class="logo-text overflow-hidden">
-                <h1 class="text-lg font-bold text-stone-900 dark:text-white tracking-tight">Student<span
-                        class="text-orange-500">Hub</span></h1>
+                <h1 class="text-lg font-bold text-stone-900 dark:text-white tracking-tight">SF<span
+                        class="text-primary-500">HUB</span></h1>
                 <p class="text-[10px] text-stone-500 dark:text-stone-400">Admin Panel</p>
             </div>
         </div>
 
         <nav class="flex-1 overflow-y-auto py-4">
-            <!-- Group: ADMIN OVERVIEW -->
+            <!-- Group: DASHBOARD -->
             <div class="mb-6 px-3">
-                <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">Admin
-                    Overview</p>
+                <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">Dashboard
+                </p>
                 <ul class="space-y-1">
                     <li>
                         <a href="{{ route('admin.index') }}"
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.index') ? 'nav-active' : '' }}">
-                            <i class="fa-solid fa-chart-line w-5 text-center mr-3"></i>
-                            <span class="nav-text">Dashboard</span>
+                            <i class="fa-solid fa-chart-pie w-5 text-center mr-3"></i>
+                            <span class="nav-text">Overview</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('admin.analytics') }}"
+                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.analytics') ? 'nav-active' : '' }}">
+                            <i class="fa-solid fa-chart-line w-5 text-center mr-3"></i>
+                            <span class="nav-text">Analytics</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Group: USER MANAGEMENT -->
+            <div class="mb-6 px-3">
+                <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">User
+                    Management</p>
+                <ul class="space-y-1">
                     <li>
                         <a href="{{ route('admin.users') }}"
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.users') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-users w-5 text-center mr-3"></i>
-                            <span class="nav-text">User Management</span>
+                            <span class="nav-text">All Users</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.subscriptions') }}"
+                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.subscriptions') ? 'nav-active' : '' }}">
+                            <i class="fa-solid fa-crown w-5 text-center mr-3"></i>
+                            <span class="nav-text">Subscriptions</span>
                         </a>
                     </li>
                 </ul>
@@ -198,15 +232,44 @@
                     <li>
                         <a href="{{ route('admin.landing') }}"
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.landing') ? 'nav-active' : '' }}">
-                            <i class="fa-solid fa-palette w-5 text-center mr-3"></i>
+                            <i class="fa-solid fa-globe w-5 text-center mr-3"></i>
                             <span class="nav-text">Landing Page</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#"
-                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all opacity-60 cursor-not-allowed">
+                        <a href="{{ route('admin.blog.index') }}"
+                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.blog.*') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-newspaper w-5 text-center mr-3"></i>
-                            <span class="nav-text">Blog (Soon)</span>
+                            <span class="nav-text">Blog & Articles</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.faq.index') }}"
+                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.faq.*') ? 'nav-active' : '' }}">
+                            <i class="fa-solid fa-circle-question w-5 text-center mr-3"></i>
+                            <span class="nav-text">FAQ & Help</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Group: SEO & SETTINGS -->
+            <div class="mb-6 px-3">
+                <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">SEO &
+                    Settings</p>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="{{ route('admin.seo.index') }}"
+                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.seo.*') ? 'nav-active' : '' }}">
+                            <i class="fa-solid fa-magnifying-glass w-5 text-center mr-3"></i>
+                            <span class="nav-text">SEO Settings</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.settings.index') }}"
+                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.settings.*') ? 'nav-active' : '' }}">
+                            <i class="fa-solid fa-gear w-5 text-center mr-3"></i>
+                            <span class="nav-text">System Settings</span>
                         </a>
                     </li>
                 </ul>
@@ -217,46 +280,17 @@
                 <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">System</p>
                 <ul class="space-y-1">
                     <li>
-                        <a href="#"
-                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all opacity-60 cursor-not-allowed">
-                            <i class="fa-solid fa-cog w-5 text-center mr-3"></i>
-                            <span class="nav-text">Settings (Soon)</span>
+                        <a href="{{ route('admin.logs.index') }}"
+                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.logs.*') ? 'nav-active' : '' }}">
+                            <i class="fa-solid fa-history w-5 text-center mr-3"></i>
+                            <span class="nav-text">Activity Logs</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#"
-                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all opacity-60 cursor-not-allowed">
-                            <i class="fa-solid fa-file-alt w-5 text-center mr-3"></i>
-                            <span class="nav-text">Logs (Soon)</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#"
-                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all opacity-60 cursor-not-allowed">
-                            <i class="fa-solid fa-shield-alt w-5 text-center mr-3"></i>
-                            <span class="nav-text">Security (Soon)</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Group: ANALYTICS -->
-            <div class="mb-6 px-3">
-                <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">Analytics
-                </p>
-                <ul class="space-y-1">
-                    <li>
-                        <a href="#"
-                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all opacity-60 cursor-not-allowed">
-                            <i class="fa-solid fa-chart-bar w-5 text-center mr-3"></i>
-                            <span class="nav-text">Reports (Soon)</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#"
-                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all opacity-60 cursor-not-allowed">
-                            <i class="fa-solid fa-download w-5 text-center mr-3"></i>
-                            <span class="nav-text">Export (Soon)</span>
+                        <a href="{{ route('admin.settings.backups') }}"
+                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.settings.backups') ? 'nav-active' : '' }}">
+                            <i class="fa-solid fa-database w-5 text-center mr-3"></i>
+                            <span class="nav-text">Backup & Restore</span>
                         </a>
                     </li>
                 </ul>
