@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminMediaController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminUserController;
-use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\LandingPageController;
 use App\Http\Controllers\Admin\LogController;
@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CreativeStudioController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DebtController;
@@ -34,6 +35,10 @@ use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Public Blog Routes
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
@@ -306,20 +311,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/subscriptions/{subscription}/extend', [SubscriptionController::class, 'extendSubscription'])->name('subscriptions.extend');
 
     // Blog Management
-    Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
-    Route::post('/blog', [BlogController::class, 'store'])->name('blog.store');
-    Route::get('/blog/{post}', [BlogController::class, 'show'])->name('blog.show');
-    Route::put('/blog/{post}', [BlogController::class, 'update'])->name('blog.update');
-    Route::delete('/blog/{post}', [BlogController::class, 'destroy'])->name('blog.destroy');
-    Route::get('/blog-categories', [BlogController::class, 'getCategories'])->name('blog.categories');
-    Route::post('/blog-categories', [BlogController::class, 'storeCategory'])->name('blog.categories.store');
-    Route::put('/blog-categories/{category}', [BlogController::class, 'updateCategory'])->name('blog.categories.update');
-    Route::delete('/blog-categories/{category}', [BlogController::class, 'destroyCategory'])->name('blog.categories.destroy');
-    Route::get('/blog-tags', [BlogController::class, 'getTags'])->name('blog.tags');
-    Route::post('/blog-tags', [BlogController::class, 'storeTag'])->name('blog.tags.store');
-    Route::get('/blog/comments', [BlogController::class, 'getComments'])->name('blog.comments');
-    Route::post('/blog/comments', [BlogController::class, 'storeComment'])->name('blog.comments.store');
-    Route::delete('/blog/comments/{comment}', [BlogController::class, 'destroyComment'])->name('blog.comments.destroy');
+    Route::get('/blog', [AdminBlogController::class, 'index'])->name('blog.index');
+    Route::get('/blog/create', [AdminBlogController::class, 'create'])->name('blog.create');
+    Route::post('/blog', [AdminBlogController::class, 'store'])->name('blog.store');
+    Route::get('/blog/{post}/edit', [AdminBlogController::class, 'edit'])->name('blog.edit');
+    Route::get('/blog/{post}', [AdminBlogController::class, 'show'])->name('blog.show');
+    Route::put('/blog/{post}', [AdminBlogController::class, 'update'])->name('blog.update');
+    Route::delete('/blog/{post}', [AdminBlogController::class, 'destroy'])->name('blog.destroy');
+    Route::get('/blog-categories', [AdminBlogController::class, 'getCategories'])->name('blog.categories');
+    Route::post('/blog-categories', [AdminBlogController::class, 'storeCategory'])->name('blog.categories.store');
+    Route::put('/blog-categories/{category}', [AdminBlogController::class, 'updateCategory'])->name('blog.categories.update');
+    Route::delete('/blog-categories/{category}', [AdminBlogController::class, 'destroyCategory'])->name('blog.categories.destroy');
+    Route::get('/blog-tags', [AdminBlogController::class, 'getTags'])->name('blog.tags');
+    Route::post('/blog-tags', [AdminBlogController::class, 'storeTag'])->name('blog.tags.store');
+    Route::get('/blog/comments', [AdminBlogController::class, 'getComments'])->name('blog.comments');
+    Route::post('/blog/comments', [AdminBlogController::class, 'storeComment'])->name('blog.comments.store');
+    Route::delete('/blog/comments/{comment}', [AdminBlogController::class, 'destroyComment'])->name('blog.comments.destroy');
 
     // FAQ Management
     Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');

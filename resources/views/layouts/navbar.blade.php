@@ -16,6 +16,8 @@
             </div>
             <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-stone-600 dark:text-stone-300">
                 <a href="#fitur" class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Fitur</a>
+                <a href="{{ route('blog.index') }}"
+                    class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Blog</a>
                 <a href="#bagaimana" class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Cara
                     Kerja</a>
                 <a href="#testimoni"

@@ -151,6 +151,113 @@
 
     @include('home.registration')
 
+    {{-- LATEST BLOG POSTS --}}
+    <section class="py-20 bg-white dark:bg-stone-900" id="blog">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <span
+                    class="inline-block px-4 py-1.5 mb-4 text-xs font-bold tracking-widest text-orange-600 dark:text-orange-400 uppercase bg-orange-100 dark:bg-orange-900/30 rounded-full">
+                    Blog & Artikel
+                </span>
+                <h2 class="text-4xl font-extrabold text-stone-900 dark:text-white mb-4">
+                    Tips & <span class="text-orange-500">Inspirasi</span> Terbaru
+                </h2>
+                <p class="text-lg text-stone-500 dark:text-stone-400 max-w-2xl mx-auto">
+                    Artikel bermanfaat untuk meningkatkan produktivitas dan karir kamu sebagai mahasiswa.
+                </p>
+            </div>
+
+            @php
+                $latestPosts = \App\Models\BlogPost::with(['user', 'categories'])
+                    ->where('status', 'published')
+                    ->orderBy('published_at', 'desc')
+                    ->take(3)
+                    ->get();
+            @endphp
+
+            @if ($latestPosts->count() > 0)
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    @foreach ($latestPosts as $post)
+                        <article
+                            class="group bg-stone-50 dark:bg-stone-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-stone-200 dark:border-stone-700">
+                            @if ($post->featured_image)
+                                <div class="aspect-w-16 aspect-h-9 overflow-hidden">
+                                    <img src="{{ asset($post->featured_image) }}" alt="{{ $post->title }}"
+                                        class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                            @else
+                                <div
+                                    class="w-full h-48 bg-gradient-to-br from-orange-400 to-rose-400 flex items-center justify-center">
+                                    <i class="fa-solid fa-newspaper text-white text-4xl"></i>
+                                </div>
+                            @endif
+                            <div class="p-6">
+                                <div class="flex items-center gap-2 mb-3">
+                                    @foreach ($post->categories->take(2) as $category)
+                                        <span
+                                            class="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs font-medium rounded-full">
+                                            {{ $category->name }}
+                                        </span>
+                                    @endforeach
+                                    @if ($post->featured)
+                                        <span
+                                            class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-xs font-medium rounded-full">
+                                            <i class="fa-solid fa-star mr-1"></i>Unggulan
+                                        </span>
+                                    @endif
+                                </div>
+                                <h3
+                                    class="font-bold text-lg text-stone-900 dark:text-white mb-2 group-hover:text-orange-500 transition-colors">
+                                    <a href="{{ route('blog.show', $post->slug) }}">
+                                        {{ $post->title }}
+                                    </a>
+                                </h3>
+                                <p class="text-stone-600 dark:text-stone-300 text-sm mb-4 line-clamp-2">
+                                    {{ $post->excerpt ?: \Illuminate\Support\Str::limit(strip_tags($post->content), 100) }}
+                                </p>
+                                <div class="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
+                                    <div class="flex items-center gap-2">
+                                        @if ($post->user->avatar)
+                                            <img src="{{ asset($post->user->avatar) }}" alt="{{ $post->user->name }}"
+                                                class="w-5 h-5 rounded-full">
+                                        @else
+                                            <div
+                                                class="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                                                <i
+                                                    class="fa-solid fa-user text-orange-600 dark:text-orange-400 text-xs"></i>
+                                            </div>
+                                        @endif
+                                        <span>{{ $post->user->name }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span><i class="fa-solid fa-eye mr-1"></i>{{ $post->views }}</span>
+                                        <span>{{ $post->published_at->format('d M Y') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+
+                <div class="text-center mt-12">
+                    <a href="{{ route('blog.index') }}"
+                        class="inline-flex items-center gap-2 px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold shadow-lg shadow-orange-200 dark:shadow-none transition-all">
+                        Lihat Semua Artikel
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            @else
+                <div class="text-center py-12">
+                    <i class="fa-solid fa-newspaper text-6xl text-stone-300 dark:text-stone-600 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-stone-900 dark:text-white mb-2">Belum ada artikel</h3>
+                    <p class="text-stone-600 dark:text-stone-300">
+                        Nantikan artikel menarik dari kami segera!
+                    </p>
+                </div>
+            @endif
+        </div>
+    </section>
+
 @endsection
 
 @push('scripts')
