@@ -4,9 +4,14 @@
         <div class="flex justify-between h-16 items-center">
             <div class="flex items-center">
                 <a href="{{ route('home') }}"
-                    class="text-2xl font-black text-stone-900 dark:text-white tracking-tighter transition-colors">
-                    <i class="fa-solid fa-layer-group text-orange-500 mr-2"></i>Student<span
-                        class="text-orange-500">Hub</span>
+                    class="text-2xl font-black text-stone-900 dark:text-white tracking-tighter transition-colors flex items-center">
+                    @if (\App\Models\SiteSetting::getValue('site_logo'))
+                        <img src="{{ \App\Models\SiteSetting::getValue('site_logo') }}" alt="StudentHub Logo"
+                            class="h-8 w-auto mr-2">
+                    @else
+                        <i class="fa-solid fa-layer-group text-orange-500 mr-2"></i>
+                    @endif
+                    Student<span class="text-orange-500">Hub</span>
                 </a>
             </div>
             <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-stone-600 dark:text-stone-300">

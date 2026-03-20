@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@yield('title', 'Student-Freelancer Hub | Kelola Kuliah & Karirmu')</title>
 
+    <!-- Favicon -->
+    @if (\App\Models\SiteSetting::getValue('site_favicon'))
+        <link rel="icon" type="image/x-icon" href="{{ \App\Models\SiteSetting::getValue('site_favicon') }}">
+    @else
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    @endif
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>

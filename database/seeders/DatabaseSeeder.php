@@ -840,7 +840,14 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('✅ Schedules and events created successfully');
 
-        // ── 7. SUMMARY ───────────────────────────────────────────────────────
+        // ── 7. CREATE LANDING PAGE DATA ───────────────────────────────────────
+        $this->command->info('🏠 Membuat data landing page...');
+
+        $this->call(LandingPageSeeder::class);
+
+        $this->command->info('✅ Landing page data created successfully');
+
+        // ── 8. SUMMARY ───────────────────────────────────────────────────────
         $this->command->info('🎉 Database seeding completed successfully!');
         $this->command->info('');
         $this->command->info('📊 Created Data Summary:');

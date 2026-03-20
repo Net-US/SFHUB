@@ -3,10 +3,17 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div>
-                <span class="text-2xl font-black tracking-tighter mb-4 block">
-                    <i class="fa-solid fa-layer-group text-orange-400 mr-2"></i>Student<span
-                        class="text-orange-400">Hub</span>
-                </span>
+                <div class="flex items-center mb-4">
+                    @if (\App\Models\SiteSetting::getValue('site_logo'))
+                        <img src="{{ \App\Models\SiteSetting::getValue('site_logo') }}" alt="StudentHub Logo"
+                            class="h-10 w-auto mr-3">
+                    @else
+                        <i class="fa-solid fa-layer-group text-orange-400 mr-3 text-2xl"></i>
+                    @endif
+                    <span class="text-2xl font-black tracking-tighter">
+                        Student<span class="text-orange-400">Hub</span>
+                    </span>
+                </div>
                 <p class="text-stone-400 text-sm leading-relaxed">
                     Platform manajemen produktivitas untuk mahasiswa kreatif.
                     Membantu menemukan keseimbangan antara kuliah dan karir.

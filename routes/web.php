@@ -334,6 +334,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Landing Page Management
     Route::get('/landing', [LandingPageController::class, 'index'])->name('landing');
     Route::post('/landing/save-all', [LandingPageController::class, 'saveAll'])->name('landing.save');
+    Route::post('/landing/upload-image', [LandingPageController::class, 'uploadHeroImage'])->name('landing.upload-image');
+    Route::post('/landing/upload-logo', [LandingPageController::class, 'uploadLogo'])->name('landing.upload-logo');
+    Route::post('/landing/upload-favicon', [LandingPageController::class, 'uploadFavicon'])->name('landing.upload-favicon');
     Route::get('/landing/heroes', [LandingPageController::class, 'getHeroes'])->name('landing.heroes');
     Route::post('/landing/heroes', [LandingPageController::class, 'storeHero'])->name('landing.heroes.store');
     Route::put('/landing/heroes/{hero}', [LandingPageController::class, 'updateHero'])->name('landing.heroes.update');

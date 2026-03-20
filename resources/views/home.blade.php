@@ -23,7 +23,7 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                @forelse($features as $feat)
+                @foreach ($features as $feat)
                     <div
                         class="group bg-stone-50 dark:bg-stone-800 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 border border-stone-100 dark:border-stone-700">
                         <div
@@ -32,21 +32,9 @@
                                 class="fa-solid {{ $feat->icon ?? 'fa-star' }} text-xl {{ $feat->color ?? 'text-orange-500' }}"></i>
                         </div>
                         <h3 class="font-bold text-stone-900 dark:text-white text-base mb-2">{{ $feat->title }}</h3>
-                        <p class="text-stone-500 dark:text-stone-400 text-sm leading-relaxed">{{ $feat->content }}</p>
+                        <p class="text-stone-500 dark:text-stone-400 text-sm leading-relaxed">{{ $feat->description }}</p>
                     </div>
-                @empty
-                    @foreach ([['fa-graduation-cap', 'text-blue-600', 'Academic Hub', 'Kelola mata kuliah, tugas, deadline, dan progres skripsi.'], ['fa-film', 'text-orange-600', 'Creative Studio', 'Kanban board proyek freelance, konten, dan Shutterstock.'], ['fa-briefcase', 'text-emerald-600', 'PKL Manager', 'Catat aktivitas harian magang dan laporan mingguan.'], ['fa-wallet', 'text-amber-600', 'Finance Tracker', 'Monitor pemasukan, pengeluaran, dan investasi.'], ['fa-calendar-days', 'text-violet-600', 'Smart Calendar', 'Kalender terintegrasi untuk semua jadwal dan deadline.'], ['fa-list-check', 'text-rose-600', 'General Tracker', 'Lacak aktivitas kesehatan, personal, dan pengembangan diri.'], ['fa-timeline', 'text-sky-600', 'Focus Today (Gantt)', 'Timeline harian + Eisenhower Matrix untuk prioritas cerdas.'], ['fa-chart-line', 'text-indigo-600', 'Analytics & Produktivitas', 'Insight produktivitas mingguan dari data nyata aktivitasmu.']] as [$ic, $color, $title, $desc])
-                        <div
-                            class="group bg-stone-50 dark:bg-stone-800 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 border border-stone-100 dark:border-stone-700">
-                            <div
-                                class="w-12 h-12 rounded-xl bg-white dark:bg-stone-700 shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                <i class="fa-solid {{ $ic }} text-xl {{ $color }}"></i>
-                            </div>
-                            <h3 class="font-bold text-stone-900 dark:text-white text-base mb-2">{{ $title }}</h3>
-                            <p class="text-stone-500 dark:text-stone-400 text-sm leading-relaxed">{{ $desc }}</p>
-                        </div>
-                    @endforeach
-                @endforelse
+                @endforeach
             </div>
         </div>
     </section>
@@ -55,19 +43,53 @@
     <section class="py-16 bg-gradient-to-r from-orange-500 to-rose-500">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center text-white">
-                @forelse($stats as $stat)
+                @foreach ($stats as $stat)
                     <div>
-                        <p class="text-4xl font-extrabold mb-1">{{ $stat->title }}</p>
-                        <p class="text-orange-100 text-sm font-medium">{{ $stat->content }}</p>
+                        <p class="text-4xl font-extrabold mb-1">{{ $stat->value }}</p>
+                        <p class="text-orange-100 text-sm font-medium">{{ $stat->label }}</p>
                     </div>
-                @empty
-                    @foreach ([['500+', 'Mahasiswa Aktif'], ['10.000+', 'Tugas Diselesaikan'], ['2.500+', 'Proyek Freelance'], ['4.9/5', 'Rating Kepuasan']] as [$v, $l])
-                        <div>
-                            <p class="text-4xl font-extrabold mb-1">{{ $v }}</p>
-                            <p class="text-orange-100 text-sm font-medium">{{ $l }}</p>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- TESTIMONIALS SECTION --}}
+    <section class="py-20 bg-white dark:bg-stone-900" id="testimonials">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <h2 class="text-4xl font-extrabold text-stone-900 dark:text-white mb-4">Apa Kata Mereka</h2>
+                <p class="text-stone-500 dark:text-stone-400 max-w-2xl mx-auto">
+                    Pengalaman nyata dari mahasiswa yang sudah menggunakan SFHUB
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach ($testimonials as $testimonial)
+                    <div
+                        class="bg-stone-50 dark:bg-stone-800 rounded-2xl p-6 border border-stone-200 dark:border-stone-700">
+                        <div class="flex items-center mb-4">
+                            @if ($testimonial->avatar)
+                                <img src="{{ $testimonial->avatar }}" alt="{{ $testimonial->name }}"
+                                    class="w-12 h-12 rounded-full mr-3">
+                            @else
+                                <div
+                                    class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mr-3">
+                                    <i class="fa-solid fa-user text-orange-600 dark:text-orange-400"></i>
+                                </div>
+                            @endif
+                            <div>
+                                <h4 class="font-bold text-stone-900 dark:text-white">{{ $testimonial->name }}</h4>
+                                <p class="text-sm text-stone-500 dark:text-stone-400">{{ $testimonial->role }}</p>
+                            </div>
                         </div>
-                    @endforeach
-                @endforelse
+                        <div class="mb-3">
+                            @for ($i = 1; $i <= 5; $i++)
+                                <i
+                                    class="fa-solid fa-star {{ $i <= $testimonial->rating ? 'text-yellow-400' : 'text-stone-300' }}"></i>
+                            @endfor
+                        </div>
+                        <p class="text-stone-600 dark:text-stone-300 italic">"{{ $testimonial->content }}"</p>
+                    </div>
+                @endforeach
             </div>
         </div>
     </section>

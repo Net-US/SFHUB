@@ -1,11 +1,19 @@
 <!-- resources/views/layouts/app-dashboard.blade.php -->
 <!doctype html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard | Student-Freelancer Hub')</title>
+
+    <!-- Favicon -->
+    @if (\App\Models\SiteSetting::getValue('site_favicon'))
+        <link rel="icon" type="image/x-icon" href="{{ \App\Models\SiteSetting::getValue('site_favicon') }}">
+    @else
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    @endif
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +39,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
 
     <style>
         body {
@@ -43,19 +52,24 @@
             width: 6px;
             height: 6px;
         }
+
         ::-webkit-scrollbar-track {
             background: transparent;
         }
+
         ::-webkit-scrollbar-thumb {
             background: #d6d3d1;
             border-radius: 4px;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background: #a8a29e;
         }
+
         .dark ::-webkit-scrollbar-thumb {
             background: #4b5563;
         }
+
         .dark ::-webkit-scrollbar-thumb:hover {
             background: #6b7280;
         }
@@ -63,7 +77,7 @@
         /* === SIDEBAR TRANSITIONS === */
         .sidebar-transition {
             transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .nav-text {
@@ -100,6 +114,7 @@
             color: rgb(180 83 9) !important;
             box-shadow: inset 3px 0 0 #f97316;
         }
+
         .dark .nav-active {
             background-color: rgb(120 53 15 / 0.2) !important;
             color: rgb(254 215 170) !important;
@@ -120,13 +135,13 @@
 
             #sidebar.mobile-open {
                 transform: translateX(0);
-                box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+                box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
             }
 
             #sidebar-overlay {
                 position: fixed;
                 inset: 0;
-                background: rgba(0,0,0,0.5);
+                background: rgba(0, 0, 0, 0.5);
                 backdrop-filter: blur(4px);
                 z-index: 45;
                 opacity: 0;
@@ -162,6 +177,7 @@
             .sidebar-toggle-mobile {
                 display: none !important;
             }
+
             .sidebar-toggle-desktop {
                 display: flex !important;
             }
@@ -188,7 +204,7 @@
                 transition: all 0.2s ease;
                 z-index: 100;
                 margin-left: 0.5rem;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             }
 
             .sidebar-collapsed .nav-item:hover::after {
@@ -202,6 +218,7 @@
             background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
         }
+
         .modal-content {
             max-height: 90vh;
             overflow-y: auto;
@@ -211,12 +228,15 @@
         .priority-urgent-important {
             border-left-color: #ef4444;
         }
+
         .priority-important-not-urgent {
             border-left-color: #3b82f6;
         }
+
         .priority-urgent-not-important {
             border-left-color: #f97316;
         }
+
         .priority-not-urgent-not-important {
             border-left-color: #6b7280;
         }
@@ -226,12 +246,16 @@
             display: inline-block;
             transition: transform 0.3s ease;
         }
+
         .hamburger-icon.active {
             transform: rotate(90deg);
         }
 
         /* === SMOOTH TRANSITIONS === */
-        .nav-item, .nav-text, .logo-text, .user-details {
+        .nav-item,
+        .nav-text,
+        .logo-text,
+        .user-details {
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
     </style>
@@ -239,7 +263,8 @@
     @stack('styles')
 </head>
 
-<body class="bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100 h-screen flex overflow-hidden transition-colors duration-300">
+<body
+    class="bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100 h-screen flex overflow-hidden transition-colors duration-300">
 
     <!-- === SIDEBAR OVERLAY (MOBILE) === -->
     <div id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
@@ -260,7 +285,8 @@
         </button>
 
         <!-- Header Sidebar -->
-        <div class="logo-container p-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between h-16 md:h-20">
+        <div
+            class="logo-container p-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between h-16 md:h-20">
             <div class="flex items-center overflow-hidden">
                 <i class="fa-solid fa-layer-group text-orange-500 text-2xl mr-3 flex-shrink-0"></i>
                 <div class="logo-text">
@@ -325,7 +351,8 @@
                                    hover:text-stone-900 dark:hover:text-white transition-all group
                                    {{ request()->routeIs('creative.*') ? 'nav-active' : '' }}"
                             data-tooltip="Studio Kreatif">
-                            <i class="fa-solid fa-palette w-5 text-center mr-3 flex-shrink-0 group-hover:text-pink-500 transition-colors"></i>
+                            <i
+                                class="fa-solid fa-palette w-5 text-center mr-3 flex-shrink-0 group-hover:text-pink-500 transition-colors"></i>
                             <span class="nav-text">Studio Kreatif</span>
                         </a>
                     </li>
@@ -336,7 +363,8 @@
                                    hover:text-stone-900 dark:hover:text-white transition-all group
                                    {{ request()->routeIs('academic.*') ? 'nav-active' : '' }}"
                             data-tooltip="Pusat Akademik">
-                            <i class="fa-solid fa-graduation-cap w-5 text-center mr-3 flex-shrink-0 group-hover:text-blue-500 transition-colors"></i>
+                            <i
+                                class="fa-solid fa-graduation-cap w-5 text-center mr-3 flex-shrink-0 group-hover:text-blue-500 transition-colors"></i>
                             <span class="nav-text">Pusat Akademik</span>
                         </a>
                     </li>
@@ -347,7 +375,8 @@
                                    hover:text-stone-900 dark:hover:text-white transition-all group
                                    {{ request()->routeIs('pkl.*') ? 'nav-active' : '' }}"
                             data-tooltip="PKL / Kerja">
-                            <i class="fa-solid fa-briefcase w-5 text-center mr-3 flex-shrink-0 group-hover:text-emerald-500 transition-colors"></i>
+                            <i
+                                class="fa-solid fa-briefcase w-5 text-center mr-3 flex-shrink-0 group-hover:text-emerald-500 transition-colors"></i>
                             <span class="nav-text">PKL / Kerja</span>
                         </a>
                     </li>
@@ -367,7 +396,8 @@
                                    hover:text-stone-900 dark:hover:text-white transition-all group
                                    {{ request()->routeIs('productivity.*') ? 'nav-active' : '' }}"
                             data-tooltip="Analitik">
-                            <i class="fa-solid fa-chart-pie w-5 text-center mr-3 flex-shrink-0 group-hover:text-indigo-500 transition-colors"></i>
+                            <i
+                                class="fa-solid fa-chart-pie w-5 text-center mr-3 flex-shrink-0 group-hover:text-indigo-500 transition-colors"></i>
                             <span class="nav-text">Analitik</span>
                         </a>
                     </li>
@@ -378,7 +408,8 @@
                                    hover:text-stone-900 dark:hover:text-white transition-all group
                                    {{ request()->routeIs('tracker.*') ? 'nav-active' : '' }}"
                             data-tooltip="Pelacak Umum">
-                            <i class="fa-solid fa-list-check w-5 text-center mr-3 flex-shrink-0 group-hover:text-rose-500 transition-colors"></i>
+                            <i
+                                class="fa-solid fa-list-check w-5 text-center mr-3 flex-shrink-0 group-hover:text-rose-500 transition-colors"></i>
                             <span class="nav-text">Pelacak Umum</span>
                         </a>
                     </li>
@@ -398,7 +429,8 @@
                                    hover:text-stone-900 dark:hover:text-white transition-all group
                                    {{ request()->routeIs('finance.*') ? 'nav-active' : '' }}"
                             data-tooltip="Manajer Keuangan">
-                            <i class="fa-solid fa-wallet w-5 text-center mr-3 flex-shrink-0 group-hover:text-amber-500 transition-colors"></i>
+                            <i
+                                class="fa-solid fa-wallet w-5 text-center mr-3 flex-shrink-0 group-hover:text-amber-500 transition-colors"></i>
                             <span class="nav-text">Manajer Keuangan</span>
                         </a>
                     </li>
@@ -409,7 +441,8 @@
                                    hover:text-stone-900 dark:hover:text-white transition-all group
                                    {{ request()->routeIs('assets.*') ? 'nav-active' : '' }}"
                             data-tooltip="Manajemen Aset">
-                            <i class="fa-solid fa-landmark w-5 text-center mr-3 flex-shrink-0 group-hover:text-blue-500 transition-colors"></i>
+                            <i
+                                class="fa-solid fa-landmark w-5 text-center mr-3 flex-shrink-0 group-hover:text-blue-500 transition-colors"></i>
                             <span class="nav-text">Manajemen Aset</span>
                         </a>
                     </li>
@@ -420,7 +453,8 @@
                                    hover:text-stone-900 dark:hover:text-white transition-all group
                                    {{ request()->routeIs('debts.*') ? 'nav-active' : '' }}"
                             data-tooltip="Pelacak Utang">
-                            <i class="fa-solid fa-hand-holding-usd w-5 text-center mr-3 flex-shrink-0 group-hover:text-rose-500 transition-colors"></i>
+                            <i
+                                class="fa-solid fa-hand-holding-usd w-5 text-center mr-3 flex-shrink-0 group-hover:text-rose-500 transition-colors"></i>
                             <span class="nav-text">Pelacak Utang</span>
                         </a>
                     </li>
@@ -431,7 +465,8 @@
                                    hover:text-stone-900 dark:hover:text-white transition-all group
                                    {{ request()->routeIs('investments.*') ? 'nav-active' : '' }}"
                             data-tooltip="Portofolio Investasi">
-                            <i class="fa-solid fa-chart-line w-5 text-center mr-3 flex-shrink-0 group-hover:text-emerald-500 transition-colors"></i>
+                            <i
+                                class="fa-solid fa-chart-line w-5 text-center mr-3 flex-shrink-0 group-hover:text-emerald-500 transition-colors"></i>
                             <span class="nav-text">Portofolio Investasi</span>
                         </a>
                     </li>
@@ -444,7 +479,8 @@
             <button onclick="toggleSidebarUserMenu()"
                 class="w-full flex items-center nav-item p-2 rounded-xl hover:bg-stone-50
                        dark:hover:bg-stone-800 cursor-pointer transition-colors group">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-500
+                <div
+                    class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-500
                             flex items-center justify-center text-white text-xs font-bold shadow-md flex-shrink-0">
                     {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                 </div>
@@ -456,7 +492,8 @@
                         {{ ucfirst(auth()->user()->plan ?? 'Free') }} Plan
                     </p>
                 </div>
-                <i class="fa-solid fa-ellipsis-vertical text-stone-400 nav-text text-xs group-hover:text-stone-600 flex-shrink-0"></i>
+                <i
+                    class="fa-solid fa-ellipsis-vertical text-stone-400 nav-text text-xs group-hover:text-stone-600 flex-shrink-0"></i>
             </button>
 
             <!-- Sidebar User Menu Dropdown -->
@@ -464,7 +501,8 @@
                 class="hidden absolute bottom-full left-3 right-3 mb-2
                        bg-white dark:bg-stone-800 border border-stone-200
                        dark:border-stone-700 rounded-2xl shadow-xl z-50 overflow-hidden">
-                <div class="px-4 py-3 border-b border-stone-100 dark:border-stone-700 bg-gradient-to-br from-orange-50 to-red-50 dark:from-stone-800 dark:to-stone-800">
+                <div
+                    class="px-4 py-3 border-b border-stone-100 dark:border-stone-700 bg-gradient-to-br from-orange-50 to-red-50 dark:from-stone-800 dark:to-stone-800">
                     <p class="text-sm font-bold text-stone-800 dark:text-white truncate">
                         {{ auth()->user()->name }}
                     </p>
@@ -501,10 +539,12 @@
     </aside>
 
     <!-- === MAIN CONTENT === -->
-    <main class="flex-1 flex flex-col h-screen overflow-hidden relative bg-stone-50 dark:bg-stone-950 transition-colors duration-300">
+    <main
+        class="flex-1 flex flex-col h-screen overflow-hidden relative bg-stone-50 dark:bg-stone-950 transition-colors duration-300">
 
         <!-- Top Header -->
-        <header class="bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 p-4 flex justify-between items-center z-10 sticky top-0">
+        <header
+            class="bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 p-4 flex justify-between items-center z-10 sticky top-0">
             <!-- Mobile Menu Button -->
             <div class="flex items-center md:hidden">
                 <button onclick="openMobileSidebar()"
@@ -551,11 +591,13 @@
                     </button>
                     <div id="notif-panel"
                         class="hidden absolute right-0 top-full mt-2 w-80 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
-                        <div class="flex justify-between items-center px-4 py-3 border-b border-stone-100 dark:border-stone-800">
+                        <div
+                            class="flex justify-between items-center px-4 py-3 border-b border-stone-100 dark:border-stone-800">
                             <h4 class="font-bold text-stone-800 dark:text-white text-sm">Notifikasi</h4>
                             <div class="flex gap-3">
                                 <button onclick="quickMarkAllRead()"
-                                    class="text-[11px] text-blue-600 dark:text-blue-400 hover:underline">Baca semua</button>
+                                    class="text-[11px] text-blue-600 dark:text-blue-400 hover:underline">Baca
+                                    semua</button>
                                 <a href="{{ route('profile.edit') }}#notifikasi"
                                     class="text-[11px] text-stone-400 hover:text-stone-600 dark:hover:text-stone-300">Kelola</a>
                             </div>
@@ -574,7 +616,8 @@
                 <div class="relative" id="header-user-wrap">
                     <button onclick="toggleHeaderUserMenu()"
                         class="flex items-center gap-2 p-1 pl-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-500
+                        <div
+                            class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-500
                                     flex items-center justify-center text-white text-xs font-bold shadow">
                             {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
                         </div>
@@ -869,7 +912,8 @@
                 });
                 const data = await res.json();
                 if (!data.success || !data.notifications.length) {
-                    list.innerHTML = '<p class="text-center py-8 text-stone-400 text-sm"><i class="fa-solid fa-bell-slash block mb-2 text-2xl opacity-30"></i>Tidak ada notifikasi</p>';
+                    list.innerHTML =
+                        '<p class="text-center py-8 text-stone-400 text-sm"><i class="fa-solid fa-bell-slash block mb-2 text-2xl opacity-30"></i>Tidak ada notifikasi</p>';
                     return;
                 }
 
@@ -975,4 +1019,5 @@
 
     @stack('scripts')
 </body>
+
 </html>
