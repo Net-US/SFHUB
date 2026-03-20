@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\GlobalSeo;
 use App\Models\MetaTag;
+use App\Models\Page;
 use App\Models\SeoSetting;
 use App\Models\SitemapSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Str;
 
 class SeoController extends Controller
 {
@@ -20,10 +21,11 @@ class SeoController extends Controller
     {
         $globalSeo = GlobalSeo::first();
         $pages = SeoSetting::all();
+        $staticPages = Page::latest()->get();
         $metaTags = MetaTag::all();
         $sitemap = SitemapSetting::first();
 
-        return view('admin.seo', compact('globalSeo', 'pages', 'metaTags', 'sitemap'));
+        return view('admin.seo', compact('globalSeo', 'pages', 'staticPages', 'metaTags', 'sitemap'));
     }
 
     public function getGlobalSettings(): JsonResponse
@@ -219,5 +221,117 @@ class SeoController extends Controller
         }
 
         return response()->download($path, 'sitemap.xml');
+    }
+
+    // Static Pages Management
+    public function createPage()
+    {
+        return view('admin.seo.pages.create');
+    }
+
+    public function storePage(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:pages,slug',
+            'content' => 'required|string',
+            'excerpt' => 'nullable|string',
+            'featured_image' => 'nullable|string',
+            'status' => 'required|in:draft,published',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:500',
+            'meta_keywords' => 'nullable|string|max:255',
+            'published_at' => 'nullable|date',
+            'page_type' => 'nullable|in:about,contact,privacy,terms,faq,custom',
+        ], [
+            'title.required' => 'Judul halaman wajib diisi.',
+            'slug.required' => 'URL slug wajib diisi.',
+            'slug.unique' => 'URL slug sudah digunakan, silakan pilih yang lain.',
+            'content.required' => 'Konten halaman wajib diisi.',
+            'status.required' => 'Status halaman wajib dipilih.',
+            'status.in' => 'Status harus draft atau published.',
+        ]);
+
+        $validated['created_by'] = auth()->id();
+        $validated['updated_by'] = auth()->id();
+
+        if ($validated['status'] === 'published' && !$validated['published_at']) {
+            $validated['published_at'] = now();
+        }
+
+        $page = Page::create($validated);
+
+        return response()->json([
+            'message' => 'Halaman berhasil dibuat!',
+            'page' => $page,
+        ], 201);
+    }
+
+    public function editPage(Page $page)
+    {
+        return view('admin.seo.pages.edit', compact('page'));
+    }
+
+    public function updatePage(Request $request, Page $page): JsonResponse
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:pages,slug,' . $page->id,
+            'content' => 'required|string',
+            'excerpt' => 'nullable|string',
+            'featured_image' => 'nullable|string',
+            'status' => 'required|in:draft,published',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:500',
+            'meta_keywords' => 'nullable|string|max:255',
+            'published_at' => 'nullable|date',
+            'page_type' => 'nullable|in:about,contact,privacy,terms,faq,custom',
+        ], [
+            'title.required' => 'Judul halaman wajib diisi.',
+            'slug.required' => 'URL slug wajib diisi.',
+            'slug.unique' => 'URL slug sudah digunakan, silakan pilih yang lain.',
+            'content.required' => 'Konten halaman wajib diisi.',
+            'status.required' => 'Status halaman wajib dipilih.',
+            'status.in' => 'Status harus draft atau published.',
+        ]);
+
+        $validated['updated_by'] = auth()->id();
+
+        if ($validated['status'] === 'published' && !$validated['published_at'] && !$page->published_at) {
+            $validated['published_at'] = now();
+        }
+
+        $page->update($validated);
+
+        return response()->json([
+            'message' => 'Halaman berhasil diperbarui!',
+            'page' => $page,
+        ]);
+    }
+
+    public function destroyPage(Page $page): JsonResponse
+    {
+        $page->delete();
+
+        return response()->json([
+            'message' => 'Halaman berhasil dihapus!',
+        ]);
+    }
+
+    public function getPages(): JsonResponse
+    {
+        $pages = Page::latest()->get()->map(function ($page) {
+            return [
+                'id' => $page->id,
+                'title' => $page->title,
+                'slug' => $page->slug,
+                'status' => $page->status,
+                'published_at' => $page->published_at?->format('d M Y H:i'),
+                'created_at' => $page->created_at->format('d M Y H:i'),
+                'excerpt' => Str::limit(strip_tags($page->content), 100),
+            ];
+        });
+
+        return response()->json($pages);
     }
 }

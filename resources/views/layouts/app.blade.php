@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin Dashboard | SFHUB')</title>
+    <title>@yield('title', 'Dashboard Admin | SFHUB')</title>
 
     <!-- Favicon -->
     @if (\App\Models\SiteSetting::getValue('site_favicon'))
@@ -183,7 +183,7 @@
             <div class="logo-text overflow-hidden">
                 <h1 class="text-lg font-bold text-stone-900 dark:text-white tracking-tight">SF<span
                         class="text-primary-500">HUB</span></h1>
-                <p class="text-[10px] text-stone-500 dark:text-stone-400">Admin Panel</p>
+                <p class="text-[10px] text-stone-500 dark:text-stone-400">Panel Admin</p>
             </div>
         </div>
 
@@ -197,14 +197,14 @@
                         <a href="{{ route('admin.index') }}"
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.index') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-chart-pie w-5 text-center mr-3"></i>
-                            <span class="nav-text">Overview</span>
+                            <span class="nav-text">Ringkasan</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{ route('admin.analytics') }}"
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.analytics') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-chart-line w-5 text-center mr-3"></i>
-                            <span class="nav-text">Analytics</span>
+                            <span class="nav-text">Analitik</span>
                         </a>
                     </li>
                 </ul>
@@ -212,21 +212,21 @@
 
             <!-- Group: USER MANAGEMENT -->
             <div class="mb-6 px-3">
-                <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">User
-                    Management</p>
+                <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">Manajemen
+                    Pengguna</p>
                 <ul class="space-y-1">
                     <li>
                         <a href="{{ route('admin.users') }}"
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.users') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-users w-5 text-center mr-3"></i>
-                            <span class="nav-text">All Users</span>
+                            <span class="nav-text">Semua Pengguna</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{ route('admin.subscriptions') }}"
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.subscriptions') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-crown w-5 text-center mr-3"></i>
-                            <span class="nav-text">Subscriptions</span>
+                            <span class="nav-text">Langganan</span>
                         </a>
                     </li>
                 </ul>
@@ -234,28 +234,28 @@
 
             <!-- Group: CONTENT MANAGEMENT -->
             <div class="mb-6 px-3">
-                <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">Content
-                    Management</p>
+                <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">Manajemen
+                    Konten</p>
                 <ul class="space-y-1">
                     <li>
                         <a href="{{ route('admin.landing') }}"
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.landing') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-globe w-5 text-center mr-3"></i>
-                            <span class="nav-text">Landing Page</span>
+                            <span class="nav-text">Halaman Utama</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{ route('admin.blog.index') }}"
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.blog.*') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-newspaper w-5 text-center mr-3"></i>
-                            <span class="nav-text">Blog & Articles</span>
+                            <span class="nav-text">Blog & Artikel</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{ route('admin.faq.index') }}"
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.faq.*') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-circle-question w-5 text-center mr-3"></i>
-                            <span class="nav-text">FAQ & Help</span>
+                            <span class="nav-text">FAQ & Bantuan</span>
                         </a>
                     </li>
                 </ul>
@@ -264,20 +264,20 @@
             <!-- Group: SEO & SETTINGS -->
             <div class="mb-6 px-3">
                 <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">SEO &
-                    Settings</p>
+                    Pengaturan</p>
                 <ul class="space-y-1">
                     <li>
                         <a href="{{ route('admin.seo.index') }}"
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.seo.*') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-magnifying-glass w-5 text-center mr-3"></i>
-                            <span class="nav-text">SEO Settings</span>
+                            <span class="nav-text">Pengaturan SEO</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{ route('admin.settings.index') }}"
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.settings.*') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-gear w-5 text-center mr-3"></i>
-                            <span class="nav-text">System Settings</span>
+                            <span class="nav-text">Pengaturan Sistem</span>
                         </a>
                     </li>
                 </ul>
@@ -285,13 +285,13 @@
 
             <!-- Group: SYSTEM -->
             <div class="mb-6 px-3">
-                <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">System</p>
+                <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">Sistem</p>
                 <ul class="space-y-1">
                     <li>
                         <a href="{{ route('admin.logs.index') }}"
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.logs.*') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-history w-5 text-center mr-3"></i>
-                            <span class="nav-text">Activity Logs</span>
+                            <span class="nav-text">Log Aktivitas</span>
                         </a>
                     </li>
                     <li>
@@ -313,8 +313,8 @@
                     <i class="fa-solid fa-shield-alt text-xs"></i>
                 </div>
                 <div class="ml-3 overflow-hidden nav-text flex-1 text-left">
-                    <p class="text-sm font-medium text-stone-700 dark:text-stone-200 truncate">
-                        {{ auth()->user()->name }}</p>
+                    <span
+                        class="text-sm font-bold text-stone-800 dark:text-white truncate">{{ auth()->user()->name }}</span>
                     <p class="text-[10px] text-stone-500 dark:text-stone-400 truncate">
                         Administrator</p>
                 </div>
@@ -331,7 +331,7 @@
                 <div class="py-1">
                     <a href="{{ route('profile.edit') }}"
                         class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i
-                            class="fa-solid fa-user-circle w-4 text-center text-stone-400"></i>Edit Profil</a>
+                            class="fa-solid fa-user-circle w-4 text-center text-stone-400"></i>Profil Saya</a>
                     <a href="{{ route('profile.edit') }}#pengaturan"
                         class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i
                             class="fa-solid fa-sliders w-4 text-center text-stone-400"></i>Pengaturan</a>
@@ -343,8 +343,7 @@
                         @csrf
                         <button type="submit"
                             class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors">
-                            <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>Keluar
-                        </button>
+                            <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>Keluar</button>
                     </form>
                 </div>
             </div>
@@ -435,21 +434,16 @@
                         <div class="px-4 py-3 border-b border-stone-100 dark:border-stone-700">
                             <p class="text-sm font-bold text-stone-800 dark:text-white truncate">
                                 {{ auth()->user()->name }}</p>
-                            <p class="text-xs text-stone-400 truncate">{{ auth()->user()->email }}</p>
-                        </div>
-                        <div class="py-1">
-                            <a href="{{ route('profile.edit') }}"
-                                class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i
-                                    class="fa-solid fa-user-circle w-4 text-center text-stone-400"></i>Profil Saya</a>
                             <a href="{{ route('profile.edit') }}#pengaturan"
                                 class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i
-                                    class="fa-solid fa-sliders w-4 text-center text-stone-400"></i>Pengaturan</a>
+                                    class="fa-solid fa-sliders w-4 text-center text-stone-400"></i>Pengaturan Akun</a>
                             <div class="border-t border-stone-100 dark:border-stone-700 my-1"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit"
                                     class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"><i
-                                        class="fa-solid fa-right-from-bracket w-4 text-center"></i>Keluar</button>
+                                        class="fa-solid fa-right-from-bracket w-4 text-center"></i>Keluar dari
+                                    Akun</button>
                             </form>
                         </div>
                     </div>
@@ -464,7 +458,7 @@
             <div class="absolute left-0 top-0 h-full w-72 max-w-[80vw] bg-white dark:bg-stone-900 shadow-xl p-4 flex flex-col transform transition-transform duration-300 ease-out"
                 onclick="event.stopPropagation()">
                 <div class="flex justify-between items-center mb-6">
-                    <span class="font-bold text-lg text-stone-900 dark:text-white">Menu</span>
+                    <span class="font-bold text-lg text-stone-800 dark:text-white">Menu</span>
                     <button onclick="toggleMobileMenu()"
                         class="text-stone-500 hover:text-stone-800 dark:hover:text-white">
                         <i class="fa-solid fa-xmark text-xl"></i>
@@ -474,60 +468,48 @@
                     <!-- Main Focus -->
                     <a href="{{ route('dashboard') }}" onclick="toggleMobileMenu()"
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 {{ request()->routeIs('dashboard') || request()->path() === '/' ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400' : 'text-stone-700 dark:text-stone-300' }}">
-                        <i class="fa-solid fa-bolt mr-2"></i>Focus Today
-                    </a>
+                        <i class="fa-solid fa-bolt mr-2"></i>Fokus Hari Ini</a>
                     <a href="{{ route('dashboard.smartcalendar') }}" onclick="toggleMobileMenu()"
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 {{ request()->routeIs('calendar.*') ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400' : 'text-stone-700 dark:text-stone-300' }}">
-                        <i class="fa-solid fa-calendar-day mr-2"></i>Smart Calendar
-                    </a>
+                        <i class="fa-solid fa-calendar-day mr-2"></i>Kalender Cerdas</a>
 
                     <!-- Workspaces -->
                     <a href="{{ route('dashboard.creative.index') }}" onclick="toggleMobileMenu()"
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
-                        <i class="fa-solid fa-palette mr-2"></i>Creative Studio
-                    </a>
+                        <i class="fa-solid fa-palette mr-2"></i>Studio Kreatif</a>
                     <a href="{{ route('dashboard.academic') }}" onclick="toggleMobileMenu()"
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
-                        <i class="fa-solid fa-graduation-cap mr-2"></i>Academic Hub
-                    </a>
+                        <i class="fa-solid fa-graduation-cap mr-2"></i>HUB Akademik</a>
                     <a href="{{ route('dashboard.pkl') }}" onclick="toggleMobileMenu()"
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
-                        <i class="fa-solid fa-briefcase mr-2"></i>PKL / Work
-                    </a>
+                        <i class="fa-solid fa-briefcase mr-2"></i>PKL / Pekerjaan</a>
 
                     <!-- Insights -->
                     <a href="{{ route('dashboard.productivity') }}" onclick="toggleMobileMenu()"
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
-                        <i class="fa-solid fa-chart-pie mr-2"></i>Analytics
-                    </a>
+                        <i class="fa-solid fa-chart-pie mr-2"></i>Analitik Produktivitas</a>
                     <a href="{{ route('dashboard.tracker') }}" onclick="toggleMobileMenu()"
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
-                        <i class="fa-solid fa-list-check mr-2"></i>General Tracker
-                    </a>
+                        <i class="fa-solid fa-list-check mr-2"></i>Tracker Umum</a>
 
                     <!-- Finance & Assets -->
                     <div class="border-t border-stone-100 dark:border-stone-800 my-2"></div>
                     <a href="{{ route('dashboard.finance') }}" onclick="toggleMobileMenu()"
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
-                        <i class="fa-solid fa-wallet mr-2"></i>Finance Manager
-                    </a>
+                        <i class="fa-solid fa-wallet mr-2"></i>Manajemen Keuangan</a>
                     <a href="{{ route('dashboard.assets') }}" onclick="toggleMobileMenu()"
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
-                        <i class="fa-solid fa-landmark mr-2"></i>Asset Management
-                    </a>
+                        <i class="fa-solid fa-landmark mr-2"></i>Manajemen Aset</a>
                     <a href="{{ route('dashboard.debts') }}" onclick="toggleMobileMenu()"
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
-                        <i class="fa-solid fa-hand-holding-usd mr-2"></i>Debt Tracker
-                    </a>
+                        <i class="fa-solid fa-hand-holding-usd mr-2"></i>Pelacak Utang</a>
                     <a href="{{ route('dashboard.investments') }}" onclick="toggleMobileMenu()"
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
-                        <i class="fa-solid fa-chart-line mr-2"></i>Investment Portfolio
-                    </a>
+                        <i class="fa-solid fa-chart-line mr-2"></i>Portofolio Investasi</a>
                     <div class="border-t border-stone-100 dark:border-stone-800 my-2"></div>
                     <a href="{{ route('profile.edit') }}" onclick="toggleMobileMenu()"
                         class="w-full text-left p-3 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300">
-                        <i class="fa-solid fa-user-circle mr-2"></i>Profil & Pengaturan
-                    </a>
+                        <i class="fa-solid fa-user-circle mr-2"></i>Profil & Pengaturan</a>
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
                         <button type="submit"

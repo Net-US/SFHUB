@@ -4,7 +4,109 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@yield('title', 'Student-Freelancer Hub | Kelola Kuliah & Karirmu')</title>
+    <!-- SEO Meta Tags -->
+    @php
+        $globalSeo = \App\Models\GlobalSeo::first();
+        $currentPage = request()->route()->getName() ?? 'home';
+        $pageSeo = \App\Models\SeoSetting::getForPage($currentPage);
+        $metaTags = \App\Models\MetaTag::active()->get();
+
+        $title = $pageSeo?->title ?? ($globalSeo?->default_title ?? 'Student-Freelancer Hub | Kelola Kuliah & Karirmu');
+        $description =
+            $pageSeo?->description ??
+            ($globalSeo?->default_description ?? 'Platform terpadu untuk mahasiswa dan freelancer Indonesia');
+        $keywords =
+            $pageSeo?->keywords ??
+            ($globalSeo?->default_keywords ?? 'mahasiswa, freelancer, manajemen tugas, keuangan, kalender');
+        $author = $globalSeo?->author ?? 'SFHUB Team';
+        $robots = $globalSeo?->robots ?? 'index, follow';
+        $canonicalUrl = $pageSeo?->canonical_url ?? url()->current();
+        $ogTitle = $pageSeo?->og_title ?? $title;
+        $ogDescription = $pageSeo?->og_description ?? $description;
+        $ogImage = $pageSeo?->og_image ?? asset('images/og-default.jpg');
+    @endphp
+
+    <title>{{ $title }}</title>
+
+    <!-- Basic Meta -->
+    <meta name="description" content="{{ $description }}">
+    <meta name="keywords" content="{{ $keywords }}">
+    <meta name="author" content="{{ $author }}">
+    <meta name="robots" content="{{ $robots }}">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{ $ogTitle }}">
+    <meta property="og:description" content="{{ $ogDescription }}">
+    <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ $globalSeo?->default_title ?? 'Student-Freelancer Hub' }}">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $ogTitle }}">
+    <meta name="twitter:description" content="{{ $ogDescription }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
+
+    <!-- Custom Meta Tags -->
+    @foreach ($metaTags as $tag)
+        @if ($tag->type === 'name')
+            <meta name="{{ $tag->name }}" content="{{ $tag->content }}">
+        @elseif($tag->type === 'property')
+            <meta property="{{ $tag->name }}" content="{{ $tag->content }}">
+        @elseif($tag->type === 'http-equiv')
+            <meta http-equiv="{{ $tag->name }}" content="{{ $tag->content }}">
+        @endif
+    @endforeach
+
+    <!-- Analytics -->
+    @if ($globalSeo?->analytics_active && $globalSeo?->google_analytics_id)
+        <!-- Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $globalSeo->google_analytics_id }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
+            gtag('config', '{{ $globalSeo->google_analytics_id }}');
+        </script>
+    @endif
+
+    @if ($globalSeo?->analytics_active && $globalSeo?->facebook_pixel_id)
+        <!-- Facebook Pixel -->
+        <script>
+            ! function(f, b, e, v, n, t, s) {
+                if (f.fbq) return;
+                n = f.fbq = function() {
+                    n.callMethod ?
+                        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+                };
+                if (!f._fbq) f._fbq = n;
+                n.push = n;
+                n.loaded = !0;
+                n.version = '2.0';
+                n.queue = [];
+                t = b.createElement(e);
+                t.async = !0;
+                t.src = v;
+                s = b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t, s)
+            }(window, document, 'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '{{ $globalSeo->facebook_pixel_id }}');
+            fbq('track', 'PageView');
+        </script>
+        <noscript><img height="1" width="1" style="display:none"
+                src="https://www.facebook.com/tr?id={{ $globalSeo->facebook_pixel_id }}&ev=PageView&noscript=1" /></noscript>
+    @endif
+
+    <!-- Sitemap -->
+    @if (file_exists(public_path('sitemap.xml')))
+        <link rel="sitemap" type="application/xml" href="{{ url('sitemap.xml') }}">
+    @endif
 
     <!-- Favicon -->
     @if (\App\Models\SiteSetting::getValue('site_favicon'))

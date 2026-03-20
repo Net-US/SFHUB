@@ -376,6 +376,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/seo/sitemap/generate', [SeoController::class, 'generateSitemap'])->name('seo.sitemap.generate');
     Route::get('/seo/sitemap/download', [SeoController::class, 'downloadSitemap'])->name('seo.sitemap.download');
 
+    // Static Pages Management
+    Route::get('/seo/pages/create', [SeoController::class, 'createPage'])->name('seo.pages.create');
+    Route::post('/seo/pages', [SeoController::class, 'storePage'])->name('seo.pages.store');
+    Route::get('/seo/pages/{page}/edit', [SeoController::class, 'editPage'])->name('seo.pages.edit');
+    Route::put('/seo/pages/{page}', [SeoController::class, 'updatePage'])->name('seo.pages.update');
+    Route::delete('/seo/pages/{page}', [SeoController::class, 'destroyPage'])->name('seo.pages.destroy');
+    Route::get('/api/pages', [SeoController::class, 'getPages'])->name('api.pages');
+
     // System Settings
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingController::class, 'store'])->name('settings.store');

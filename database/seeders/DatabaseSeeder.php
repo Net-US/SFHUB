@@ -847,7 +847,11 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('✅ Landing page data created successfully');
 
-        // ── 8. SUMMARY ───────────────────────────────────────────────────────
+        // ── 7. CREATE BLOG POSTS ─────────────────────────────────────────────
+        $this->command->info('📝 Membuat blog posts...');
+        $this->call(BlogPostSeeder::class);
+
+        // ── SUMMARY ────────────────────────────────────────────────────────
         $this->command->info('🎉 Database seeding completed successfully!');
         $this->command->info('');
         $this->command->info('📊 Created Data Summary:');
