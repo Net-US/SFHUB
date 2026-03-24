@@ -7,24 +7,184 @@ use App\Models\Backup;
 use App\Models\SystemSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
 
 class SettingController extends Controller
 {
     public function index()
     {
-        $settings = SystemSetting::orderBy('group')->orderBy('key')->get()->groupBy('group');
+        $settings = SystemSetting::all()->pluck('value', 'key')->toArray();
 
-        // Get backup stats
+        $settingsByGroup = SystemSetting::orderBy('group')->orderBy('key')->get()->groupBy('group');
+
+        // Backup stats
         $backups = Backup::latest()->paginate(10);
         $totalBackups = Backup::count();
-        $totalSize = Backup::sum('file_size') ?? 0; // Use file_size instead of size
+        $totalSize = Backup::sum('file_size') ?? 0;
         $lastBackup = Backup::latest()->first();
         $autoBackup = SystemSetting::get('auto_backup_enabled', false);
 
-        return view('admin.settings', compact('settings', 'backups', 'totalBackups', 'totalSize', 'lastBackup', 'autoBackup'));
+        return view('admin.settings', compact(
+            'settings',
+            'settingsByGroup',
+            'backups',
+            'totalBackups',
+            'totalSize',
+            'lastBackup',
+            'autoBackup'
+        ));
+    }
+
+    /**
+     * Simpan semua settings sekaligus dari form blade.
+     */
+    public function saveSettings(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            // General
+            'site_name' => 'sometimes|string|max:255',
+            'site_url' => 'sometimes|url|max:255',
+            'timezone' => 'sometimes|string|max:50',
+            'language' => 'sometimes|in:id,en',
+            'contact_email' => 'sometimes|email|max:255',
+            'contact_phone' => 'sometimes|nullable|string|max:50',
+            'copyright_text' => 'sometimes|nullable|string|max:255',
+            'user_registration' => 'sometimes|boolean',
+
+            // Security
+            'force_2fa' => 'sometimes|boolean',
+            'email_verification' => 'sometimes|boolean',
+            'max_login_attempts' => 'sometimes|integer|min:1|max:20',
+            'session_timeout' => 'sometimes|integer|min:5|max:1440',
+            'password_min_length' => 'sometimes|integer|min:6|max:32',
+
+            // Email / SMTP
+            'mail_host' => 'sometimes|nullable|string|max:255',
+            'mail_port' => 'sometimes|nullable|integer',
+            'mail_username' => 'sometimes|nullable|string|max:255',
+            'mail_password' => 'sometimes|nullable|string|max:255',
+            'mail_encryption' => 'sometimes|nullable|in:tls,ssl,starttls',
+            'mail_from_name' => 'sometimes|nullable|string|max:255',
+            'mail_from_address' => 'sometimes|nullable|email|max:255',
+
+            // Payment
+            'enable_subscriptions' => 'sometimes|boolean',
+            'currency' => 'sometimes|string|size:3',
+            'midtrans_server_key' => 'sometimes|nullable|string|max:255',
+            'midtrans_client_key' => 'sometimes|nullable|string|max:255',
+            'midtrans_sandbox' => 'sometimes|boolean',
+
+            // OAuth / Third-party auth
+            'google_client_id' => 'sometimes|nullable|string|max:255',
+            'google_client_secret' => 'sometimes|nullable|string|max:255',
+            'google_redirect_uri' => 'sometimes|nullable|url|max:255',
+            'google_enabled' => 'sometimes|boolean',
+
+            // Social
+            'social_facebook' => 'sometimes|nullable|url|max:255',
+            'social_twitter' => 'sometimes|nullable|url|max:255',
+            'social_instagram' => 'sometimes|nullable|url|max:255',
+            'social_linkedin' => 'sometimes|nullable|url|max:255',
+            'social_youtube' => 'sometimes|nullable|url|max:255',
+            'social_whatsapp' => 'sometimes|nullable|string|max:20',
+
+            // Maintenance
+            'maintenance_mode' => 'sometimes|boolean',
+            'maintenance_message' => 'sometimes|nullable|string|max:500',
+        ]);
+
+        $booleanKeys = [
+            'user_registration',
+            'force_2fa',
+            'email_verification',
+            'enable_subscriptions',
+            'midtrans_sandbox',
+            'google_enabled',
+            'maintenance_mode',
+        ];
+
+        $integerKeys = [
+            'max_login_attempts',
+            'session_timeout',
+            'password_min_length',
+            'mail_port',
+        ];
+
+        foreach ($data as $key => $value) {
+            $type = 'string';
+
+            if (in_array($key, $booleanKeys, true)) {
+                $type = 'boolean';
+                $value = $value ? '1' : '0';
+            } elseif (in_array($key, $integerKeys, true)) {
+                $type = 'integer';
+            }
+
+            SystemSetting::updateOrCreate(
+                ['key' => $key],
+                [
+                    'value' => (string) $value,
+                    'type' => $type,
+                    'group' => $this->resolveGroup($key),
+                ]
+            );
+        }
+
+        Cache::forget('system_settings_all');
+        Cache::forget('maintenance_mode');
+        Cache::forget('maintenance_message');
+
+        if (isset($data['maintenance_mode'])) {
+            if ($data['maintenance_mode']) {
+                Artisan::call('down', [
+                    '--message' => $data['maintenance_message'] ?? 'We are under maintenance.',
+                    '--retry' => 60,
+                ]);
+            } else {
+                Artisan::call('up');
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Settings saved successfully',
+        ]);
+    }
+
+    private function resolveGroup(string $key): string
+    {
+        if (str_starts_with($key, 'mail_')) {
+            return 'email';
+        }
+
+        if (str_starts_with($key, 'midtrans_')) {
+            return 'payment';
+        }
+
+        if (in_array($key, ['enable_subscriptions', 'currency'], true)) {
+            return 'payment';
+        }
+
+        if (str_starts_with($key, 'social_')) {
+            return 'social';
+        }
+
+        if (str_starts_with($key, 'google_')) {
+            return 'oauth';
+        }
+
+        if (str_starts_with($key, 'maintenance')) {
+            return 'maintenance';
+        }
+
+        if (in_array($key, ['force_2fa', 'email_verification', 'max_login_attempts', 'session_timeout', 'password_min_length'], true)) {
+            return 'security';
+        }
+
+        return 'general';
     }
 
     public function store(Request $request): JsonResponse
@@ -40,8 +200,7 @@ class SettingController extends Controller
 
         $setting = SystemSetting::create($validated);
 
-        // Clear cache if the setting was cached
-        Cache::forget('setting_' . $setting->key);
+        Cache::forget('system_settings_all');
 
         return response()->json([
             'message' => 'Setting created successfully',
@@ -61,8 +220,7 @@ class SettingController extends Controller
 
         $setting->update($validated);
 
-        // Clear cache
-        Cache::forget('setting_' . $setting->key);
+        Cache::forget('system_settings_all');
 
         return response()->json([
             'message' => 'Setting updated successfully',
@@ -72,7 +230,7 @@ class SettingController extends Controller
 
     public function destroy(SystemSetting $setting): JsonResponse
     {
-        Cache::forget('setting_' . $setting->key);
+        Cache::forget('system_settings_all');
         $setting->delete();
 
         return response()->json([
@@ -148,6 +306,52 @@ class SettingController extends Controller
         return response()->json($info);
     }
 
+    public function testEmail(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        try {
+            Mail::raw('This is a test email from ' . config('app.name'), function ($message) use ($validated) {
+                $message->to($validated['email'])
+                    ->subject('Test Email - ' . config('app.name'));
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Test email sent to ' . $validated['email'],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function configBackup(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'auto_backup_enabled' => 'boolean',
+            'backup_frequency' => 'in:daily,weekly,monthly',
+            'backup_retention' => 'integer|min:1|max:30',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            SystemSetting::updateOrCreate(
+                ['key' => $key],
+                ['value' => $value, 'type' => is_bool($value) ? 'boolean' : 'string', 'group' => 'backup']
+            );
+        }
+
+        Cache::forget('system_settings_all');
+
+        return response()->json([
+            'message' => 'Backup configuration saved successfully',
+        ]);
+    }
+
     public function backups()
     {
         $backups = Backup::with('creator')->latest()->paginate(20);
@@ -205,7 +409,7 @@ class SettingController extends Controller
             'type' => $validated['type'],
             'status' => 'pending',
             'notes' => $validated['notes'] ?? null,
-            'created_by' => auth()->id(),
+            'created_by' => Auth::id(),
         ]);
 
         // Here you would trigger the actual backup process
@@ -255,53 +459,5 @@ class SettingController extends Controller
         $bytes /= 1024 ** $pow;
 
         return round($bytes, $precision) . ' ' . $units[$pow];
-    }
-
-    public function saveSettings(Request $request): JsonResponse
-    {
-        $settings = $request->all();
-
-        foreach ($settings as $key => $value) {
-            SystemSetting::updateOrCreate(
-                ['key' => $key],
-                ['value' => $value, 'type' => 'string']
-            );
-        }
-
-        return response()->json([
-            'message' => 'Settings saved successfully',
-        ]);
-    }
-
-    public function configBackup(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'auto_backup_enabled' => 'boolean',
-            'backup_frequency' => 'in:daily,weekly,monthly',
-            'backup_retention' => 'integer|min:1|max:30',
-        ]);
-
-        foreach ($validated as $key => $value) {
-            SystemSetting::updateOrCreate(
-                ['key' => $key],
-                ['value' => $value, 'type' => is_bool($value) ? 'boolean' : 'string']
-            );
-        }
-
-        return response()->json([
-            'message' => 'Backup configuration saved successfully',
-        ]);
-    }
-
-    public function testEmail(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'email' => 'required|email',
-        ]);
-
-        // Simulate email test
-        return response()->json([
-            'message' => 'Test email sent successfully to ' . $validated['email'],
-        ]);
     }
 }

@@ -166,6 +166,7 @@
 
     @stack('styles')
 </head>
+@include('components.payment-status-banner')
 
 <body
     class="bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100 h-screen flex overflow-hidden transition-colors duration-300">

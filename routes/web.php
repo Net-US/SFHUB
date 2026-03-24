@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\AcademicController;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminMediaController;
 use App\Http\Controllers\Admin\AdminRoleController;
@@ -25,11 +24,11 @@ use App\Http\Controllers\FocusController;
 use App\Http\Controllers\GeneralTrackerController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvestmentController;
+use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\PklController;
 use App\Http\Controllers\ProductivityController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SmartCalendarController;
-use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -40,16 +39,28 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
+Route::prefix('midtrans')->group(function () {
+    Route::post('/webhook', [MidtransController::class, 'webhook'])->name('midtrans.webhook');
+    Route::get('/finish', [MidtransController::class, 'finish'])->name('midtrans.finish');
+});
+
 // Authentication Routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+
+    // Google OAuth
+    Route::get('/auth/google', [\App\Http\Controllers\GoogleController::class, 'redirect'])->name('auth.google');
+    Route::get('/auth/google/callback', [\App\Http\Controllers\GoogleController::class, 'callback'])->name('auth.google.callback');
 });
 
 // Protected Routes (require authentication)
 Route::middleware('auth')->group(function () {
+    Route::post('/subscribe', [MidtransController::class, 'createTransaction'])->name('subscribe');
+    Route::get('/onboarding/payment', [AuthController::class, 'showOnboardingPayment'])->name('auth.onboarding-payment');
+
     Route::get('/donation', [DonationController::class, 'show'])->name('donation.show');
     Route::post('/donation', [DonationController::class, 'process'])->name('donation.process');
 
@@ -281,6 +292,15 @@ Route::middleware('auth')->group(function () {
 
     // ── INVESTMENT PURCHASES ───────────────────────────────────────────
     Route::post('/investments/{id}/purchases', [InvestmentController::class, 'storePurchase'])->name('investments.purchases.store');
+
+    // ══════════════════════════════════════════════════════════════════
+    // INDODAX INTEGRATION
+    // ══════════════════════════════════════════════════════════════════
+    Route::post('/indodax/connect',     [\App\Http\Controllers\IndodaxController::class, 'store'])->name('indodax.connect');
+    Route::post('/indodax/test',        [\App\Http\Controllers\IndodaxController::class, 'test'])->name('indodax.test');
+    Route::post('/indodax/sync',        [\App\Http\Controllers\IndodaxController::class, 'sync'])->name('indodax.sync');
+    Route::get('/indodax/status',       [\App\Http\Controllers\IndodaxController::class, 'status'])->name('indodax.status');
+    Route::delete('/indodax/disconnect', [\App\Http\Controllers\IndodaxController::class, 'disconnect'])->name('indodax.disconnect');
 });
 
 // Admin Routes
