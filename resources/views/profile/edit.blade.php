@@ -392,6 +392,15 @@
                             {{ ucfirst(auth()->user()->plan ?? 'Free') }} Plan
                         </span>
 
+                        {{-- Upgrade button for free users --}}
+                        @if ((auth()->user()->plan ?? 'free') === 'free')
+                            <a href="{{ route('auth.onboarding-payment') }}"
+                                class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm">
+                                <i class="fa-solid fa-arrow-up text-[9px]"></i>
+                                Upgrade ke Pro
+                            </a>
+                        @endif
+
                         {{-- Stats --}}
                         <div class="mt-4 space-y-1.5">
                             <a href="{{ route('dashboard.finance') }}" class="stat-row block">
@@ -407,7 +416,8 @@
                                     <i class="fa-solid fa-landmark text-blue-400 text-xs w-3.5 text-center"></i>
                                     <span class="text-[11px] text-stone-500 dark:text-stone-400">Aset Fisik</span>
                                 </div>
-                                <span class="text-sm font-bold text-stone-800 dark:text-white">{{ $stats['assets'] }}</span>
+                                <span
+                                    class="text-sm font-bold text-stone-800 dark:text-white">{{ $stats['assets'] }}</span>
                             </a>
                             <a href="{{ route('dashboard.investments') }}" class="stat-row block">
                                 <div class="flex items-center gap-2">
@@ -775,6 +785,123 @@
                                     </button>
                                 </div>
                             @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Integrasi API: Indodax --}}
+                    <div
+                        class="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-sm overflow-hidden">
+                        <div
+                            class="flex items-center justify-between gap-3 px-6 py-4 border-b border-stone-100 dark:border-stone-800 flex-wrap">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-brands fa-bitcoin text-emerald-500 text-sm"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-stone-800 dark:text-white text-sm">Integrasi Indodax</h3>
+                                    <p class="text-[11px] text-stone-400">Koneksi API crypto dengan sinkronisasi manual</p>
+                                </div>
+                            </div>
+                            <span id="indodax-status-badge"
+                                class="px-2.5 py-1 rounded-full text-[11px] font-semibold {{ $indodaxConnection ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-300' }}">
+                                {{ $indodaxConnection ? 'Terhubung' : 'Belum Terhubung' }}
+                            </span>
+                        </div>
+
+                        <div class="p-6 space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="fi-label">API Key Indodax</label>
+                                    <input type="text" id="indodax-api-key" class="fi"
+                                        placeholder="Masukkan API Key">
+                                    <p class="text-[11px] text-stone-400 mt-1">Dapatkan dari <a
+                                            href="https://indodax.com/trade_api" target="_blank"
+                                            class="text-blue-500 hover:underline">Indodax Trade API</a></p>
+                                </div>
+                                <div>
+                                    <label class="fi-label">Secret Key</label>
+                                    <input type="password" id="indodax-api-secret" class="fi"
+                                        placeholder="Masukkan Secret Key">
+                                    <p class="text-[11px] text-stone-400 mt-1">Disimpan aman dalam bentuk terenkripsi</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                                <div
+                                    class="p-3 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
+                                    <p class="text-stone-400">Akun Investasi</p>
+                                    <p class="font-bold text-stone-800 dark:text-white mt-1" id="indodax-account-name">
+                                        {{ $indodaxAccount?->name ?? '-' }}</p>
+                                </div>
+                                <div
+                                    class="p-3 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
+                                    <p class="text-stone-400">Saldo Terakhir</p>
+                                    <p class="font-bold text-stone-800 dark:text-white mt-1" id="indodax-balance-last">
+                                        {{ $indodaxAccount ? 'Rp ' . number_format((float) $indodaxAccount->balance, 0, ',', '.') : '-' }}
+                                    </p>
+                                </div>
+                                <div
+                                    class="p-3 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
+                                    <p class="text-stone-400">Instrumen Crypto</p>
+                                    <p class="font-bold text-stone-800 dark:text-white mt-1"
+                                        id="indodax-instrument-count">{{ $indodaxInstruments->count() }} coin</p>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" onclick="connectIndodax()"
+                                    class="btn-save !bg-emerald-600 hover:!bg-emerald-700">
+                                    <i class="fa-solid fa-plug text-xs"></i> Simpan Koneksi
+                                </button>
+                                <button type="button" onclick="testIndodaxConnection()"
+                                    class="px-3.5 py-2 rounded-xl border border-stone-300 dark:border-stone-700 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800">
+                                    <i class="fa-solid fa-vial mr-1"></i> Test
+                                </button>
+                                <button type="button" onclick="syncIndodaxNow()"
+                                    class="px-3.5 py-2 rounded-xl bg-orange-500 text-white text-sm hover:bg-orange-600">
+                                    <i class="fa-solid fa-rotate mr-1"></i> Sinkron Manual
+                                </button>
+                                <button type="button" onclick="disconnectIndodax()"
+                                    class="px-3.5 py-2 rounded-xl border border-rose-200 text-rose-600 text-sm hover:bg-rose-50 dark:border-rose-900/50 dark:hover:bg-rose-900/20">
+                                    <i class="fa-solid fa-unlink mr-1"></i> Putuskan
+                                </button>
+                            </div>
+
+                            <p class="text-[11px] text-stone-400">
+                                Sinkronisasi dilakukan <strong>manual</strong> sesuai kebutuhan kamu. Data hasil sync akan
+                                dipakai di halaman
+                                <a href="{{ route('dashboard.assets') }}"
+                                    class="text-blue-500 hover:underline">Assets</a> dan
+                                <a href="{{ route('dashboard.finance') }}"
+                                    class="text-blue-500 hover:underline">Finance</a>.
+                            </p>
+
+                            @if ($indodaxInstruments->isNotEmpty())
+                                <div class="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+                                    <div
+                                        class="px-4 py-2.5 bg-stone-50 dark:bg-stone-800 text-xs font-semibold text-stone-600 dark:text-stone-300">
+                                        Snapshot Instrumen Terakhir
+                                    </div>
+                                    <div class="divide-y divide-stone-100 dark:divide-stone-800">
+                                        @foreach ($indodaxInstruments->take(6) as $instrument)
+                                            <div class="px-4 py-2.5 flex items-center justify-between text-xs">
+                                                <div>
+                                                    <p class="font-semibold text-stone-800 dark:text-white">
+                                                        {{ $instrument->symbol }}</p>
+                                                    <p class="text-stone-400">
+                                                        {{ rtrim(rtrim(number_format((float) $instrument->total_quantity, 8, '.', ''), '0'), '.') }}
+                                                        unit</p>
+                                                </div>
+                                                <p class="font-semibold text-stone-700 dark:text-stone-300">
+                                                    Rp
+                                                    {{ number_format((float) $instrument->total_quantity * (float) $instrument->current_price, 0, ',', '.') }}
+                                                </p>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -1170,6 +1297,80 @@
             api('PUT', '{{ route('profile.preferences') }}', localPrefs).then(r => {
                 if (r.success) toast('Pengaturan disimpan.');
             });
+        }
+
+        function setIndodaxBadge(connected) {
+            const badge = document.getElementById('indodax-status-badge');
+            if (!badge) return;
+            badge.textContent = connected ? 'Terhubung' : 'Belum Terhubung';
+            badge.className = connected ?
+                'px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                'px-2.5 py-1 rounded-full text-[11px] font-semibold bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-300';
+        }
+
+        async function connectIndodax() {
+            const apiKey = document.getElementById('indodax-api-key')?.value?.trim();
+            const apiSecret = document.getElementById('indodax-api-secret')?.value?.trim();
+
+            if (!apiKey || !apiSecret) {
+                toast('API Key dan Secret Key wajib diisi.', false);
+                return;
+            }
+
+            const res = await api('POST', '{{ route('indodax.connect') }}', {
+                api_key: apiKey,
+                api_secret: apiSecret,
+            });
+
+            if (res.success) {
+                setIndodaxBadge(true);
+                toast(res.message || 'Koneksi Indodax berhasil disimpan.');
+                document.getElementById('indodax-api-secret').value = '';
+            } else {
+                toast(res.message || 'Gagal menyimpan koneksi Indodax.', false);
+            }
+        }
+
+        async function testIndodaxConnection() {
+            const res = await api('POST', '{{ route('indodax.test') }}');
+            if (res.success) {
+                toast(res.message || 'Koneksi valid.');
+            } else {
+                toast(res.message || 'Koneksi gagal.', false);
+            }
+        }
+
+        async function syncIndodaxNow() {
+            const res = await api('POST', '{{ route('indodax.sync') }}');
+            if (res.success) {
+                const total = Number(res.total_value_idr || 0).toLocaleString('id-ID');
+                const coins = (res.synced_coins || []).length;
+                const balanceEl = document.getElementById('indodax-balance-last');
+                const countEl = document.getElementById('indodax-instrument-count');
+                const nameEl = document.getElementById('indodax-account-name');
+
+                if (balanceEl) balanceEl.textContent = `Rp ${total}`;
+                if (countEl) countEl.textContent = `${coins} coin`;
+                if (nameEl) nameEl.textContent = 'Indodax';
+                setIndodaxBadge(true);
+
+                toast(`Sinkron selesai: ${coins} coin (Rp ${total})`);
+                setTimeout(() => location.reload(), 900);
+            } else {
+                toast(res.error || res.message || 'Sinkronisasi gagal.', false);
+            }
+        }
+
+        async function disconnectIndodax() {
+            if (!confirm('Putuskan koneksi Indodax? Data hasil sync tidak dihapus.')) return;
+            const res = await api('DELETE', '{{ route('indodax.disconnect') }}');
+            if (res.success) {
+                setIndodaxBadge(false);
+                toast(res.message || 'Koneksi Indodax diputuskan.');
+                setTimeout(() => location.reload(), 700);
+            } else {
+                toast(res.message || 'Gagal memutuskan koneksi.', false);
+            }
         }
 
         // ── Notifikasi ─────────────────────────────────────────────────────────────

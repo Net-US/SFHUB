@@ -6,6 +6,7 @@ use App\Models\FinanceAccount;
 use App\Models\Transaction;
 use App\Models\SavingsGoal;
 use App\Models\Budget;
+use App\Models\InvestmentInstrument;
 use App\Models\PendingNeed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -116,6 +117,23 @@ class FinanceController extends Controller
             ->limit(8)
             ->get();
 
+        $indodaxAccount = $accounts->first(function ($account) {
+            return $account->type === 'investment' && strtolower($account->name) === 'indodax';
+        });
+
+        $indodaxInstruments = collect();
+        if ($indodaxAccount) {
+            $indodaxInstruments = InvestmentInstrument::where('user_id', $userId)
+                ->where('type', 'crypto')
+                ->where('finance_account_id', $indodaxAccount->id)
+                ->orderByDesc('total_quantity')
+                ->get();
+        }
+
+        $indodaxTotalValue = $indodaxInstruments->sum(function ($instrument) {
+            return (float) $instrument->total_quantity * (float) $instrument->current_price;
+        });
+
         return view('dashboard.finance', compact(
             'accounts',
             'totalLiquid',
@@ -132,6 +150,9 @@ class FinanceController extends Controller
             'pendingNeeds',
             'totalPending',
             'expenseByCategory',
+            'indodaxAccount',
+            'indodaxInstruments',
+            'indodaxTotalValue',
         ));
     }
 

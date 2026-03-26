@@ -34,6 +34,11 @@ use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/about', [HomeController::class, 'about'])->name('about');
+Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+Route::post('/contact', [HomeController::class, 'submitContactForm'])->name('contact.submit');
+
+Route::post('/feedback', [HomeController::class, 'storeFeedback'])->name('feedback.store');
 
 // Public Blog Routes
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
@@ -41,7 +46,7 @@ Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::prefix('midtrans')->group(function () {
     Route::post('/webhook', [MidtransController::class, 'webhook'])->name('midtrans.webhook');
-    Route::get('/finish', [MidtransController::class, 'finish'])->name('midtrans.finish');
+    Route::get('/finish',   [MidtransController::class, 'finish'])->name('midtrans.finish');
 });
 
 // Authentication Routes
@@ -58,9 +63,11 @@ Route::middleware('guest')->group(function () {
 
 // Protected Routes (require authentication)
 Route::middleware('auth')->group(function () {
+    // Buat transaksi Midtrans
     Route::post('/subscribe', [MidtransController::class, 'createTransaction'])->name('subscribe');
-    Route::get('/onboarding/payment', [AuthController::class, 'showOnboardingPayment'])->name('auth.onboarding-payment');
 
+    Route::get('/onboarding/payment', [AuthController::class, 'showOnboardingPayment'])
+        ->name('auth.onboarding-payment');
     Route::get('/donation', [DonationController::class, 'show'])->name('donation.show');
     Route::post('/donation', [DonationController::class, 'process'])->name('donation.process');
 
@@ -320,15 +327,31 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users-export', [AdminUserController::class, 'export'])->name('users.export');
 
     // Subscriptions
-    Route::get('/subscriptions', [SubscriptionController::class, 'getSubscriptions'])->name('subscriptions');
-    Route::post('/subscriptions', [SubscriptionController::class, 'store'])->name('subscriptions.store');
-    Route::get('/subscription-plans', [SubscriptionController::class, 'getPlans'])->name('subscriptions.plans');
-    Route::post('/subscription-plans', [SubscriptionController::class, 'storePlan'])->name('subscriptions.plans.store');
-    Route::put('/subscription-plans/{plan}', [SubscriptionController::class, 'updatePlan'])->name('subscriptions.plans.update');
-    Route::delete('/subscription-plans/{plan}', [SubscriptionController::class, 'destroyPlan'])->name('subscriptions.plans.destroy');
-    Route::get('/subscriptions/stats', [SubscriptionController::class, 'getStats'])->name('subscriptions.stats');
-    Route::post('/subscriptions/{subscription}/cancel', [SubscriptionController::class, 'cancelSubscription'])->name('subscriptions.cancel');
-    Route::post('/subscriptions/{subscription}/extend', [SubscriptionController::class, 'extendSubscription'])->name('subscriptions.extend');
+    // View (HTML)
+    Route::get('/subscriptions', [SubscriptionController::class, 'getSubscriptions'])
+        ->name('subscriptions');
+
+    // Plan CRUD (JSON)
+    Route::get('/subscriptions/plans',               [SubscriptionController::class, 'getPlans'])
+        ->name('subscriptions.plans.index');
+    Route::get('/subscriptions/plans/{plan}',        [SubscriptionController::class, 'getPlan'])
+        ->name('subscriptions.plans.show');
+    Route::post('/subscriptions/plans',              [SubscriptionController::class, 'storePlan'])
+        ->name('subscriptions.store');
+    Route::put('/subscriptions/plans/{plan}',        [SubscriptionController::class, 'updatePlan'])
+        ->name('subscriptions.plans.update');
+    Route::patch('/subscriptions/plans/{plan}/toggle', [SubscriptionController::class, 'togglePlan'])
+        ->name('subscriptions.plans.toggle');
+    Route::delete('/subscriptions/plans/{plan}',     [SubscriptionController::class, 'destroyPlan'])
+        ->name('subscriptions.plans.destroy');
+
+    // Subscription management (JSON)
+    Route::get('/subscriptions/stats',                         [SubscriptionController::class, 'getStats'])
+        ->name('subscriptions.stats');
+    Route::post('/subscriptions/{subscription}/cancel',        [SubscriptionController::class, 'cancelSubscription'])
+        ->name('subscriptions.cancel');
+    Route::post('/subscriptions/{subscription}/extend',        [SubscriptionController::class, 'extendSubscription'])
+        ->name('subscriptions.extend');
 
     // Blog Management
     Route::get('/blog', [AdminBlogController::class, 'index'])->name('blog.index');
@@ -400,7 +423,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/seo/pages/create', [SeoController::class, 'createPage'])->name('seo.pages.create');
     Route::post('/seo/pages', [SeoController::class, 'storePage'])->name('seo.pages.store');
     Route::get('/seo/pages/{page}/edit', [SeoController::class, 'editPage'])->name('seo.pages.edit');
-    Route::put('/seo/pages/{page}', [SeoController::class, 'updatePage'])->name('seo.pages.update');
+    Route::put('/seo/pages/{page}', [SeoController::class, 'updatePage'])->name('seo.static-pages.update');
     Route::delete('/seo/pages/{page}', [SeoController::class, 'destroyPage'])->name('seo.pages.destroy');
     Route::get('/api/pages', [SeoController::class, 'getPages'])->name('api.pages');
 
@@ -417,8 +440,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Backup Management
     Route::get('/settings/backups', [SettingController::class, 'backups'])->name('settings.backups');
-    Route::get('/backups/create', [SettingController::class, 'createBackup'])->name('backups.create');
-    Route::get('/settings/backups/create', [SettingController::class, 'createBackup'])->name('settings.backups.create');
+    Route::post('/backups/create', [SettingController::class, 'createBackup'])->name('backups.create');
     Route::post('/settings/backups', [SettingController::class, 'createBackup'])->name('settings.backups.store');
     Route::get('/settings/backups/{backup}/download', [SettingController::class, 'downloadBackup'])->name('settings.backups.download');
     Route::delete('/settings/backups/{backup}', [SettingController::class, 'destroyBackup'])->name('settings.backups.destroy');
@@ -426,6 +448,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Activity Logs
     Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
+    Route::get('/logs/activity/{activityLog}', [LogController::class, 'showActivityLog'])->name('logs.activity.show');
     Route::get('/logs/system', [LogController::class, 'getSystemLogs'])->name('logs.system');
     Route::delete('/logs/activity', [LogController::class, 'clearActivityLogs'])->name('logs.activity.clear');
     Route::delete('/logs/system', [LogController::class, 'clearSystemLogs'])->name('logs.system.clear');

@@ -73,4 +73,48 @@ class HomeController extends Controller
 
         return view('home', compact('hero', 'features', 'testimonials', 'stats'));
     }
+
+    public function about()
+    {
+        return view('pages.about');
+    }
+
+    public function contact()
+    {
+        return view('pages.contact');
+    }
+
+    public function submitContactForm(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:150'],
+            'subject' => ['required', 'string', 'max:150'],
+            'message' => ['required', 'string', 'max:2000'],
+        ]);
+
+        return back()->with('success', 'Terima kasih! Pesan kamu sudah terkirim, tim kami akan segera menghubungi.');
+    }
+
+    public function storeFeedback(\Illuminate\Http\Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:150'],
+            'type' => ['required', 'in:Saran,Kritik,Bug,Fitur Baru'],
+            'message' => ['required', 'string', 'max:2000'],
+        ]);
+
+        // Log feedback to activity logs
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->check() ? auth()->user()->id : null,
+            'action' => 'feedback_submitted',
+            'entity_type' => 'feedback',
+            'entity_id' => null,
+            'description' => "Feedback [{$validated['type']}] dari {$validated['name']}: " . \Illuminate\Support\Str::limit($validated['message'], 100),
+            'ip_address' => $request->ip(),
+        ]);
+
+        return back()->with('feedback_success', 'Terima kasih atas feedback Anda! Kami akan meninjaunya segera.');
+    }
 }

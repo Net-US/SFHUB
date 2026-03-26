@@ -333,6 +333,11 @@
                     <a href="{{ route('profile.edit') }}"
                         class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i
                             class="fa-solid fa-user-circle w-4 text-center text-stone-400"></i>Profil Saya</a>
+                    @if ((string) auth()->user()->plan === 'free')
+                        <a href="{{ route('auth.onboarding-payment') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"><i
+                                class="fa-solid fa-crown w-4 text-center text-emerald-500"></i>Upgrade Plan</a>
+                    @endif
                     <a href="{{ route('profile.edit') }}#pengaturan"
                         class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i
                             class="fa-solid fa-sliders w-4 text-center text-stone-400"></i>Pengaturan</a>
@@ -435,6 +440,11 @@
                         <div class="px-4 py-3 border-b border-stone-100 dark:border-stone-700">
                             <p class="text-sm font-bold text-stone-800 dark:text-white truncate">
                                 {{ auth()->user()->name }}</p>
+                            @if ((string) auth()->user()->plan === 'free')
+                                <a href="{{ route('auth.onboarding-payment') }}"
+                                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"><i
+                                        class="fa-solid fa-crown w-4 text-center text-emerald-500"></i>Upgrade Plan</a>
+                            @endif
                             <a href="{{ route('profile.edit') }}#pengaturan"
                                 class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"><i
                                     class="fa-solid fa-sliders w-4 text-center text-stone-400"></i>Pengaturan Akun</a>

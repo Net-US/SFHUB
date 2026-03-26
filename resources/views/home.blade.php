@@ -5,165 +5,307 @@
 @section('content')
     @include('home.hero')
 
-    {{-- FEATURES SECTION --}}
-    <section class="py-20 bg-white dark:bg-stone-900" id="fitur">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-14">
-                <span
-                    class="inline-block px-4 py-1.5 mb-4 text-xs font-bold tracking-widest text-orange-600 dark:text-orange-400 uppercase bg-orange-100 dark:bg-orange-900/30 rounded-full">
-                    Fitur Lengkap
-                </span>
-                <h2 class="text-4xl font-extrabold text-stone-900 dark:text-white mb-4">
-                    Semua yang Kamu Butuhkan, <span class="text-orange-500">Satu Platform</span>
-                </h2>
-                <p class="text-lg text-stone-500 dark:text-stone-400 max-w-2xl mx-auto">
-                    Dirancang khusus untuk mahasiswa aktif yang juga menjalani kehidupan sebagai freelancer, konten kreator,
-                    atau magang.
-                </p>
-            </div>
+    {{-- FEATURES SECTION - Like Image Design --}}
+    <section class="landing-section bg-white dark:bg-stone-900 overflow-hidden" id="fitur">
+        <div class="landing-container">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+                {{-- Left Title --}}
+                <div class="lg:col-span-4 lg:sticky lg:top-24">
+                    <span class="brand-pill">Fitur Utama</span>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-stone-900 dark:text-white mt-4 mb-4">
+                        Kenapa memilih <span class="text-orange-500">SFHUB?</span>
+                    </h2>
+                    <p class="text-stone-600 dark:text-stone-400 mb-6">
+                        Platform all-in-one yang dirancang khusus untuk mahasiswa Indonesia. Kelola akademik, karir, dan
+                        finansial dalam satu dashboard.
+                    </p>
+                    <img src="{{ asset('images/1974.jpg') }}" alt="Student Character"
+                        class="w-full max-w-[280px] rounded-2xl shadow-lg hidden lg:block">
+                </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                @foreach ($features as $feat)
-                    <div
-                        class="group bg-stone-50 dark:bg-stone-800 rounded-2xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 border border-stone-100 dark:border-stone-700">
-                        <div
-                            class="w-12 h-12 rounded-xl bg-white dark:bg-stone-700 shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <i
-                                class="fa-solid {{ $feat->icon ?? 'fa-star' }} text-xl {{ $feat->color ?? 'text-orange-500' }}"></i>
-                        </div>
-                        <h3 class="font-bold text-stone-900 dark:text-white text-base mb-2">{{ $feat->title }}</h3>
-                        <p class="text-stone-500 dark:text-stone-400 text-sm leading-relaxed">{{ $feat->description }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    {{-- STATS SECTION --}}
-    <section class="py-16 bg-gradient-to-r from-orange-500 to-rose-500">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center text-white">
-                @foreach ($stats as $stat)
-                    <div>
-                        <p class="text-4xl font-extrabold mb-1">{{ $stat->value }}</p>
-                        <p class="text-orange-100 text-sm font-medium">{{ $stat->label }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    {{-- TESTIMONIALS SECTION --}}
-    <section class="py-20 bg-white dark:bg-stone-900" id="testimonials">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-14">
-                <h2 class="text-4xl font-extrabold text-stone-900 dark:text-white mb-4">Apa Kata Mereka</h2>
-                <p class="text-stone-500 dark:text-stone-400 max-w-2xl mx-auto">
-                    Pengalaman nyata dari mahasiswa yang sudah menggunakan SFHUB
-                </p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach ($testimonials as $testimonial)
-                    <div
-                        class="bg-stone-50 dark:bg-stone-800 rounded-2xl p-6 border border-stone-200 dark:border-stone-700">
-                        <div class="flex items-center mb-4">
-                            @if ($testimonial->avatar)
-                                <img src="{{ $testimonial->avatar }}" alt="{{ $testimonial->name }}"
-                                    class="w-12 h-12 rounded-full mr-3">
-                            @else
+                {{-- Right Features Grid --}}
+                <div class="lg:col-span-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        @foreach ($features as $index => $feat)
+                            @php
+                                $iconColors = [
+                                    'text-blue-500',
+                                    'text-orange-500',
+                                    'text-emerald-500',
+                                    'text-purple-500',
+                                ];
+                                $bgColors = [
+                                    'bg-blue-50 dark:bg-blue-900/20',
+                                    'bg-orange-50 dark:bg-orange-900/20',
+                                    'bg-emerald-50 dark:bg-emerald-900/20',
+                                    'bg-purple-50 dark:bg-purple-900/20',
+                                ];
+                                $color = $iconColors[$index % 4];
+                                $bg = $bgColors[$index % 4];
+                            @endphp
+                            <div
+                                class="flex gap-4 p-5 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-100 dark:border-stone-700 hover:shadow-lg transition-shadow group">
                                 <div
-                                    class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mr-3">
-                                    <i class="fa-solid fa-user text-orange-600 dark:text-orange-400"></i>
+                                    class="w-12 h-12 rounded-xl {{ $bg }} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid {{ $feat->icon ?? 'fa-star' }} text-xl {{ $color }}"></i>
                                 </div>
-                            @endif
-                            <div>
-                                <h4 class="font-bold text-stone-900 dark:text-white">{{ $testimonial->name }}</h4>
-                                <p class="text-sm text-stone-500 dark:text-stone-400">{{ $testimonial->role }}</p>
+                                <div>
+                                    <h3 class="font-bold text-stone-900 dark:text-white text-lg mb-2">{{ $feat->title }}
+                                    </h3>
+                                    <p class="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">
+                                        {{ $feat->description }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- STATS SECTION - Like Image Design (Horizontal Cards) --}}
+    <section class="py-16 bg-stone-100 dark:bg-stone-800" id="stats">
+        <div class="landing-container">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+                @foreach ($stats as $index => $stat)
+                    @php
+                        $colors = [
+                            [
+                                'bg' => 'bg-amber-100 dark:bg-amber-900/30',
+                                'icon' => 'text-amber-600 dark:text-amber-400',
+                                'border' => 'border-amber-200 dark:border-amber-800',
+                            ],
+                            [
+                                'bg' => 'bg-blue-100 dark:bg-blue-900/30',
+                                'icon' => 'text-blue-600 dark:text-blue-400',
+                                'border' => 'border-blue-200 dark:border-blue-800',
+                            ],
+                            [
+                                'bg' => 'bg-purple-100 dark:bg-purple-900/30',
+                                'icon' => 'text-purple-600 dark:text-purple-400',
+                                'border' => 'border-purple-200 dark:border-purple-800',
+                            ],
+                            [
+                                'bg' => 'bg-emerald-100 dark:bg-emerald-900/30',
+                                'icon' => 'text-emerald-600 dark:text-emerald-400',
+                                'border' => 'border-emerald-200 dark:border-emerald-800',
+                            ],
+                        ];
+                        $color = $colors[$index % 4];
+                    @endphp
+                    <div
+                        class="flex items-center gap-4 bg-white dark:bg-stone-800 rounded-xl p-5 border {{ $color['border'] }} hover:shadow-lg transition-shadow">
+                        <div
+                            class="w-14 h-14 rounded-lg {{ $color['bg'] }} flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid {{ $stat->icon ?? 'fa-chart-line' }} text-2xl {{ $color['icon'] }}"></i>
+                        </div>
+                        <div>
+                            <p class="text-2xl lg:text-3xl font-bold text-stone-900 dark:text-white">{{ $stat->value }}
+                            </p>
+                            <p class="text-sm text-stone-500 dark:text-stone-400">{{ $stat->label }}</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- STUDENT FEEDBACK - Horizontal Scroll Carousel --}}
+    <section class="landing-section bg-white dark:bg-stone-900 overflow-hidden" id="testimonials">
+        <div class="landing-container">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <span class="brand-pill">Student Feedback</span>
+                    <h2 class="landing-section-title mt-3">Apa kata pengguna SFHUB</h2>
+                </div>
+                <div class="flex gap-3">
+                    <button id="scroll-left"
+                        class="w-12 h-12 rounded-full border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-500 transition-all flex items-center justify-center">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button id="scroll-right"
+                        class="w-12 h-12 rounded-full border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-500 transition-all flex items-center justify-center">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="testimonials-scroll" class="flex gap-9 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory"
+                style="scrollbar-width: none; -ms-overflow-style: none;">
+                @foreach ($testimonials as $testimonial)
+                    <div class="flex-shrink-0 w-[320px] md:w-[380px] snap-start">
+                        <div
+                            class="bg-stone-50 dark:bg-stone-800 rounded-2xl p-6 border border-stone-200 dark:border-stone-700 h-full hover:shadow-xl transition-shadow">
+                            <div class="flex items-center gap-4 mb-4">
+                                @if ($testimonial->avatar)
+                                    <img src="{{ $testimonial->avatar }}" alt="{{ $testimonial->name }}"
+                                        class="w-14 h-14 rounded-full object-cover">
+                                @else
+                                    <div
+                                        class="w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg">
+                                        {{ substr($testimonial->name, 0, 1) }}
+                                    </div>
+                                @endif
+                                <div>
+                                    <h4 class="font-bold text-stone-900 dark:text-white">{{ $testimonial->name }}</h4>
+                                    <p class="text-sm text-stone-500 dark:text-stone-400">{{ $testimonial->role }}</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-1 mb-3">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <i
+                                        class="fa-solid fa-star {{ $i <= $testimonial->rating ? 'text-yellow-400' : 'text-stone-300 dark:text-stone-600' }} text-sm"></i>
+                                @endfor
+                            </div>
+                            <p class="text-stone-600 dark:text-stone-300 text-sm leading-relaxed">
+                                "{{ $testimonial->content }}"</p>
+                        </div>
+                    </div>
+                @endforeach
+
+                {{-- Duplicate for infinite scroll effect --}}
+                @foreach ($testimonials->take(3) as $testimonial)
+                    <div class="flex-shrink-0 w-[320px] md:w-[380px] snap-start">
+                        <div
+                            class="bg-stone-50 dark:bg-stone-800 rounded-2xl p-6 border border-stone-200 dark:border-stone-700 h-full hover:shadow-xl transition-shadow">
+                            <div class="flex items-center gap-4 mb-4">
+                                @if ($testimonial->avatar)
+                                    <img src="{{ $testimonial->avatar }}" alt="{{ $testimonial->name }}"
+                                        class="w-14 h-14 rounded-full object-cover">
+                                @else
+                                    <div
+                                        class="w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg">
+                                        {{ substr($testimonial->name, 0, 1) }}
+                                    </div>
+                                @endif
+                                <div>
+                                    <h4 class="font-bold text-stone-900 dark:text-white">{{ $testimonial->name }}</h4>
+                                    <p class="text-sm text-stone-500 dark:text-stone-400">{{ $testimonial->role }}</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-1 mb-3">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <i
+                                        class="fa-solid fa-star {{ $i <= $testimonial->rating ? 'text-yellow-400' : 'text-stone-300 dark:text-stone-600' }} text-sm"></i>
+                                @endfor
+                            </div>
+                            <p class="text-stone-600 dark:text-stone-300 text-sm leading-relaxed">
+                                "{{ $testimonial->content }}"</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <script>
+            (function() {
+                const scrollContainer = document.getElementById('testimonials-scroll');
+                const scrollLeftBtn = document.getElementById('scroll-left');
+                const scrollRightBtn = document.getElementById('scroll-right');
+                const cardWidth = 380 + 24; // card width + gap
+
+                scrollLeftBtn.addEventListener('click', () => {
+                    scrollContainer.scrollBy({
+                        left: -cardWidth,
+                        behavior: 'smooth'
+                    });
+                });
+
+                scrollRightBtn.addEventListener('click', () => {
+                    scrollContainer.scrollBy({
+                        left: cardWidth,
+                        behavior: 'smooth'
+                    });
+                });
+            })();
+        </script>
+    </section>
+
+    {{-- HOW IT WORKS - With SVG Curved Arrows --}}
+    <section class="landing-section bg-stone-100 dark:bg-stone-800 overflow-hidden" id="cara-kerja">
+        <div class="landing-container">
+            {{-- Header Row --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-end mb-16">
+                <div>
+                    <span class="brand-pill">Cara Kerja</span>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-stone-900 dark:text-white mt-4">
+                        Bagaimana kami membantu mahasiswa <span class="text-orange-500">sukses berkarir</span>
+                    </h2>
+                </div>
+                <div class="lg:text-right">
+                    <p class="text-stone-600 dark:text-stone-400 mb-4">Platform yang dirancang untuk memudahkan perjalanan
+                        akademik dan profesionalmu.</p>
+                    @guest
+                        <a href="{{ route('register') }}"
+                            class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors">
+                            Mulai Sekarang <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    @else
+                        <a href="{{ route('dashboard') }}"
+                            class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors">
+                            Dashboard <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    @endguest
+                </div>
+            </div>
+
+            {{-- Steps with Curved Arrows --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 relative">
+                @foreach ([['icon' => 'fa-user-graduate', 'title' => 'Dukungan Akademik', 'desc' => 'Kami peduli dengan perkembangan studimu. Dapatkan bantuan manajemen jadwal, skripsi, dan PKL.'], ['icon' => 'fa-lightbulb', 'title' => 'Pembangun Karir', 'desc' => 'Belajar sepanjang hayat dengan tools dan mentor yang membantumu berkembang setiap hari.'], ['icon' => 'fa-hands-helping', 'title' => 'Bimbingan Personal', 'desc' => 'Tidak sendirian! Dapatkan dukungan saat menghadapi tantangan akademik maupun karir.']] as $index => $step)
+                    <div class="relative text-center group">
+                        {{-- Curved Arrow SVG (except last item) --}}
+                        @if ($index < 2)
+                            <div class="hidden lg:block absolute top-16 -right-8 w-16 z-0">
+                                @if ($index == 0)
+                                    {{-- Down-right curve --}}
+                                    <svg width="60" height="80" viewBox="0 0 60 80" fill="none"
+                                        class="text-orange-400">
+                                        <path d="M10 10 Q 50 10, 50 40 T 30 70" stroke="currentColor" stroke-width="2"
+                                            fill="none" stroke-dasharray="4 4" />
+                                        <polygon points="25,65 35,70 30,75" fill="currentColor" />
+                                    </svg>
+                                @else
+                                    {{-- Up-right curve --}}
+                                    <svg width="60" height="80" viewBox="0 0 60 80" fill="none"
+                                        class="text-orange-400">
+                                        <path d="M10 70 Q 50 70, 50 40 T 30 10" stroke="currentColor" stroke-width="2"
+                                            fill="none" stroke-dasharray="4 4" />
+                                        <polygon points="25,15 35,10 30,5" fill="currentColor" />
+                                    </svg>
+                                @endif
+                            </div>
+                        @endif
+
+                        {{-- Icon Circle --}}
+                        <div class="relative inline-block mb-6">
+                            <div
+                                class="w-24 h-24 rounded-full bg-white dark:bg-stone-700 shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <div
+                                    class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                                    <i class="fa-solid {{ $step['icon'] }} text-2xl text-white"></i>
+                                </div>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            @for ($i = 1; $i <= 5; $i++)
-                                <i
-                                    class="fa-solid fa-star {{ $i <= $testimonial->rating ? 'text-yellow-400' : 'text-stone-300' }}"></i>
-                            @endfor
-                        </div>
-                        <p class="text-stone-600 dark:text-stone-300 italic">"{{ $testimonial->content }}"</p>
+
+                        {{-- Content --}}
+                        <h3 class="text-xl font-bold text-stone-900 dark:text-white mb-3">{{ $step['title'] }}</h3>
+                        <p class="text-stone-600 dark:text-stone-400 text-sm leading-relaxed px-4">{{ $step['desc'] }}</p>
                     </div>
                 @endforeach
             </div>
         </div>
     </section>
-
-    {{-- HOW IT WORKS --}}
-    <section class="py-20 bg-stone-50 dark:bg-stone-800" id="cara-kerja">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-14">
-                <h2 class="text-4xl font-extrabold text-stone-900 dark:text-white mb-4">Mulai dalam 3 Langkah</h2>
-                <p class="text-stone-500 dark:text-stone-400 max-w-xl mx-auto">Tidak perlu setup rumit. Langsung produktif
-                    dari hari pertama.</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                @foreach ([['1', 'Daftar Akun', 'Buat akun gratis dalam 30 detik. Tidak perlu kartu kredit.', 'fa-user-plus', 'bg-blue-500'], ['2', 'Setup Dashboard', 'Isi jadwal kuliah, info PKL, dan proyek aktifmu.', 'fa-sliders', 'bg-orange-500'], ['3', 'Mulai Produktif', 'Gunakan semua fitur untuk mengelola aktivitas harian.', 'fa-rocket', 'bg-emerald-500']] as [$num, $title, $desc, $ic, $bg])
-                    <div class="text-center">
-                        <div
-                            class="w-16 h-16 {{ $bg }} rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg">
-                            <i class="fa-solid {{ $ic }} text-2xl text-white"></i>
-                        </div>
-                        <div
-                            class="w-8 h-8 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 text-sm font-bold flex items-center justify-center mx-auto mb-3">
-                            {{ $num }}</div>
-                        <h3 class="font-bold text-stone-900 dark:text-white text-lg mb-2">{{ $title }}</h3>
-                        <p class="text-stone-500 dark:text-stone-400 text-sm">{{ $desc }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    {{-- CTA SECTION --}}
-    <section class="py-20 bg-white dark:bg-stone-900">
-        <div class="max-w-4xl mx-auto px-4 text-center">
-            <h2 class="text-4xl font-extrabold text-stone-900 dark:text-white mb-4">
-                Siap Lebih Produktif Mulai Hari Ini?
-            </h2>
-            <p class="text-lg text-stone-500 dark:text-stone-400 mb-8">
-                Bergabung dengan ribuan mahasiswa yang sudah mengelola kuliah dan karir mereka lebih efektif.
-            </p>
-            @guest
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ route('register') }}"
-                        class="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold shadow-lg shadow-orange-200 dark:shadow-none transition-all">
-                        Daftar Gratis Sekarang
-                    </a>
-                    <a href="{{ route('login') }}"
-                        class="px-8 py-4 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 rounded-xl font-bold transition-all">
-                        Sudah Punya Akun?
-                    </a>
-                </div>
-            @else
-                <a href="{{ route('dashboard') }}"
-                    class="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold shadow-lg shadow-orange-200 dark:shadow-none transition-all">
-                    Ke Dashboard Saya
-                </a>
-            @endguest
-        </div>
-    </section>
-
-    @include('home.registration')
 
     {{-- LATEST BLOG POSTS --}}
-    <section class="py-20 bg-white dark:bg-stone-900" id="blog">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section class="landing-section bg-white dark:bg-stone-900" id="blog">
+        <div class="landing-container">
             <div class="text-center mb-14">
-                <span
-                    class="inline-block px-4 py-1.5 mb-4 text-xs font-bold tracking-widest text-orange-600 dark:text-orange-400 uppercase bg-orange-100 dark:bg-orange-900/30 rounded-full">
-                    Blog & Artikel
-                </span>
-                <h2 class="text-4xl font-extrabold text-stone-900 dark:text-white mb-4">
+                <span class="brand-pill">Blog & Insight</span>
+                <h2 class="landing-section-title mt-4">
                     Tips & <span class="text-orange-500">Inspirasi</span> Terbaru
                 </h2>
-                <p class="text-lg text-stone-500 dark:text-stone-400 max-w-2xl mx-auto">
-                    Artikel bermanfaat untuk meningkatkan produktivitas dan karir kamu sebagai mahasiswa.
+                <p class="landing-section-subtitle mx-auto">
+                    Artikel ringkas dan praktis untuk bantu kamu tetap konsisten membangun skill, karir, dan finansial.
                 </p>
             </div>
 
@@ -258,37 +400,124 @@
         </div>
     </section>
 
+    {{-- FAQ SECTION - Dynamic from Database --}}
+    @php
+        $faqCategories = \App\Models\FaqCategory::with([
+            'faqs' => function ($query) {
+                $query->where('is_active', true)->orderBy('sort_order');
+            },
+        ])
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+    @endphp
+    {{-- CTA SECTION --}}
+    <section class="landing-section bg-white dark:bg-stone-900">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <div
+                class="rounded-3xl bg-gradient-to-r from-orange-500 to-rose-500 text-white p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+                <div class="text-left max-w-xl">
+                    <h2 class="text-3xl md:text-4xl font-extrabold mb-2">Siap naik level bareng SFHUB?</h2>
+                    <p class="text-orange-100 text-sm md:text-base">Atur ritme kuliah, proyek kerja, dan finansial jadi
+                        satu
+                        sistem yang rapi dan berkelanjutan.</p>
+                </div>
+                @guest
+                    <a href="{{ route('register') }}"
+                        class="px-6 py-3 bg-white text-stone-900 rounded-xl font-bold hover:bg-stone-100 transition-colors whitespace-nowrap">
+                        Mulai Sekarang
+                    </a>
+                @else
+                    <a href="{{ route('dashboard') }}"
+                        class="px-6 py-3 bg-white text-stone-900 rounded-xl font-bold hover:bg-stone-100 transition-colors whitespace-nowrap">
+                        Buka Dashboard
+                    </a>
+                @endguest
+            </div>
+        </div>
+    </section>
+
+    @if ($faqCategories->isNotEmpty() && $faqCategories->pluck('faqs')->flatten()->isNotEmpty())
+        <section class="landing-section bg-stone-50 dark:bg-stone-800" id="faq">
+            <div class="landing-container">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+                    {{-- Left: Title & Description --}}
+                    <div>
+                        <h2 class="text-3xl lg:text-4xl font-bold text-stone-900 dark:text-white mb-4">
+                            Pertanyaan yang <span class="text-orange-500">Sering Diajukan</span>
+                        </h2>
+                        <p class="text-stone-600 dark:text-stone-400 mb-6">
+                            Kami menjawab pertanyaan yang paling sering ditanyakan. Jika tidak menemukan jawaban yang tepat,
+                            hubungi tim support kami atau cari di halaman <a href="{{ route('blog.index') }}"
+                                class="text-orange-500 hover:underline">Blog</a>.
+                        </p>
+                        <a href="{{ route('contact') }}"
+                            class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors">
+                            <i class="fa-solid fa-headset"></i>
+                            Hubungi Support
+                        </a>
+                    </div>
+
+                    {{-- Right: Accordion --}}
+                    <div class="space-y-3">
+                        @foreach ($faqCategories as $category)
+                            @foreach ($category->faqs as $faq)
+                                <div
+                                    class="faq-item bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 overflow-hidden">
+                                    <button
+                                        class="faq-trigger w-full flex items-center justify-between p-5 text-left hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors"
+                                        onclick="toggleFaq(this)">
+                                        <span
+                                            class="font-semibold text-stone-900 dark:text-white pr-4">{{ $faq->question }}</span>
+                                        <span
+                                            class="faq-icon w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center flex-shrink-0 transition-transform">
+                                            <i class="fa-solid fa-plus text-stone-500 dark:text-stone-400 text-sm"></i>
+                                        </span>
+                                    </button>
+                                    <div class="faq-content hidden px-5 pb-5">
+                                        <div class="pt-2 border-t border-stone-100 dark:border-stone-800">
+                                            <p class="text-stone-600 dark:text-stone-400 text-sm leading-relaxed pt-3">
+                                                {{ $faq->answer }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function toggleFaq(button) {
+                    const item = button.closest('.faq-item');
+                    const content = item.querySelector('.faq-content');
+                    const icon = item.querySelector('.faq-icon');
+                    const isOpen = !content.classList.contains('hidden');
+
+                    // Close all other items
+                    document.querySelectorAll('.faq-content').forEach(c => {
+                        if (c !== content) c.classList.add('hidden');
+                    });
+                    document.querySelectorAll('.faq-icon').forEach(i => {
+                        if (i !== icon) {
+                            i.classList.remove('rotate-45');
+                            i.querySelector('i').classList.replace('fa-minus', 'fa-plus');
+                        }
+                    });
+
+                    // Toggle current
+                    if (isOpen) {
+                        content.classList.add('hidden');
+                        icon.classList.remove('rotate-45');
+                        icon.querySelector('i').classList.replace('fa-minus', 'fa-plus');
+                    } else {
+                        content.classList.remove('hidden');
+                        icon.classList.add('rotate-45');
+                        icon.querySelector('i').classList.replace('fa-plus', 'fa-minus');
+                    }
+                }
+            </script>
+        </section>
+    @endif
+
 @endsection
-
-@push('scripts')
-    <script>
-        // Form validation
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                const email = this.querySelector('input[type="email"]');
-                if (email && !email.value.includes("@")) {
-                    e.preventDefault();
-                    alert("Silakan masukkan email yang valid.");
-                }
-            });
-        });
-
-        // Plan selection styling
-        document.querySelectorAll('input[name="plan"]').forEach((radio) => {
-            radio.addEventListener("change", function() {
-                document.querySelectorAll("label").forEach((label) => {
-                    label.classList.remove("border-orange-300", "bg-orange-50",
-                        "dark:bg-orange-900/40", "dark:border-orange-500");
-                    label.classList.add("dark:hover:border-orange-500");
-                });
-
-                if (this.checked) {
-                    const label = this.closest("label");
-                    label.classList.remove("dark:hover:border-orange-500");
-                    label.classList.add("border-orange-300", "bg-orange-50", "dark:bg-orange-900/40",
-                        "dark:border-orange-500");
-                }
-            });
-        });
-    </script>
-@endpush

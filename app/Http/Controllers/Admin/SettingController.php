@@ -10,7 +10,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
+use ZipArchive;
 
 class SettingController extends Controller
 {
@@ -333,10 +338,22 @@ class SettingController extends Controller
     public function configBackup(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'auto_backup_enabled' => 'boolean',
-            'backup_frequency' => 'in:daily,weekly,monthly',
-            'backup_retention' => 'integer|min:1|max:30',
+            'auto_backup_enabled' => 'sometimes|boolean',
+            'backup_frequency' => 'sometimes|in:daily,weekly,monthly',
+            'backup_retention' => 'sometimes|integer|min:1|max:365',
+            'auto_backup' => 'sometimes|boolean',
+            'keep_days' => 'sometimes|integer|min:1|max:365',
         ]);
+
+        if (array_key_exists('auto_backup', $validated)) {
+            $validated['auto_backup_enabled'] = (bool) $validated['auto_backup'];
+            unset($validated['auto_backup']);
+        }
+
+        if (array_key_exists('keep_days', $validated)) {
+            $validated['backup_retention'] = (int) $validated['keep_days'];
+            unset($validated['keep_days']);
+        }
 
         foreach ($validated as $key => $value) {
             SystemSetting::updateOrCreate(
@@ -348,19 +365,52 @@ class SettingController extends Controller
         Cache::forget('system_settings_all');
 
         return response()->json([
+            'success' => true,
             'message' => 'Backup configuration saved successfully',
         ]);
     }
 
-    public function backups()
+    public function backups(Request $request)
     {
-        $backups = Backup::with('creator')->latest()->paginate(20);
+        $query = Backup::with('creator')->latest();
+
+        if ($request->filled('type') && in_array($request->string('type')->value(), ['full', 'database', 'files'], true)) {
+            $query->where('type', $request->string('type')->value());
+        }
+
+        $backups = $query->paginate(20)->withQueryString();
         $totalBackups = Backup::count();
-        $totalSize = Backup::sum('file_size');
+        $totalSize = (int) (Backup::sum('file_size') ?? 0);
         $lastBackup = Backup::latest()->first();
         $autoBackup = SystemSetting::get('auto_backup_enabled', false);
 
-        return view('admin.backups', compact('backups', 'totalBackups', 'totalSize', 'lastBackup', 'autoBackup'));
+        $dbBackupsSize = (int) Backup::where('type', 'database')->sum('file_size');
+        $fileBackupsSize = (int) Backup::where('type', 'files')->sum('file_size');
+
+        $dbBackupsCount = Backup::where('type', 'database')->count();
+        $fileBackupsCount = Backup::where('type', 'files')->count();
+
+        $dbUsagePercent = $totalSize > 0 ? round(($dbBackupsSize / $totalSize) * 100) : 0;
+        $fileUsagePercent = $totalSize > 0 ? round(($fileBackupsSize / $totalSize) * 100) : 0;
+
+        $backupFrequency = (string) SystemSetting::get('backup_frequency', 'weekly');
+        $backupRetention = (int) SystemSetting::get('backup_retention', 30);
+
+        return view('admin.backups', compact(
+            'backups',
+            'totalBackups',
+            'totalSize',
+            'lastBackup',
+            'autoBackup',
+            'dbBackupsSize',
+            'fileBackupsSize',
+            'dbBackupsCount',
+            'fileBackupsCount',
+            'dbUsagePercent',
+            'fileUsagePercent',
+            'backupFrequency',
+            'backupRetention'
+        ));
     }
 
     public function getBackups(): JsonResponse
@@ -390,11 +440,13 @@ class SettingController extends Controller
     public function createBackup(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'type' => 'required|in:full,database,files',
+            'type' => 'sometimes|in:full,database,files',
             'notes' => 'nullable|string',
         ]);
 
-        $filename = 'backup_' . date('Y-m-d_H-i-s') . '_' . $validated['type'] . '.zip';
+        $type = $validated['type'] ?? 'full';
+
+        $filename = 'backup_' . date('Y-m-d_H-i-s') . '_' . $type . '.zip';
         $path = storage_path('app/backups/' . $filename);
 
         // Ensure directory exists
@@ -406,24 +458,58 @@ class SettingController extends Controller
             'file_name' => $filename,
             'file_path' => $path,
             'file_size' => 0,
-            'type' => $validated['type'],
+            'type' => $type,
             'status' => 'pending',
             'notes' => $validated['notes'] ?? null,
             'created_by' => Auth::id(),
         ]);
 
-        // Here you would trigger the actual backup process
-        // For now, we'll simulate completion
-        $backup->update([
-            'status' => 'completed',
-            'completed_at' => now(),
-            'file_size' => file_exists($path) ? filesize($path) : 0,
-        ]);
+        try {
+            $zip = new ZipArchive();
+            $zipStatus = $zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
-        return response()->json([
-            'message' => 'Backup created successfully',
-            'backup' => $backup,
-        ], 201);
+            if ($zipStatus !== true) {
+                throw new \RuntimeException('Failed to create archive file.');
+            }
+
+            if (in_array($type, ['database', 'full'], true)) {
+                $zip->addFromString('database.sql', $this->generateDatabaseDumpSql());
+            }
+
+            if (in_array($type, ['files', 'full'], true)) {
+                $this->appendApplicationFilesToZip($zip);
+            }
+
+            $zip->close();
+
+            $backup->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+                'file_size' => file_exists($path) ? filesize($path) : 0,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Backup created successfully',
+                'backup' => $backup->fresh(),
+            ], 201);
+        } catch (Throwable $e) {
+            $backup->update([
+                'status' => 'failed',
+                'completed_at' => now(),
+            ]);
+
+            Log::error('Backup creation failed', [
+                'backup_id' => $backup->id,
+                'type' => $type,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Backup gagal dibuat: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function downloadBackup(Backup $backup)
@@ -444,8 +530,135 @@ class SettingController extends Controller
         $backup->delete();
 
         return response()->json([
+            'success' => true,
             'message' => 'Backup deleted successfully',
         ]);
+    }
+
+    private function generateDatabaseDumpSql(): string
+    {
+        $connection = DB::connection();
+        $driver = $connection->getDriverName();
+
+        if ($driver !== 'mysql') {
+            throw new \RuntimeException('Backup database saat ini hanya mendukung MySQL/MariaDB.');
+        }
+
+        $databaseName = $connection->getDatabaseName() ?: 'database';
+        $dump = [];
+        $dump[] = '-- SFHUB SQL Backup';
+        $dump[] = '-- Generated at: ' . now()->toDateTimeString();
+        $dump[] = '-- Database: ' . $databaseName;
+        $dump[] = '';
+        $dump[] = 'SET FOREIGN_KEY_CHECKS=0;';
+        $dump[] = '';
+
+        $rawTables = $connection->select('SHOW TABLES');
+        $tables = collect($rawTables)
+            ->map(fn($row) => (array) $row)
+            ->map(fn($row) => (string) reset($row))
+            ->values();
+
+        foreach ($tables as $table) {
+            $safeTable = str_replace('`', '``', $table);
+            $createTable = $connection->select("SHOW CREATE TABLE `{$safeTable}`");
+            $createRow = (array) ($createTable[0] ?? []);
+            $createSql = $createRow['Create Table'] ?? (count($createRow) > 1 ? array_values($createRow)[1] : null);
+
+            if (!$createSql) {
+                continue;
+            }
+
+            $dump[] = "DROP TABLE IF EXISTS `{$safeTable}`;";
+            $dump[] = $createSql . ';';
+
+            $rows = $connection->table($table)->get();
+            foreach ($rows as $row) {
+                $data = (array) $row;
+                $columns = implode(', ', array_map(fn($column) => '`' . str_replace('`', '``', (string) $column) . '`', array_keys($data)));
+                $values = implode(', ', array_map(fn($value) => $this->convertValueToSql($value), array_values($data)));
+                $dump[] = "INSERT INTO `{$safeTable}` ({$columns}) VALUES ({$values});";
+            }
+
+            $dump[] = '';
+        }
+
+        $dump[] = 'SET FOREIGN_KEY_CHECKS=1;';
+
+        return implode("\n", $dump) . "\n";
+    }
+
+    private function convertValueToSql(mixed $value): string
+    {
+        if ($value === null) {
+            return 'NULL';
+        }
+
+        if (is_bool($value)) {
+            return $value ? '1' : '0';
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (string) $value;
+        }
+
+        if ($value instanceof \DateTimeInterface) {
+            return DB::connection()->getPdo()->quote($value->format('Y-m-d H:i:s'));
+        }
+
+        return DB::connection()->getPdo()->quote((string) $value);
+    }
+
+    private function appendApplicationFilesToZip(ZipArchive $zip): void
+    {
+        $sources = [
+            base_path('app') => 'app',
+            base_path('config') => 'config',
+            base_path('resources/views') => 'resources/views',
+            base_path('routes') => 'routes',
+            storage_path('app/public') => 'storage/app/public',
+            public_path() => 'public',
+        ];
+
+        foreach ($sources as $sourcePath => $zipPath) {
+            $this->addPathToZip($zip, $sourcePath, $zipPath);
+        }
+
+        $envExample = base_path('.env.example');
+        if (File::exists($envExample)) {
+            $zip->addFile($envExample, '.env.example');
+        }
+    }
+
+    private function addPathToZip(ZipArchive $zip, string $path, string $zipPath): void
+    {
+        if (!File::exists($path)) {
+            return;
+        }
+
+        if (File::isFile($path)) {
+            $zip->addFile($path, ltrim(str_replace('\\', '/', $zipPath), '/'));
+            return;
+        }
+
+        $files = File::allFiles($path);
+
+        foreach ($files as $file) {
+            $realPath = $file->getRealPath();
+
+            if (!$realPath) {
+                continue;
+            }
+
+            if (str_contains(str_replace('\\', '/', $realPath), 'storage/app/backups/')) {
+                continue;
+            }
+
+            $relative = ltrim(str_replace('\\', '/', $file->getRelativePathname()), '/');
+            $entryPath = trim($zipPath, '/') . '/' . $relative;
+
+            $zip->addFile($realPath, $entryPath);
+        }
     }
 
     private function formatBytes($bytes, $precision = 2): string

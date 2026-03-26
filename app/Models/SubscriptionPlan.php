@@ -29,6 +29,11 @@ class SubscriptionPlan extends Model
         'sort_order' => 'integer',
     ];
 
+    public function subscriptions()
+    {
+        return $this->hasMany(UserSubscription::class, 'subscription_plan_id');
+    }
+
     protected static function boot()
     {
         parent::boot();

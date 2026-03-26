@@ -49,6 +49,12 @@
                     terintegrasi</p>
             </div>
             <div class="flex gap-2 flex-wrap">
+                @if ($indodaxAccount)
+                    <button onclick="syncIndodaxFinance()"
+                        class="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium transition-colors">
+                        <i class="fa-solid fa-rotate"></i> Sync Indodax
+                    </button>
+                @endif
                 <button onclick="openModal('modal-account')"
                     class="flex items-center gap-2 px-4 py-2 bg-stone-800 dark:bg-stone-700 hover:bg-stone-900 text-white rounded-xl text-sm font-medium transition-colors">
                     <i class="fa-solid fa-plus"></i> Tambah Akun
@@ -94,6 +100,30 @@
                 <p class="text-stone-400 text-[11px] mt-1">Bulan ini</p>
             </div>
         </div>
+
+        @if ($indodaxAccount)
+            <div class="bg-white dark:bg-stone-900 rounded-2xl p-4 border border-stone-200 dark:border-stone-800 shadow-sm">
+                <div class="flex items-start justify-between gap-3 flex-wrap">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center">
+                            <i class="fa-brands fa-bitcoin"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-stone-800 dark:text-white">Indodax Portfolio Snapshot</p>
+                            <p class="text-xs text-stone-500 dark:text-stone-400">
+                                {{ $indodaxInstruments->count() }} coin · Estimasi nilai Rp
+                                {{ number_format((float) $indodaxTotalValue, 0, ',', '.') }}
+                            </p>
+                        </div>
+                    </div>
+                    <a href="{{ route('profile.edit') }}#pengaturan"
+                        class="text-xs px-3 py-1.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 transition-colors">
+                        Atur API
+                    </a>
+                </div>
+            </div>
+        @endif
 
 
         {{-- ════════════════════════════════════════════════════════════
@@ -188,7 +218,8 @@
                                 </div>
                                 <div class="w-full bg-stone-100 dark:bg-stone-700 rounded-full h-1.5">
                                     <div class="bg-rose-400 h-1.5 rounded-full transition-all"
-                                        style="width:{{ $maxCat > 0 ? round(($cat->total / $maxCat) * 100, 0) : 0 }}%"></div>
+                                        style="width:{{ $maxCat > 0 ? round(($cat->total / $maxCat) * 100, 0) : 0 }}%">
+                                    </div>
                                 </div>
                             </div>
                         @endforeach
@@ -241,7 +272,8 @@
                                                             <i class="fa-solid {{ $acc->getTypeIcon() }}"></i>
                                                         </div>
                                                         <div>
-                                                            <p class="font-semibold text-stone-800 dark:text-white text-sm">
+                                                            <p
+                                                                class="font-semibold text-stone-800 dark:text-white text-sm">
                                                                 {{ $acc->name }}</p>
                                                             @if ($acc->account_number)
                                                                 <p class="text-xs text-stone-400">
@@ -389,6 +421,34 @@
 
             {{-- ── RIGHT COLUMN ── --}}
             <div class="space-y-6">
+
+                @if ($indodaxInstruments->isNotEmpty())
+                    <div
+                        class="bg-white dark:bg-stone-900 rounded-2xl p-6 border border-stone-200 dark:border-stone-800 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-stone-800 dark:text-white">Detail Coin Indodax</h3>
+                            <span class="text-[11px] text-stone-400">Sync manual</span>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            @foreach ($indodaxInstruments->take(6) as $coin)
+                                <div
+                                    class="flex items-center justify-between text-xs p-2.5 rounded-lg bg-stone-50 dark:bg-stone-800">
+                                    <div>
+                                        <p class="font-semibold text-stone-800 dark:text-white">{{ $coin->symbol }}</p>
+                                        <p class="text-stone-400">
+                                            {{ rtrim(rtrim(number_format((float) $coin->total_quantity, 8, '.', ''), '0'), '.') }}
+                                            unit</p>
+                                    </div>
+                                    <p class="font-semibold text-stone-700 dark:text-stone-300">
+                                        Rp
+                                        {{ number_format((float) $coin->total_quantity * (float) $coin->current_price, 0, ',', '.') }}
+                                    </p>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
                 {{-- DISTRIBUSI ASET (chart) ─────────────────────────── --}}
                 <div
@@ -1219,7 +1279,21 @@
             if (res.success) {
                 toast(res.message);
                 setTimeout(() => location.reload(), 800);
-            } else toast(res.message, false);
+            } else {
+                toast(res.message || 'Gagal menyimpan target tabungan.', false);
+            }
+        }
+
+        async function syncIndodaxFinance() {
+            const res = await api('POST', '{{ route('indodax.sync') }}', {});
+            if (res.success) {
+                const coins = (res.synced_coins || []).length;
+                const total = Number(res.total_value_idr || 0).toLocaleString('id-ID');
+                toast(`Indodax tersinkron: ${coins} coin (Rp ${total})`);
+                setTimeout(() => location.reload(), 900);
+            } else {
+                toast(res.error || res.message || 'Sync Indodax gagal.', false);
+            }
         }
 
         // ── DELETE: Savings Goal ──────────────────────────────────────

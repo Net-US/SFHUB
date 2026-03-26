@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\FinanceAccount;
+use App\Models\InvestmentInstrument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -54,6 +55,23 @@ class AssetController extends Controller
         $warrantyAlerts  = $assets->filter(fn($a) => $a->isWarrantyExpiringSoon(30));
         $insuranceAlerts = $assets->filter(fn($a) => $a->isInsuranceExpiringSoon(30));
 
+        $indodaxAccount = $accounts->first(function ($account) {
+            return $account->type === 'investment' && strtolower($account->name) === 'indodax';
+        });
+
+        $indodaxInstruments = collect();
+        if ($indodaxAccount) {
+            $indodaxInstruments = InvestmentInstrument::where('user_id', $userId)
+                ->where('type', 'crypto')
+                ->where('finance_account_id', $indodaxAccount->id)
+                ->orderByDesc('total_quantity')
+                ->get();
+        }
+
+        $indodaxTotalValue = $indodaxInstruments->sum(function ($instrument) {
+            return (float) $instrument->total_quantity * (float) $instrument->current_price;
+        });
+
         return view('dashboard.assets', compact(
             'assets',
             'accounts',
@@ -69,6 +87,9 @@ class AssetController extends Controller
             'assetsByCategory',
             'warrantyAlerts',
             'insuranceAlerts',
+            'indodaxAccount',
+            'indodaxInstruments',
+            'indodaxTotalValue',
         ));
     }
 

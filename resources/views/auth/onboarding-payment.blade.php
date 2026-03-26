@@ -652,7 +652,30 @@
                     const data = await res.json();
 
                     if (!res.ok || !data.snap_token) {
-                        throw new Error(data.message || 'Gagal membuat transaksi.');
+                        // Handle specific error codes
+                        if (data.code === 'MIDTRANS_NOT_CONFIGURED') {
+                            payError.innerHTML = `
+                                <div class="font-semibold mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Pembayaran Belum Siap</div>
+                                <div class="text-xs">${data.message}</div>
+                                <div class="mt-2 text-xs">
+                                    <a href="{{ route('dashboard') }}" class="text-emerald-400 hover:underline">
+                                        Lanjutkan ke Dashboard dengan paket gratis →
+                                    </a>
+                                </div>
+                            `;
+                        } else if (data.code === 'MIDTRANS_ERROR') {
+                            payError.innerHTML = `
+                                <div class="font-semibold mb-1"><i class="fa-solid fa-circle-xmark mr-1"></i> Gagal Membuat Transaksi</div>
+                                <div class="text-xs">${data.message}</div>
+                                <div class="mt-2 text-xs text-slate-400">Coba lagi atau hubungi support.</div>
+                            `;
+                        } else {
+                            throw new Error(data.message || 'Gagal membuat transaksi.');
+                        }
+                        payError.classList.remove('hidden');
+                        payBtn.disabled = false;
+                        payBtnText.textContent = 'Bayar Sekarang';
+                        return;
                     }
 
                     window.snap.pay(data.snap_token, {
@@ -666,7 +689,7 @@
                         },
                         onError: () => {
                             window.location.href =
-                            '{{ route('dashboard') }}?payment=error';
+                                '{{ route('dashboard') }}?payment=error';
                         },
                         onClose: () => {
                             payBtn.disabled = false;
@@ -674,7 +697,10 @@
                         },
                     });
                 } catch (err) {
-                    payError.textContent = err.message;
+                    payError.innerHTML = `
+                        <div class="font-semibold mb-1"><i class="fa-solid fa-circle-xmark mr-1"></i> Error</div>
+                        <div class="text-xs">${err.message}</div>
+                    `;
                     payError.classList.remove('hidden');
                     payBtn.disabled = false;
                     payBtnText.textContent = 'Bayar Sekarang';

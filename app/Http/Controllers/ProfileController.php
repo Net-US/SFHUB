@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FinanceAccount;
 use App\Models\Asset;
 use App\Models\Debt;
+use App\Models\IndodaxConnection;
 use App\Models\InvestmentInstrument;
 use App\Models\Notification;
 use App\Models\User;
@@ -42,7 +43,33 @@ class ProfileController extends Controller
             'total_net_worth'  => FinanceAccount::where('user_id', $userId)->where('is_active', true)->sum('balance'),
         ];
 
-        return view('profile.edit', compact('user', 'notifications', 'unreadCount', 'stats'));
+        $indodaxConnection = IndodaxConnection::where('user_id', $userId)
+            ->where('provider', 'indodax')
+            ->first();
+
+        $indodaxAccount = FinanceAccount::where('user_id', $userId)
+            ->where('type', 'investment')
+            ->where('name', 'Indodax')
+            ->first();
+
+        $indodaxInstruments = collect();
+        if ($indodaxAccount) {
+            $indodaxInstruments = InvestmentInstrument::where('user_id', $userId)
+                ->where('type', 'crypto')
+                ->where('finance_account_id', $indodaxAccount->id)
+                ->orderByDesc('total_quantity')
+                ->get();
+        }
+
+        return view('profile.edit', compact(
+            'user',
+            'notifications',
+            'unreadCount',
+            'stats',
+            'indodaxConnection',
+            'indodaxAccount',
+            'indodaxInstruments'
+        ));
     }
 
     // ── UPDATE PROFIL DASAR ───────────────────────────────────────────────

@@ -14,6 +14,9 @@ use Illuminate\Auth\Events\Registered;
 
 class AuthController extends Controller
 {
+    // ────────────────────────────────────────────────────────────────────
+    // LOGIN
+    // ────────────────────────────────────────────────────────────────────
     public function showLogin()
     {
         return view('auth.portal-morph', ['mode' => 'login']);
@@ -26,26 +29,28 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        // Throttle: cek max_login_attempts dari settings
+        // Rate-limiting
         $maxAttempts = (int) (\App\Models\SystemSetting::get('max_login_attempts', 5));
-        $key = 'login_attempts_' . $request->ip();
-        $attempts = cache()->get($key, 0);
+        $key         = 'login_attempts_' . $request->ip();
+        $attempts    = cache()->get($key, 0);
         if ($attempts >= $maxAttempts) {
-            return back()->withErrors(['login' => 'Terlalu banyak percobaan login. Coba lagi dalam 15 menit.'])->onlyInput('login');
+            return back()
+                ->withErrors(['login' => 'Terlalu banyak percobaan login. Coba lagi dalam 15 menit.'])
+                ->onlyInput('login');
         }
 
         $loginField  = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
         $credentials = [$loginField => $request->login, 'password' => $request->password];
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            // Reset attempts on success
             cache()->forget($key);
-
             $user = Auth::user();
 
             if (isset($user->is_active) && !$user->is_active) {
                 Auth::logout();
-                return back()->withErrors(['login' => 'Akun Anda telah dinonaktifkan.'])->onlyInput('login');
+                return back()
+                    ->withErrors(['login' => 'Akun Anda telah dinonaktifkan.'])
+                    ->onlyInput('login');
             }
 
             $request->session()->regenerate();
@@ -54,11 +59,19 @@ class AuthController extends Controller
                 return redirect()->intended(route('admin.index'));
             }
 
-            // Jika pilih plan premium saat daftar tapi belum bayar, arahkan ke checkout
+            // ── Cek pending subscription → arahkan ke payment ──────────
             if ($this->shouldRedirectToPremiumCheckout($user)) {
-                $plan = $this->resolvePlanBySlug((string) $user->plan);
+                $pending = UserSubscription::where('user_id', $user->id)
+                    ->where('status', 'pending')
+                    ->latest()
+                    ->with('plan')
+                    ->first();
+
+                $plan = $pending?->plan ?? $this->resolvePlanBySlug((string) $user->plan);
+
                 if ($plan) {
-                    return redirect()->route('auth.onboarding-payment', ['plan' => $plan->id])
+                    return redirect()
+                        ->route('auth.onboarding-payment', ['plan' => $plan->id])
                         ->with('info', 'Akun premium kamu belum aktif. Selesaikan pembayaran untuk melanjutkan.');
                 }
             }
@@ -66,7 +79,6 @@ class AuthController extends Controller
             return redirect()->intended(route('dashboard'));
         }
 
-        // Increment failed attempts with 15-minute TTL
         cache()->put($key, $attempts + 1, now()->addMinutes(15));
 
         return back()->withErrors([
@@ -74,6 +86,9 @@ class AuthController extends Controller
         ])->onlyInput('login');
     }
 
+    // ────────────────────────────────────────────────────────────────────
+    // REGISTER
+    // ────────────────────────────────────────────────────────────────────
     public function showRegister()
     {
         return view('auth.portal-morph', ['mode' => 'register']);
@@ -89,14 +104,14 @@ class AuthController extends Controller
             'terms'    => ['required', 'accepted'],
         ]);
 
-        // Check if user registration is enabled
         if (!\App\Models\SystemSetting::get('user_registration', true)) {
             return back()->withErrors(['email' => 'Pendaftaran user sedang ditutup.']);
         }
 
         $selectedPlan = $request->input('plan', 'free');
+        $isPaidPlan   = in_array($selectedPlan, ['pro', 'team'], true);
 
-        // Auto-generate unique username
+        // ── Auto-generate username ────────────────────────────────────
         $base = strtolower(preg_replace('/[^a-z0-9]/', '', strtolower($request->name)));
         if (empty($base)) $base = 'user';
         $username = $base;
@@ -106,14 +121,14 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'name'      => $request->name,
-            'username'  => $username,
-            'email'     => $request->email,
-            'password'  => Hash::make($request->password),
-            'avatar'    => null,
-            'role'      => 'student',
-            'is_active' => true,
-            'plan'      => $selectedPlan,
+            'name'        => $request->name,
+            'username'    => $username,
+            'email'       => $request->email,
+            'password'    => Hash::make($request->password),
+            'avatar'      => null,
+            'role'        => 'student',
+            'is_active'   => true,
+            'plan'        => 'free', // selalu free dulu sampai pembayaran selesai
             'preferences' => json_encode([
                 'theme'         => 'light',
                 'notifications' => true,
@@ -124,44 +139,87 @@ class AuthController extends Controller
 
         Profile::create(['user_id' => $user->id]);
         $this->createDefaultWorkspace($user);
-
         event(new Registered($user));
         Auth::login($user);
 
-        // Jika plan berbayar, arahkan ke onboarding payment
-        if (in_array($selectedPlan, ['pro', 'team'], true)) {
-            $plan = SubscriptionPlan::where('is_active', true)
-                ->where(fn($q) => $q->where('slug', $selectedPlan)->orWhereRaw('LOWER(name) = ?', [$selectedPlan]))
-                ->first();
+        // ── Jika plan berbayar dipilih ─────────────────────────────────
+        if ($isPaidPlan) {
+            // Cek Midtrans siap
+            $midtransReady = !empty(\App\Models\SystemSetting::get('midtrans_server_key'))
+                && !empty(\App\Models\SystemSetting::get('midtrans_client_key'));
 
-            if ($plan) {
-                return redirect()->route('auth.onboarding-payment', ['plan' => $plan->id])
-                    ->with('success', 'Akun berhasil dibuat! Lanjutkan pembayaran untuk aktivasi premium.');
+            if (!$midtransReady) {
+                // Midtrans belum dikonfigurasi — beri tahu user dengan jelas
+                return redirect()->route('dashboard')
+                    ->with('warning',
+                        '⚠️ Akun berhasil dibuat, tetapi paket ' . strtoupper($selectedPlan) .
+                        ' belum dapat diaktifkan karena sistem pembayaran belum dikonfigurasi. ' .
+                        'Kamu masuk dengan paket Gratis. Coba upgrade nanti dari halaman Profil.'
+                    );
             }
 
-            // Jika plan di DB belum ada, arahkan ke dashboard dengan warning
-            return redirect()->route('dashboard')
-                ->with('warning', 'Akun dibuat dengan paket gratis. Paket premium belum tersedia, hubungi admin.');
+            // Cari plan di database
+            $plan = $this->resolvePlanBySlug($selectedPlan);
+
+            if (!$plan) {
+                // Plan ada di DB tapi slug tidak cocok — beri tahu user
+                return redirect()->route('dashboard')
+                    ->with('warning',
+                        '⚠️ Akun berhasil dibuat, tetapi paket ' . strtoupper($selectedPlan) .
+                        ' tidak ditemukan di sistem. Kamu masuk dengan paket Gratis. ' .
+                        'Hubungi admin untuk mengaktifkan paket premium.'
+                    );
+            }
+
+            // Buat pending subscription
+            $pendingSub = UserSubscription::create([
+                'user_id'              => $user->id,
+                'subscription_plan_id' => $plan->id,
+                'status'               => 'pending',
+                'billing_cycle'        => 'monthly',
+                'amount_paid'          => $plan->price_monthly,
+                'starts_at'            => now(),
+                'ends_at'              => now()->addMonth(),
+            ]);
+
+            return redirect()
+                ->route('auth.onboarding-payment', ['plan' => $plan->id])
+                ->with('success', 'Akun berhasil dibuat! Selesaikan pembayaran untuk mengaktifkan paket ' . $plan->name . '.');
         }
 
         return redirect()->route('dashboard')
-            ->with('success', 'Selamat datang di SFHUB, ' . $user->name . '!');
+            ->with('success', 'Selamat datang di SFHUB, ' . $user->name . '! 🎉');
     }
 
+    // ────────────────────────────────────────────────────────────────────
+    // ONBOARDING PAYMENT PAGE
+    // ────────────────────────────────────────────────────────────────────
     public function showOnboardingPayment(Request $request)
     {
         $plans = SubscriptionPlan::where('is_active', true)->orderBy('sort_order')->get();
 
         if ($plans->isEmpty()) {
             return redirect()->route('dashboard')
-                ->with('warning', 'Belum ada paket premium yang tersedia.');
+                ->with('warning', 'Belum ada paket premium yang tersedia. Hubungi admin.');
         }
 
-        $selectedPlan = $plans->firstWhere('id', (int) $request->query('plan')) ?? $plans->first();
+        $selectedPlan = $plans->firstWhere('id', (int) $request->query('plan'))
+            ?? $plans->where('price_monthly', '>', 0)->first()
+            ?? $plans->first();
 
-        return view('auth.onboarding-payment', compact('plans', 'selectedPlan'));
+        // Cek apakah user sudah punya active subscription
+        $activeSubscription = UserSubscription::where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->where('ends_at', '>', now())
+            ->with('plan')
+            ->first();
+
+        return view('auth.onboarding-payment', compact('plans', 'selectedPlan', 'activeSubscription'));
     }
 
+    // ────────────────────────────────────────────────────────────────────
+    // LOGOUT
+    // ────────────────────────────────────────────────────────────────────
     public function logout(Request $request)
     {
         Auth::logout();
@@ -170,6 +228,9 @@ class AuthController extends Controller
         return redirect('/');
     }
 
+    // ────────────────────────────────────────────────────────────────────
+    // PRIVATE HELPERS
+    // ────────────────────────────────────────────────────────────────────
     private function createDefaultWorkspace(User $user): void
     {
         $workspaces = [
@@ -185,19 +246,29 @@ class AuthController extends Controller
 
     private function shouldRedirectToPremiumCheckout(User $user): bool
     {
-        if (!in_array((string) $user->plan, ['pro', 'team'], true)) {
-            return false;
-        }
-        return !UserSubscription::where('user_id', $user->id)
+        // Jika sudah punya active subscription → tidak redirect
+        $hasActive = UserSubscription::where('user_id', $user->id)
             ->where('status', 'active')
             ->where('ends_at', '>', now())
+            ->exists();
+        if ($hasActive) return false;
+
+        // Jika ada pending subscription → redirect
+        return UserSubscription::where('user_id', $user->id)
+            ->where('status', 'pending')
             ->exists();
     }
 
     private function resolvePlanBySlug(string $slug): ?SubscriptionPlan
     {
+        if (empty($slug) || $slug === 'free') return null;
+
         return SubscriptionPlan::where('is_active', true)
-            ->where(fn($q) => $q->where('slug', $slug)->orWhereRaw('LOWER(name) = ?', [strtolower($slug)]))
+            ->where(fn($q) =>
+                $q->whereRaw('LOWER(slug) = ?', [strtolower($slug)])
+                  ->orWhereRaw('LOWER(name) LIKE ?', ['%' . strtolower($slug) . '%'])
+            )
+            ->orderBy('sort_order')
             ->first();
     }
 }

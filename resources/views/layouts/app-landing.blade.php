@@ -131,9 +131,128 @@
         rel="stylesheet" />
 
     <style>
+        :root {
+            --landing-bg: #fafaf9;
+            --landing-surface: #ffffff;
+            --landing-text: #1c1917;
+            --landing-muted: #57534e;
+            --landing-brand: #f97316;
+            --landing-brand-2: #fb7185;
+            --bg: #fafaf9;
+            --surface: #ffffff;
+            --text: #1c1917;
+            --muted: #57534e;
+            --brand: #f97316;
+            --border: #e7e5e4;
+        }
+
+        .dark {
+            --bg: #0c0a09;
+            --surface: #1c1917;
+            --text: #f5f5f4;
+            --muted: #a8a29e;
+            --brand: #f97316;
+            --border: #292524;
+        }
+
         body {
             font-family: "Inter", sans-serif;
             scroll-behavior: smooth;
+            background: var(--landing-bg);
+            color: var(--landing-text);
+        }
+
+        .landing-container {
+            max-width: 80rem;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .lp-container {
+            max-width: 80rem;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        .landing-section {
+            position: relative;
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+
+        .lp-section {
+            position: relative;
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+
+        .landing-section-title {
+            font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+            line-height: 1.15;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #1c1917;
+        }
+
+        .dark .landing-section-title {
+            color: #f5f5f4;
+        }
+
+        .landing-section-subtitle {
+            margin-top: .75rem;
+            color: #78716c;
+            font-size: .98rem;
+            max-width: 42rem;
+        }
+
+        .dark .landing-section-subtitle {
+            color: #a8a29e;
+        }
+
+        .lp-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.1;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .lp-subtitle {
+            margin-top: 1rem;
+            color: var(--muted);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .lp-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .4rem 1rem;
+            border-radius: 999px;
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: #c2410c;
+            background: #ffedd5;
+            border: 1px solid #fed7aa;
+        }
+
+        .dark .lp-eyebrow {
+            background: rgba(249, 115, 22, 0.15);
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #f97316 0%, #fb7185 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .hero-gradient {
@@ -183,12 +302,63 @@
         .hover-lift:hover {
             transform: translateY(-8px);
         }
+
+        .brand-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .35rem .8rem;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: #c2410c;
+            background: #ffedd5;
+            border: 1px solid #fed7aa;
+        }
+
+        /* Demo Banner */
+        .demo-banner {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 10px 35px -5px rgba(249, 115, 22, 0.6);
+            }
+        }
+
+        .demo-banner i {
+            font-size: 1rem;
+        }
     </style>
 
     @stack('styles')
 </head>
 
-<body class="bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100 transition-colors duration-300">
+<body id="top"
+    class="bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100 transition-colors duration-300">
     @include('layouts.navbar')
 
     <main>
@@ -196,6 +366,12 @@
     </main>
 
     @include('layouts.footer')
+
+    {{-- Demo Status Banner --}}
+    <div class="demo-banner" title="Platform masih dalam tahap pengembangan dan pengujian">
+        <i class="fa-solid fa-flask"></i>
+        <span>Beta / Demo Mode</span>
+    </div>
 
     @stack('scripts')
 
@@ -251,34 +427,6 @@
                     });
                 }
             });
-        });
-    </script>
-    // Tambahkan script ini di bagian scripts pada layout
-    <script>
-        function previewAvatar(event) {
-            const input = event.target;
-            const preview = document.getElementById('avatar-preview');
-            const placeholder = document.getElementById('avatar-placeholder');
-
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.classList.remove('hidden');
-                    placeholder.classList.add('hidden');
-                }
-
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        // Untuk form di halaman register terpisah
-        document.addEventListener('DOMContentLoaded', function() {
-            const avatarInput = document.getElementById('avatar');
-            if (avatarInput) {
-                avatarInput.addEventListener('change', previewAvatar);
-            }
         });
     </script>
 </body>

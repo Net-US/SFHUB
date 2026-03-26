@@ -15,14 +15,22 @@
                 </a>
             </div>
             <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-stone-600 dark:text-stone-300">
-                <a href="#fitur" class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Fitur</a>
+                <a href="{{ route('home') }}"
+                    class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors {{ request()->routeIs('home') ? 'text-orange-500' : '' }}">Home</a>
+                <a href="{{ route('about') }}"
+                    class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors {{ request()->routeIs('about') ? 'text-orange-500' : '' }}">About</a>
+                <a href="{{ route('contact') }}"
+                    class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors {{ request()->routeIs('contact') ? 'text-orange-500' : '' }}">Contact</a>
                 <a href="{{ route('blog.index') }}"
-                    class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Blog</a>
-                <a href="#bagaimana" class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Cara
-                    Kerja</a>
-                <a href="#testimoni"
-                    class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Testimoni</a>
-                <a href="#harga" class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Harga</a>
+                    class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors {{ request()->routeIs('blog.*') ? 'text-orange-500' : '' }}">Blog</a>
+                @if (request()->routeIs('home'))
+                    <a href="#fitur"
+                        class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Fitur</a>
+                    <a href="#cara-kerja"
+                        class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Cara Kerja</a>
+                    <a href="#feedback"
+                        class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Feedback</a>
+                @endif
 
                 <button id="theme-toggle"
                     class="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors focus:outline-none">
@@ -85,14 +93,23 @@
     <div id="mobile-menu"
         class="md:hidden hidden bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800">
         <div class="px-4 py-3 space-y-3">
-            <a href="#fitur"
-                class="block py-2 hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Fitur</a>
-            <a href="#bagaimana"
-                class="block py-2 hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Cara Kerja</a>
-            <a href="#testimoni"
-                class="block py-2 hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Testimoni</a>
-            <a href="#harga"
-                class="block py-2 hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Harga</a>
+            <a href="{{ route('home') }}"
+                class="block py-2 {{ request()->routeIs('home') ? 'text-orange-500' : '' }} hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Home</a>
+            <a href="{{ route('about') }}"
+                class="block py-2 {{ request()->routeIs('about') ? 'text-orange-500' : '' }} hover:text-orange-500 dark:hover:text-orange-400 transition-colors">About</a>
+            <a href="{{ route('contact') }}"
+                class="block py-2 {{ request()->routeIs('contact') ? 'text-orange-500' : '' }} hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Contact</a>
+            <a href="{{ route('blog.index') }}"
+                class="block py-2 {{ request()->routeIs('blog.*') ? 'text-orange-500' : '' }} hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Blog</a>
+
+            @if (request()->routeIs('home'))
+                <a href="#fitur"
+                    class="block py-2 hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Fitur</a>
+                <a href="#cara-kerja"
+                    class="block py-2 hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Cara Kerja</a>
+                <a href="#feedback"
+                    class="block py-2 hover:text-orange-500 dark:hover:text-orange-400 transition-colors">Feedback</a>
+            @endif
 
             <div class="pt-3 border-t border-stone-200 dark:border-stone-700">
                 @guest
