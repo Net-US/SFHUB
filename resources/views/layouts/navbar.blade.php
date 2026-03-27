@@ -6,8 +6,8 @@
                 <a href="{{ route('home') }}"
                     class="text-2xl font-black text-stone-900 dark:text-white tracking-tighter transition-colors flex items-center">
                     @if (\App\Models\SiteSetting::getValue('site_logo'))
-                        <img src="{{ \App\Models\SiteSetting::getValue('site_logo') }}" alt="StudentHub Logo"
-                            class="h-8 w-auto mr-2">
+                        <img src="{{ \App\Helpers\StorageHelper::getImageUrl(\App\Models\SiteSetting::getValue('site_logo'), 'site') }}"
+                            alt="StudentHub Logo" class="h-8 w-auto mr-2">
                     @else
                         <i class="fa-solid fa-layer-group text-orange-500 mr-2"></i>
                     @endif

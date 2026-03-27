@@ -10,7 +10,8 @@ use App\Models\LandingTestimonial;
 use App\Models\SiteSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Helpers\StorageHelper;
+use Illuminate\Support\Facades\Log;
 
 class LandingPageController extends Controller
 {
@@ -368,26 +369,38 @@ class LandingPageController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            // Ensure storage directory exists
-            $storagePath = storage_path('app/public/landing');
-            if (!file_exists($storagePath)) {
-                mkdir($storagePath, 0755, true);
-            }
-
             $file = $request->file('image');
             $filename = 'hero_' . time() . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('landing', $filename, 'public');
 
-            if ($path) {
+            try {
+                // Delete old hero image if exists (from hero_id in request or from existing heroes)
+                $heroId = $request->input('hero_id');
+                if ($heroId) {
+                    $hero = LandingHero::find($heroId);
+                    if ($hero && $hero->hero_image) {
+                        StorageHelper::deleteFile($hero->hero_image, 'landing');
+                    }
+                }
+
+                // Use StorageHelper to store file - returns only filename
+                $result = StorageHelper::storeFile($file, 'images/landing', $filename);
+
+                Log::info('Hero image uploaded', [
+                    'filename' => $result['filename'],
+                    'full_url' => $result['full_url'],
+                    'write_path' => $result['write_path'],
+                ]);
+
                 return response()->json([
                     'success' => true,
-                    'url' => Storage::url($path),
-                    'path' => $path,
+                    'url' => $result['full_url'],
+                    'filename' => $result['filename'],  // Only filename, no path
                 ]);
-            } else {
+            } catch (\Exception $e) {
+                Log::error('Failed to save hero image', ['error' => $e->getMessage()]);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to store image',
+                    'message' => 'Gagal menyimpan gambar: ' . $e->getMessage(),
                 ], 500);
             }
         }
@@ -406,29 +419,32 @@ class LandingPageController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            // Ensure storage directory exists
-            $storagePath = storage_path('app/public/site');
-            if (!file_exists($storagePath)) {
-                mkdir($storagePath, 0755, true);
-            }
-
             $file = $request->file('image');
             $filename = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('site', $filename, 'public');
 
-            if ($path) {
-                // Save to site settings
-                SiteSetting::setValue('site_logo', Storage::url($path), 'image');
+            try {
+                // Delete old logo if exists
+                $oldLogo = SiteSetting::getValue('site_logo');
+                if ($oldLogo) {
+                    StorageHelper::deleteFile($oldLogo, 'site');
+                }
+
+                // Use StorageHelper to store file - returns only filename
+                $result = StorageHelper::storeFile($file, 'images/site', $filename);
+
+                // Save to site settings - simpan hanya nama file, bukan path lengkap
+                SiteSetting::setValue('site_logo', $result['filename'], 'image');
 
                 return response()->json([
                     'success' => true,
-                    'url' => Storage::url($path),
-                    'path' => $path,
+                    'url' => $result['full_url'],
+                    'filename' => $result['filename'],  // Only filename, no path
                 ]);
-            } else {
+            } catch (\Exception $e) {
+                Log::error('Failed to save logo', ['error' => $e->getMessage()]);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to store logo',
+                    'message' => 'Gagal menyimpan logo: ' . $e->getMessage(),
                 ], 500);
             }
         }
@@ -447,29 +463,32 @@ class LandingPageController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            // Ensure storage directory exists
-            $storagePath = storage_path('app/public/site');
-            if (!file_exists($storagePath)) {
-                mkdir($storagePath, 0755, true);
-            }
-
             $file = $request->file('image');
             $filename = 'favicon_' . time() . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('site', $filename, 'public');
 
-            if ($path) {
-                // Save to site settings
-                SiteSetting::setValue('site_favicon', Storage::url($path), 'image');
+            try {
+                // Delete old favicon if exists
+                $oldFavicon = SiteSetting::getValue('site_favicon');
+                if ($oldFavicon) {
+                    StorageHelper::deleteFile($oldFavicon, 'site');
+                }
+
+                // Use StorageHelper to store file - returns only filename
+                $result = StorageHelper::storeFile($file, 'images/site', $filename);
+
+                // Save to site settings - simpan hanya nama file, bukan path lengkap
+                SiteSetting::setValue('site_favicon', $result['filename'], 'image');
 
                 return response()->json([
                     'success' => true,
-                    'url' => Storage::url($path),
-                    'path' => $path,
+                    'url' => $result['full_url'],
+                    'filename' => $result['filename'],  // Only filename, no path
                 ]);
-            } else {
+            } catch (\Exception $e) {
+                Log::error('Failed to save favicon', ['error' => $e->getMessage()]);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to store favicon',
+                    'message' => 'Gagal menyimpan favicon: ' . $e->getMessage(),
                 ], 500);
             }
         }
@@ -478,5 +497,72 @@ class LandingPageController extends Controller
             'success' => false,
             'message' => 'No image file provided',
         ], 400);
+    }
+
+    // Delete hero image
+    public function deleteHeroImage(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'hero_id' => 'required|integer|exists:landing_heroes,id',
+        ]);
+
+        $hero = LandingHero::find($validated['hero_id']);
+        if (!$hero) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hero not found',
+            ], 404);
+        }
+
+        // Delete the old image file if exists
+        if ($hero->hero_image) {
+            StorageHelper::deleteFile($hero->hero_image, 'landing');
+        }
+
+        // Clear the hero_image field
+        $hero->update(['hero_image' => null]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Hero image deleted successfully',
+        ]);
+    }
+
+    // Delete logo
+    public function deleteLogo(Request $request): JsonResponse
+    {
+        $logoFilename = SiteSetting::getValue('site_logo');
+
+        if ($logoFilename) {
+            // Delete the file
+            StorageHelper::deleteFile($logoFilename, 'site');
+
+            // Clear the setting
+            SiteSetting::setValue('site_logo', null, 'image');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Logo deleted successfully',
+        ]);
+    }
+
+    // Delete favicon
+    public function deleteFavicon(Request $request): JsonResponse
+    {
+        $faviconFilename = SiteSetting::getValue('site_favicon');
+
+        if ($faviconFilename) {
+            // Delete the file
+            StorageHelper::deleteFile($faviconFilename, 'site');
+
+            // Clear the setting
+            SiteSetting::setValue('site_favicon', null, 'image');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Favicon deleted successfully',
+        ]);
     }
 }

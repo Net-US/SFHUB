@@ -52,12 +52,12 @@ class Media extends Model
 
     public function getFullPath(): string
     {
-        return storage_path('app/public/' . $this->filepath);
+        return get_image_base_path() . '/' . $this->filepath;
     }
 
     public function getUrl(): string
     {
-        return asset('storage/' . $this->filepath);
+        return asset($this->filepath);
     }
 
     public function getSizeForHumans(): string

@@ -7,7 +7,7 @@ use App\Models\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class AdminMediaController extends Controller
 {
@@ -103,13 +103,59 @@ class AdminMediaController extends Controller
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
         $filepath = $folder . '/' . $filename;
 
-        // Store file
-        $path = $file->storeAs($folder, $filename, 'public');
+        // Store file to public/images/ dengan pengecekan folder
+        $uploadPath = public_path('images/' . $folder);
 
-        if (!$path) {
+        Log::info('Media upload debug', [
+            'uploadPath' => $uploadPath,
+            'exists' => file_exists($uploadPath),
+            'writable' => is_writable(dirname($uploadPath))
+        ]);
+
+        if (!file_exists($uploadPath)) {
+            $mkdirResult = @mkdir($uploadPath, 0755, true);
+            if (!$mkdirResult) {
+                Log::error('Failed to create media directory', [
+                    'path' => $uploadPath,
+                    'error' => error_get_last()
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal membuat folder upload. Periksa permission.',
+                ], 500);
+            }
+        }
+
+        if (!is_writable($uploadPath)) {
+            Log::error('Media upload path not writable', ['path' => $uploadPath]);
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to upload file',
+                'message' => 'Folder upload tidak dapat ditulis.',
+            ], 500);
+        }
+
+        try {
+            $file->move($uploadPath, $filename);
+
+            // Verifikasi file tersimpan
+            $fullPath = $uploadPath . '/' . $filename;
+            if (!file_exists($fullPath)) {
+                Log::error('Media file not found after move', ['path' => $fullPath]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File tidak ditemukan setelah upload.',
+                ], 500);
+            }
+
+            Log::info('Media file saved', ['path' => $filepath]);
+        } catch (\Exception $e) {
+            Log::error('Failed to move media file', [
+                'error' => $e->getMessage(),
+                'path' => $uploadPath
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan file: ' . $e->getMessage(),
             ], 500);
         }
 
@@ -171,9 +217,10 @@ class AdminMediaController extends Controller
      */
     public function destroy(Media $media): JsonResponse
     {
-        // Delete file from storage
-        if (Storage::disk('public')->exists($media->filepath)) {
-            Storage::disk('public')->delete($media->filepath);
+        // Delete file from public/images
+        $fullPath = public_path('images/' . $media->filepath);
+        if (file_exists($fullPath)) {
+            unlink($fullPath);
         }
 
         // Delete record
@@ -198,8 +245,9 @@ class AdminMediaController extends Controller
         $mediaItems = Media::whereIn('id', $validated['ids'])->get();
 
         foreach ($mediaItems as $media) {
-            if (Storage::disk('public')->exists($media->filepath)) {
-                Storage::disk('public')->delete($media->filepath);
+            $fullPath = public_path('images/' . $media->filepath);
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
             }
             $media->delete();
         }
@@ -224,8 +272,24 @@ class AdminMediaController extends Controller
         $newFolder = $validated['folder_name'];
         $fullPath = $parent ? $parent . '/' . $newFolder : $newFolder;
 
-        // Create folder in storage
-        Storage::disk('public')->makeDirectory($fullPath);
+        // Create folder in public/images
+        $folderPath = public_path('images/' . $fullPath);
+
+        if (!file_exists($folderPath)) {
+            $mkdirResult = @mkdir($folderPath, 0755, true);
+            if (!$mkdirResult) {
+                Log::error('Failed to create media folder', [
+                    'path' => $folderPath,
+                    'error' => error_get_last()
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal membuat folder. Periksa permission.',
+                ], 500);
+            }
+        }
+
+        Log::info('Media folder created', ['path' => $folderPath]);
 
         return response()->json([
             'success' => true,
@@ -297,15 +361,19 @@ class AdminMediaController extends Controller
         if (str_starts_with($mimeType, 'audio/')) {
             return 'audio';
         }
-        if (str_starts_with($mimeType, 'application/pdf') ||
+        if (
+            str_starts_with($mimeType, 'application/pdf') ||
             str_starts_with($mimeType, 'application/msword') ||
             str_starts_with($mimeType, 'application/vnd.openxmlformats-officedocument') ||
-            str_starts_with($mimeType, 'text/')) {
+            str_starts_with($mimeType, 'text/')
+        ) {
             return 'document';
         }
-        if (str_starts_with($mimeType, 'application/zip') ||
+        if (
+            str_starts_with($mimeType, 'application/zip') ||
             str_starts_with($mimeType, 'application/x-rar') ||
-            str_starts_with($mimeType, 'application/x-7z-compressed')) {
+            str_starts_with($mimeType, 'application/x-7z-compressed')
+        ) {
             return 'archive';
         }
         return 'other';

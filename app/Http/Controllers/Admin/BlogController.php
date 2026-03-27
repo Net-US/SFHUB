@@ -9,7 +9,6 @@ use App\Models\BlogTag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class BlogController extends Controller
@@ -31,7 +30,7 @@ class BlogController extends Controller
         }
 
         if ($request->has('category')) {
-            $query->whereHas('categories', fn($q) => $q->where('slug', $request->get('category')));
+            $query->whereHas('categories', fn($q) => $q->where('id', $request->get('category')));
         }
 
         $posts = $query->latest()->paginate($request->get('per_page', 20));
@@ -140,24 +139,41 @@ class BlogController extends Controller
                         ], 422);
                     }
 
-                    // Create directory if not exists
-                    $uploadPath = public_path('images/blog');
-                    if (!file_exists($uploadPath)) {
-                        mkdir($uploadPath, 0755, true);
+                    // Store to images/blog menggunakan helper
+                    $folderCheck = ensure_image_directory('blog');
+                    if (!$folderCheck['success']) {
+                        Log::error('Blog upload failed', ['error' => $folderCheck['error']]);
+                        return response()->json([
+                            'success' => false,
+                            'message' => $folderCheck['error'],
+                            'errors' => ['featured_image' => $folderCheck['error']]
+                        ], 500);
                     }
 
-                    // Create filename and save
+                    $uploadPath = $folderCheck['path'];
+
                     $filename = 'blog_' . time() . '_' . Str::random(10) . '.' . $imageType;
                     $fullPath = $uploadPath . '/' . $filename;
 
-                    // Save file to public/images/blog
-                    if (file_put_contents($fullPath, $imageData) === false) {
+                    // Save file dengan error handling
+                    $saveResult = @file_put_contents($fullPath, $imageData);
+                    if ($saveResult === false) {
+                        Log::error('Failed to save blog image', [
+                            'path' => $fullPath,
+                            'size' => strlen($imageData),
+                            'error' => error_get_last()
+                        ]);
                         return response()->json([
                             'success' => false,
                             'message' => 'Gagal menyimpan gambar. Periksa permission folder.',
-                            'errors' => ['featured_image' => 'Gagal menyimpan gambar.']
+                            'errors' => ['featured_image' => 'Gagal menyimpan gambar ke server.']
                         ], 500);
                     }
+
+                    Log::info('Blog image saved successfully', [
+                        'path' => $fullPath,
+                        'db_path' => 'images/blog/' . $filename
+                    ]);
 
                     $validated['featured_image'] = 'images/blog/' . $filename;
                 }
@@ -312,30 +328,50 @@ class BlogController extends Controller
                         ], 422);
                     }
 
-                    // Create directory if not exists
-                    $uploadPath = public_path('images/blog');
-                    if (!file_exists($uploadPath)) {
-                        mkdir($uploadPath, 0755, true);
+                    // Store to images/blog menggunakan helper
+                    $folderCheck = ensure_image_directory('blog');
+                    if (!$folderCheck['success']) {
+                        Log::error('Blog update upload failed', ['error' => $folderCheck['error']]);
+                        return response()->json([
+                            'success' => false,
+                            'message' => $folderCheck['error'],
+                            'errors' => ['featured_image' => $folderCheck['error']]
+                        ], 500);
                     }
 
-                    // Create filename and save
+                    $uploadPath = $folderCheck['path'];
+
                     $filename = 'blog_' . time() . '_' . Str::random(10) . '.' . $imageType;
                     $fullPath = $uploadPath . '/' . $filename;
 
-                    // Save file to public/images/blog
-                    if (file_put_contents($fullPath, $imageData) === false) {
+                    // Save file dengan error handling
+                    $saveResult = @file_put_contents($fullPath, $imageData);
+                    if ($saveResult === false) {
+                        Log::error('Failed to save blog image on update', [
+                            'path' => $fullPath,
+                            'error' => error_get_last()
+                        ]);
                         return response()->json([
                             'success' => false,
-                            'message' => 'Gagal menyimpan gambar. Periksa permission folder.',
-                            'errors' => ['featured_image' => 'Gagal menyimpan gambar.']
+                            'message' => 'Gagal menyimpan gambar.',
+                            'errors' => ['featured_image' => 'Gagal menyimpan gambar ke server.']
                         ], 500);
                     }
+
+                    Log::info('Blog image updated successfully', [
+                        'path' => $fullPath,
+                        'db_path' => 'images/blog/' . $filename
+                    ]);
 
                     $validated['featured_image'] = 'images/blog/' . $filename;
 
                     // Delete old image if exists
-                    if ($post->featured_image && file_exists(public_path($post->featured_image))) {
-                        unlink(public_path($post->featured_image));
+                    if ($post->featured_image) {
+                        $oldPath = get_image_base_path() . '/' . $post->featured_image;
+                        if (file_exists($oldPath)) {
+                            @unlink($oldPath);
+                            Log::info('Old blog image deleted', ['old_path' => $oldPath]);
+                        }
                     }
                 }
             } else {

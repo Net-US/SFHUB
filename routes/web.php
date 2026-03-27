@@ -377,6 +377,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/faq/{faq}', [FaqController::class, 'show'])->name('faq.show');
     Route::put('/faq/{faq}', [FaqController::class, 'update'])->name('faq.update');
     Route::delete('/faq/{faq}', [FaqController::class, 'destroy'])->name('faq.destroy');
+    Route::patch('/faq/{faq}/toggle', [FaqController::class, 'toggle'])->name('faq.toggle');
     Route::post('/faq-categories', [FaqController::class, 'storeCategory'])->name('faq.categories.store');
     Route::put('/faq-categories/{category}', [FaqController::class, 'updateCategory'])->name('faq.categories.update');
     Route::delete('/faq-categories/{category}', [FaqController::class, 'destroyCategory'])->name('faq.categories.destroy');
@@ -387,6 +388,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/landing/upload-image', [LandingPageController::class, 'uploadHeroImage'])->name('landing.upload-image');
     Route::post('/landing/upload-logo', [LandingPageController::class, 'uploadLogo'])->name('landing.upload-logo');
     Route::post('/landing/upload-favicon', [LandingPageController::class, 'uploadFavicon'])->name('landing.upload-favicon');
+    Route::post('/landing/delete-hero-image', [LandingPageController::class, 'deleteHeroImage'])->name('landing.delete-hero-image');
+    Route::post('/landing/delete-logo', [LandingPageController::class, 'deleteLogo'])->name('landing.delete-logo');
+    Route::post('/landing/delete-favicon', [LandingPageController::class, 'deleteFavicon'])->name('landing.delete-favicon');
     Route::get('/landing/heroes', [LandingPageController::class, 'getHeroes'])->name('landing.heroes');
     Route::post('/landing/heroes', [LandingPageController::class, 'storeHero'])->name('landing.heroes.store');
     Route::put('/landing/heroes/{hero}', [LandingPageController::class, 'updateHero'])->name('landing.heroes.update');

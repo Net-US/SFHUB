@@ -85,9 +85,16 @@
                             <input type="file" id="hero-image-input" accept="image/*" class="hidden"
                                 onchange="handleImageUpload(this)">
                             <input type="hidden" id="hero-image-url" value="{{ $hero?->hero_image ?? '' }}">
-                            <div id="hero-image-preview" class="mb-4 {{ $hero?->hero_image ? '' : 'hidden' }}">
-                                <img src="{{ $hero?->hero_image ?? '' }}" alt="Hero"
-                                    class="max-h-40 mx-auto rounded-lg">
+                            <div id="hero-image-preview" class="mb-4 relative {{ $hero?->hero_image ? '' : 'hidden' }}">
+                                <img src="{{ $hero?->hero_image ? \App\Helpers\StorageHelper::getImageUrl(basename($hero->hero_image), 'landing') : '' }}"
+                                    alt="Hero" class="max-h-40 mx-auto rounded-lg">
+                                @if ($hero?->hero_image)
+                                    <button onclick="deleteHeroImage()"
+                                        class="absolute top-2 right-2 bg-rose-500 hover:bg-rose-600 text-white p-1.5 rounded-lg shadow-lg"
+                                        title="Hapus gambar hero">
+                                        <i class="fa-solid fa-trash-can text-sm"></i>
+                                    </button>
+                                @endif
                             </div>
                             <button onclick="document.getElementById('hero-image-input').click()"
                                 class="px-4 py-2 bg-stone-100 dark:bg-stone-800 rounded-lg text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700">
@@ -107,9 +114,16 @@
                                 <input type="hidden" id="logo-url"
                                     value="{{ \App\Models\SiteSetting::getValue('site_logo') }}">
                                 <div id="logo-preview"
-                                    class="mb-3 {{ \App\Models\SiteSetting::getValue('site_logo') ? '' : 'hidden' }}">
-                                    <img src="{{ \App\Models\SiteSetting::getValue('site_logo') }}" alt="Logo"
-                                        class="max-h-16 mx-auto">
+                                    class="mb-3 relative {{ \App\Models\SiteSetting::getValue('site_logo') ? '' : 'hidden' }}">
+                                    <img src="{{ \App\Helpers\StorageHelper::getImageUrl(\App\Models\SiteSetting::getValue('site_logo'), 'site') }}"
+                                        alt="Logo" class="max-h-16 mx-auto">
+                                    @if (\App\Models\SiteSetting::getValue('site_logo'))
+                                        <button onclick="deleteLogo()"
+                                            class="absolute -top-2 -right-2 bg-rose-500 hover:bg-rose-600 text-white p-1 rounded-lg shadow-lg"
+                                            title="Hapus logo">
+                                            <i class="fa-solid fa-trash-can text-xs"></i>
+                                        </button>
+                                    @endif
                                 </div>
                                 <button onclick="document.getElementById('logo-input').click()"
                                     class="px-3 py-2 bg-stone-100 dark:bg-stone-800 rounded-lg text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 text-sm">
@@ -118,7 +132,8 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Favicon</label>
+                            <label
+                                class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">Favicon</label>
                             <div
                                 class="border-2 border-dashed border-stone-300 dark:border-stone-700 rounded-xl p-4 text-center">
                                 <input type="file" id="favicon-input" accept="image/*" class="hidden"
@@ -126,9 +141,16 @@
                                 <input type="hidden" id="favicon-url"
                                     value="{{ \App\Models\SiteSetting::getValue('site_favicon') }}">
                                 <div id="favicon-preview"
-                                    class="mb-3 {{ \App\Models\SiteSetting::getValue('site_favicon') ? '' : 'hidden' }}">
-                                    <img src="{{ \App\Models\SiteSetting::getValue('site_favicon') }}" alt="Favicon"
-                                        class="max-h-8 mx-auto">
+                                    class="mb-3 relative {{ \App\Models\SiteSetting::getValue('site_favicon') ? '' : 'hidden' }}">
+                                    <img src="{{ \App\Helpers\StorageHelper::getImageUrl(\App\Models\SiteSetting::getValue('site_favicon'), 'site') }}"
+                                        alt="Favicon" class="max-h-8 mx-auto">
+                                    @if (\App\Models\SiteSetting::getValue('site_favicon'))
+                                        <button onclick="deleteFavicon()"
+                                            class="absolute -top-2 -right-2 bg-rose-500 hover:bg-rose-600 text-white p-1 rounded-lg shadow-lg"
+                                            title="Hapus favicon">
+                                            <i class="fa-solid fa-trash-can text-xs"></i>
+                                        </button>
+                                    @endif
                                 </div>
                                 <button onclick="document.getElementById('favicon-input').click()"
                                     class="px-3 py-2 bg-stone-100 dark:bg-stone-800 rounded-lg text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 text-sm">
@@ -370,6 +392,8 @@
 
         // Handle image upload
         function handleImageUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
             if (input.files && input.files[0]) {
                 const file = input.files[0];
                 const formData = new FormData();
@@ -397,7 +421,7 @@
                     })
                     .then(data => {
                         if (data.success) {
-                            document.getElementById('hero-image-url').value = data.url;
+                            document.getElementById('hero-image-url').value = data.filename; // Simpan hanya filename
                             document.getElementById('hero-image-preview').innerHTML =
                                 `<img src="${data.url}" alt="Hero" class="max-h-40 mx-auto rounded-lg">`;
                             document.getElementById('hero-image-preview').classList.remove('hidden');
@@ -440,7 +464,7 @@
                     })
                     .then(data => {
                         if (data.success) {
-                            document.getElementById('logo-url').value = data.url;
+                            document.getElementById('logo-url').value = data.filename; // Simpan hanya filename
                             document.getElementById('logo-preview').innerHTML =
                                 `<img src="${data.url}" alt="Logo" class="max-h-16 mx-auto">`;
                             document.getElementById('logo-preview').classList.remove('hidden');
@@ -483,7 +507,7 @@
                     })
                     .then(data => {
                         if (data.success) {
-                            document.getElementById('favicon-url').value = data.url;
+                            document.getElementById('favicon-url').value = data.filename; // Simpan hanya filename
                             document.getElementById('favicon-preview').innerHTML =
                                 `<img src="${data.url}" alt="Favicon" class="max-h-8 mx-auto">`;
                             document.getElementById('favicon-preview').classList.remove('hidden');
@@ -497,6 +521,102 @@
                         showNotification('Error uploading favicon: ' + err.message, 'error');
                     });
             }
+        }
+
+        // Delete hero image
+        function deleteHeroImage() {
+            if (!confirm('Hapus gambar hero? Gambar akan dihapus permanen.')) return;
+
+            const heroId = document.getElementById('hero-id')?.value;
+            if (!heroId) {
+                // Just clear the preview if no hero ID
+                document.getElementById('hero-image-url').value = '';
+                document.getElementById('hero-image-preview').classList.add('hidden');
+                showNotification('Gambar hero dihapus');
+                return;
+            }
+
+            fetch('{{ route('admin.landing.delete-hero-image') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        hero_id: heroId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('hero-image-url').value = '';
+                        document.getElementById('hero-image-preview').classList.add('hidden');
+                        showNotification('Gambar hero berhasil dihapus');
+                    } else {
+                        showNotification(data.message || 'Gagal menghapus gambar', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Delete error:', err);
+                    showNotification('Error menghapus gambar hero', 'error');
+                });
+        }
+
+        // Delete logo
+        function deleteLogo() {
+            if (!confirm('Hapus logo? Logo akan kembali ke default.')) return;
+
+            fetch('{{ route('admin.landing.delete-logo') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('logo-url').value = '';
+                        document.getElementById('logo-preview').classList.add('hidden');
+                        showNotification('Logo berhasil dihapus');
+                    } else {
+                        showNotification(data.message || 'Gagal menghapus logo', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Delete error:', err);
+                    showNotification('Error menghapus logo', 'error');
+                });
+        }
+
+        // Delete favicon
+        function deleteFavicon() {
+            if (!confirm('Hapus favicon? Favicon akan kembali ke default.')) return;
+
+            fetch('{{ route('admin.landing.delete-favicon') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('favicon-url').value = '';
+                        document.getElementById('favicon-preview').classList.add('hidden');
+                        showNotification('Favicon berhasil dihapus');
+                    } else {
+                        showNotification(data.message || 'Gagal menghapus favicon', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Delete error:', err);
+                    showNotification('Error menghapus favicon', 'error');
+                });
         }
 
         // Drag and drop for hero image

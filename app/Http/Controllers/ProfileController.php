@@ -12,7 +12,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
@@ -89,10 +89,41 @@ class ProfileController extends Controller
         ]);
 
         if ($request->hasFile('avatar')) {
-            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
-                Storage::disk('public')->delete($user->avatar);
+            // Delete old avatar if exists
+            if ($user->avatar) {
+                $oldPath = get_image_base_path() . '/' . $user->avatar;
+                if (file_exists($oldPath)) {
+                    @unlink($oldPath);
+                }
             }
-            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+
+            // Ensure avatars directory exists
+            $folderCheck = ensure_image_directory('avatars');
+            if (!$folderCheck['success']) {
+                Log::error('Avatar upload failed', ['error' => $folderCheck['error']]);
+                return response()->json([
+                    'success' => false,
+                    'message' => $folderCheck['error'],
+                ], 500);
+            }
+
+            $avatarPath = $folderCheck['path'];
+
+            // Move uploaded file
+            $file = $request->file('avatar');
+            $filename = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+            try {
+                $file->move($avatarPath, $filename);
+                $data['avatar'] = 'images/avatars/' . $filename;
+                Log::info('Avatar saved', ['path' => $data['avatar']]);
+            } catch (\Exception $e) {
+                Log::error('Failed to save avatar', ['error' => $e->getMessage()]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menyimpan avatar: ' . $e->getMessage(),
+                ], 500);
+            }
         }
 
         // Unset avatar key jika tidak ada file upload (agar tidak overwrite dengan null)

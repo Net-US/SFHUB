@@ -788,7 +788,53 @@
                         @endif
                         <div class="divider">...</div>
                         <form method="POST" action="{{ route('register') }}" id="register-form">
-                            @csrf
+                            {{-- Plan Selection --}}
+                            <div class="form-group">
+                                <label class="form-label">Pilih Paket</label>
+                                <div class="plan-grid" id="plan-selector">
+                                    {{-- FREE Plan (selalu tersedia) --}}
+                                    <label class="plan-card {{ $selectedPlan === 'free' ? 'selected' : '' }}"
+                                        data-plan="free">
+                                        <input type="radio" name="plan" value="free"
+                                            {{ $selectedPlan === 'free' ? 'checked' : '' }} hidden>
+                                        <span class="plan-badge">FREE</span>
+                                        <div class="plan-name">Mahasiswa</div>
+                                        <div class="plan-price">Gratis</div>
+                                    </label>
+
+                                    {{-- Paid Plans dari Database - hanya yang ada --}}
+                                    @foreach ($activePlans->where('price_monthly', '>', 0) as $plan)
+                                        @php
+                                            $planSlug = $plan->slug ?? strtolower($plan->name);
+                                            $isSelected = $selectedPlan === $planSlug;
+                                            $isDisabled = !$midtransReady;
+                                        @endphp
+                                        <label
+                                            class="plan-card {{ $isSelected ? 'selected' : '' }} {{ $isDisabled ? 'disabled' : '' }}"
+                                            data-plan="{{ $planSlug }}">
+                                            <input type="radio" name="plan" value="{{ $planSlug }}"
+                                                {{ $isSelected ? 'checked' : '' }} {{ $isDisabled ? 'disabled' : '' }}
+                                                hidden>
+                                            <span class="plan-badge">{{ strtoupper($plan->name) }}</span>
+                                            <div class="plan-name">
+                                                {{ $plan->description ? explode('.', $plan->description)[0] : 'Premium' }}
+                                            </div>
+                                            <div class="plan-price">
+                                                Rp{{ number_format($plan->price_monthly, 0, ',', '.') }}/bln
+                                            </div>
+                                        </label>
+                                    @endforeach
+                                </div>
+
+                                @if ($midtransReady && $activePlans->where('price_monthly', '>', 0)->count() > 0)
+                                    <div id="payment-hint" class="alert alert-info"
+                                        style="margin-top: 12px; margin-bottom: 0; {{ $selectedPlan === 'free' ? 'display: none;' : '' }}">
+                                        <i class="fa-solid fa-credit-card"></i>
+                                        <span>Anda akan diarahkan ke Midtrans untuk pembayaran setelah membuat
+                                            akun.</span>
+                                    </div>
+                                @endif
+                            </div>
                             <div class="form-group" style="margin-bottom: 0;">
                                 <label class="form-label">Nama Lengkap</label>
                                 <input type="text" name="name" class="form-input" placeholder="Nama lengkap"

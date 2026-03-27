@@ -2,6 +2,16 @@
 <html lang="id">
 
 <head>
+    <!-- Dark Mode Prevention - Blocking Script (MUST BE FIRST) -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem("color-theme");
+            if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+                document.documentElement.classList.add("dark");
+            }
+        })();
+    </script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- SEO Meta Tags -->
@@ -110,7 +120,8 @@
 
     <!-- Favicon -->
     @if (\App\Models\SiteSetting::getValue('site_favicon'))
-        <link rel="icon" type="image/x-icon" href="{{ \App\Models\SiteSetting::getValue('site_favicon') }}">
+        <link rel="icon" type="image/x-icon"
+            href="{{ \App\Helpers\StorageHelper::getImageUrl(\App\Models\SiteSetting::getValue('site_favicon'), 'site') }}">
     @else
         <link rel="icon" type="image/x-icon" href="/favicon.ico">
     @endif
@@ -170,29 +181,85 @@
             padding-right: 1rem;
         }
 
+        @media (min-width: 640px) {
+            .landing-container {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .landing-container {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+        }
+
         .lp-container {
             max-width: 80rem;
             margin-left: auto;
             margin-right: auto;
-            padding-left: 1.5rem;
-            padding-right: 1.5rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .lp-container {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .lp-container {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
         }
 
         .landing-section {
             position: relative;
-            padding-top: 5rem;
-            padding-bottom: 5rem;
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+
+        @media (min-width: 640px) {
+            .landing-section {
+                padding-top: 4rem;
+                padding-bottom: 4rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .landing-section {
+                padding-top: 5rem;
+                padding-bottom: 5rem;
+            }
         }
 
         .lp-section {
             position: relative;
-            padding-top: 5rem;
-            padding-bottom: 5rem;
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+
+        @media (min-width: 640px) {
+            .lp-section {
+                padding-top: 4rem;
+                padding-bottom: 4rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .lp-section {
+                padding-top: 5rem;
+                padding-bottom: 5rem;
+            }
         }
 
         .landing-section-title {
-            font-size: clamp(1.8rem, 3.6vw, 2.6rem);
-            line-height: 1.15;
+            font-size: clamp(1.6rem, 4vw, 2.6rem);
+            line-height: 1.2;
             font-weight: 800;
             letter-spacing: -0.02em;
             color: #1c1917;
@@ -205,8 +272,9 @@
         .landing-section-subtitle {
             margin-top: .75rem;
             color: #78716c;
-            font-size: .98rem;
+            font-size: .95rem;
             max-width: 42rem;
+            line-height: 1.6;
         }
 
         .dark .landing-section-subtitle {
@@ -214,8 +282,8 @@
         }
 
         .lp-title {
-            font-size: clamp(2rem, 4vw, 3rem);
-            line-height: 1.1;
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            line-height: 1.15;
             font-weight: 800;
             letter-spacing: -0.02em;
             color: var(--text);
@@ -337,6 +405,15 @@
             animation: pulse 2s ease-in-out infinite;
         }
 
+        @media (max-width: 640px) {
+            .demo-banner {
+                left: 1rem;
+                right: 1rem;
+                bottom: 0.5rem;
+                justify-content: center;
+            }
+        }
+
         @keyframes pulse {
 
             0%,
@@ -351,6 +428,55 @@
 
         .demo-banner i {
             font-size: 1rem;
+        }
+
+        /* Responsive text utilities */
+        .text-responsive-sm {
+            font-size: clamp(0.875rem, 2vw, 1rem);
+        }
+
+        .text-responsive-base {
+            font-size: clamp(1rem, 2.5vw, 1.125rem);
+        }
+
+        /* Stats card improvements */
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Step arrow connector */
+        .step-connector {
+            position: absolute;
+            top: 50%;
+            right: -2rem;
+            transform: translateY(-50%);
+            width: 4rem;
+            height: 2px;
+            background: linear-gradient(90deg, #f97316, #fb7185);
+        }
+
+        .step-connector::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid #fb7185;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+
+        @media (max-width: 768px) {
+            .step-connector {
+                display: none;
+            }
         }
     </style>
 

@@ -63,10 +63,10 @@
         </div>
     </section>
 
-    {{-- STATS SECTION - Like Image Design (Horizontal Cards) --}}
-    <section class="py-16 bg-stone-100 dark:bg-stone-800" id="stats">
+    {{-- STATS SECTION - Responsive Horizontal Cards --}}
+    <section class="py-12 sm:py-16 bg-stone-100 dark:bg-stone-800" id="stats">
         <div class="landing-container">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 @foreach ($stats as $index => $stat)
                     @php
                         $colors = [
@@ -94,15 +94,17 @@
                         $color = $colors[$index % 4];
                     @endphp
                     <div
-                        class="flex items-center gap-4 bg-white dark:bg-stone-800 rounded-xl p-5 border {{ $color['border'] }} hover:shadow-lg transition-shadow">
+                        class="stat-card flex items-center gap-3 sm:gap-4 bg-white dark:bg-stone-800 rounded-xl p-4 sm:p-5 border {{ $color['border'] }}">
                         <div
-                            class="w-14 h-14 rounded-lg {{ $color['bg'] }} flex items-center justify-center flex-shrink-0">
-                            <i class="fa-solid {{ $stat->icon ?? 'fa-chart-line' }} text-2xl {{ $color['icon'] }}"></i>
+                            class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg {{ $color['bg'] }} flex items-center justify-center flex-shrink-0">
+                            <i
+                                class="fa-solid {{ $stat->icon ?? 'fa-chart-line' }} text-xl sm:text-2xl {{ $color['icon'] }}"></i>
                         </div>
-                        <div>
-                            <p class="text-2xl lg:text-3xl font-bold text-stone-900 dark:text-white">{{ $stat->value }}
+                        <div class="min-w-0">
+                            <p class="text-xl sm:text-2xl lg:text-3xl font-bold text-stone-900 dark:text-white truncate">
+                                {{ $stat->value }}
                             </p>
-                            <p class="text-sm text-stone-500 dark:text-stone-400">{{ $stat->label }}</p>
+                            <p class="text-xs sm:text-sm text-stone-500 dark:text-stone-400">{{ $stat->label }}</p>
                         </div>
                     </div>
                 @endforeach
@@ -130,7 +132,7 @@
                 </div>
             </div>
 
-            <div id="testimonials-scroll" class="flex gap-9 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory"
+            <div id="testimonials-scroll" class="flex justify-center gap-9 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory"
                 style="scrollbar-width: none; -ms-overflow-style: none;">
                 @foreach ($testimonials as $testimonial)
                     <div class="flex-shrink-0 w-[320px] md:w-[380px] snap-start">
@@ -221,77 +223,78 @@
         </script>
     </section>
 
-    {{-- HOW IT WORKS - With SVG Curved Arrows --}}
+    {{-- HOW IT WORKS - Improved Steps with Better Connectors --}}
     <section class="landing-section bg-stone-100 dark:bg-stone-800 overflow-hidden" id="cara-kerja">
         <div class="landing-container">
             {{-- Header Row --}}
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-end mb-16">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-end mb-10 lg:mb-16">
                 <div>
                     <span class="brand-pill">Cara Kerja</span>
-                    <h2 class="text-3xl lg:text-4xl font-bold text-stone-900 dark:text-white mt-4">
+                    <h2
+                        class="text-2xl sm:text-3xl lg:text-4xl font-bold text-stone-900 dark:text-white mt-4 leading-tight">
                         Bagaimana kami membantu mahasiswa <span class="text-orange-500">sukses berkarir</span>
                     </h2>
                 </div>
                 <div class="lg:text-right">
-                    <p class="text-stone-600 dark:text-stone-400 mb-4">Platform yang dirancang untuk memudahkan perjalanan
+                    <p class="text-stone-600 dark:text-stone-400 mb-4 text-responsive-sm">Platform yang dirancang untuk
+                        memudahkan perjalanan
                         akademik dan profesionalmu.</p>
                     @guest
                         <a href="{{ route('register') }}"
-                            class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors">
+                            class="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors text-sm sm:text-base">
                             Mulai Sekarang <i class="fa-solid fa-arrow-right"></i>
                         </a>
                     @else
                         <a href="{{ route('dashboard') }}"
-                            class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors">
+                            class="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-semibold transition-colors text-sm sm:text-base">
                             Dashboard <i class="fa-solid fa-arrow-right"></i>
                         </a>
                     @endguest
                 </div>
             </div>
 
-            {{-- Steps with Curved Arrows --}}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 relative">
-                @foreach ([['icon' => 'fa-user-graduate', 'title' => 'Dukungan Akademik', 'desc' => 'Kami peduli dengan perkembangan studimu. Dapatkan bantuan manajemen jadwal, skripsi, dan PKL.'], ['icon' => 'fa-lightbulb', 'title' => 'Pembangun Karir', 'desc' => 'Belajar sepanjang hayat dengan tools dan mentor yang membantumu berkembang setiap hari.'], ['icon' => 'fa-hands-helping', 'title' => 'Bimbingan Personal', 'desc' => 'Tidak sendirian! Dapatkan dukungan saat menghadapi tantangan akademik maupun karir.']] as $index => $step)
-                    <div class="relative text-center group">
-                        {{-- Curved Arrow SVG (except last item) --}}
-                        @if ($index < 2)
-                            <div class="hidden lg:block absolute top-16 -right-8 w-16 z-0">
-                                @if ($index == 0)
-                                    {{-- Down-right curve --}}
-                                    <svg width="60" height="80" viewBox="0 0 60 80" fill="none"
-                                        class="text-orange-400">
-                                        <path d="M10 10 Q 50 10, 50 40 T 30 70" stroke="currentColor" stroke-width="2"
-                                            fill="none" stroke-dasharray="4 4" />
-                                        <polygon points="25,65 35,70 30,75" fill="currentColor" />
-                                    </svg>
-                                @else
-                                    {{-- Up-right curve --}}
-                                    <svg width="60" height="80" viewBox="0 0 60 80" fill="none"
-                                        class="text-orange-400">
-                                        <path d="M10 70 Q 50 70, 50 40 T 30 10" stroke="currentColor" stroke-width="2"
-                                            fill="none" stroke-dasharray="4 4" />
-                                        <polygon points="25,15 35,10 30,5" fill="currentColor" />
-                                    </svg>
-                                @endif
-                            </div>
-                        @endif
-
-                        {{-- Icon Circle --}}
-                        <div class="relative inline-block mb-6">
+            {{-- Steps with Connectors --}}
+            <div class="relative">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+                    @foreach ([['icon' => 'fa-user-graduate', 'title' => 'Dukungan Akademik', 'desc' => 'Kami peduli dengan perkembangan studimu. Dapatkan bantuan manajemen jadwal, skripsi, dan PKL.'], ['icon' => 'fa-lightbulb', 'title' => 'Pembangun Karir', 'desc' => 'Belajar sepanjang hayat dengan tools dan mentor yang membantumu berkembang setiap hari.'], ['icon' => 'fa-hands-helping', 'title' => 'Bimbingan Personal', 'desc' => 'Tidak sendirian! Dapatkan dukungan saat menghadapi tantangan akademik maupun karir.']] as $index => $step)
+                        <div class="relative text-center group">
+                            {{-- Step Number Badge --}}
                             <div
-                                class="w-24 h-24 rounded-full bg-white dark:bg-stone-700 shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                                class="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-orange-500 text-white text-sm font-bold flex items-center justify-center z-10 shadow-lg">
+                                {{ $index + 1 }}
+                            </div>
+
+                            {{-- Connector Arrow (hidden on mobile, visible on lg) --}}
+                            @if ($index < 2)
+                                <div class="hidden lg:block absolute top-12 left-full -translate-x-1/2 z-0">
+                                    <svg width="60" height="24" viewBox="0 0 60 24" fill="none"
+                                        class="text-orange-400">
+                                        <path d="M0 12 Q 30 12, 50 12" stroke="currentColor" stroke-width="2" fill="none"
+                                            stroke-dasharray="5 3" />
+                                        <polygon points="52,8 60,12 52,16" fill="currentColor" />
+                                    </svg>
+                                </div>
+                            @endif
+
+                            {{-- Icon Circle --}}
+                            <div class="relative inline-block mb-5 mt-4">
                                 <div
-                                    class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
-                                    <i class="fa-solid {{ $step['icon'] }} text-2xl text-white"></i>
+                                    class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white dark:bg-stone-700 shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                    <div
+                                        class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                                        <i class="fa-solid {{ $step['icon'] }} text-xl sm:text-2xl text-white"></i>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {{-- Content --}}
-                        <h3 class="text-xl font-bold text-stone-900 dark:text-white mb-3">{{ $step['title'] }}</h3>
-                        <p class="text-stone-600 dark:text-stone-400 text-sm leading-relaxed px-4">{{ $step['desc'] }}</p>
-                    </div>
-                @endforeach
+                            {{-- Content --}}
+                            <h3 class="text-lg sm:text-xl font-bold text-stone-900 dark:text-white mb-2 sm:mb-3">
+                                {{ $step['title'] }}</h3>
+                            <p class="text-stone-600 dark:text-stone-400 text-sm leading-relaxed max-w-xs mx-auto">
+                                {{ $step['desc'] }}</p>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
     </section>
