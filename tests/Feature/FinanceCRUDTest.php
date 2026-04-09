@@ -114,7 +114,7 @@ class FinanceCRUDTest extends TestCase
                 'message' => 'Akun berhasil dihapus.'
             ]);
 
-        $this->assertSoftDeleted('finance_accounts', ['id' => $account->id]);
+        $this->assertDatabaseMissing('finance_accounts', ['id' => $account->id]);
     }
 
     public function test_cannot_delete_account_with_transactions()
@@ -231,7 +231,7 @@ class FinanceCRUDTest extends TestCase
                 'message' => 'Transaksi berhasil dihapus.'
             ]);
 
-        $this->assertSoftDeleted('transactions', ['id' => $transaction->id]);
+        $this->assertDatabaseMissing('transactions', ['id' => $transaction->id]);
     }
 
     // ==================== SAVINGS GOALS ====================
@@ -304,7 +304,7 @@ class FinanceCRUDTest extends TestCase
                 'message' => 'Target tabungan berhasil dihapus.'
             ]);
 
-        $this->assertSoftDeleted('savings_goals', ['id' => $goal->id]);
+        $this->assertDatabaseMissing('savings_goals', ['id' => $goal->id]);
     }
 
     // ==================== BUDGETS ====================
@@ -394,7 +394,7 @@ class FinanceCRUDTest extends TestCase
                 'message' => 'Budget berhasil dihapus.'
             ]);
 
-        $this->assertSoftDeleted('budgets', ['id' => $budget->id]);
+        $this->assertDatabaseMissing('budgets', ['id' => $budget->id]);
     }
 
     // ==================== PENDING NEEDS ====================

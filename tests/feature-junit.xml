@@ -1,0 +1,850 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="D:\03_Developer\Project Web\Website portfolio\SFHUB\phpunit.xml" tests="126" assertions="281" errors="31" failures="8" skipped="0" time="18.084828">
+    <testsuite name="Feature" tests="126" assertions="281" errors="31" failures="8" skipped="0" time="18.084828">
+      <testsuite name="Tests\Feature\AcademicCRUDTest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AcademicCRUDTest.php" tests="11" assertions="30" errors="0" failures="0" skipped="0" time="10.702354">
+        <testcase name="test_academic_page_loads_for_authenticated_user" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AcademicCRUDTest.php" line="31" class="Tests\Feature\AcademicCRUDTest" classname="Tests.Feature.AcademicCRUDTest" assertions="2" time="7.969747"/>
+        <testcase name="test_academic_page_redirects_guest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AcademicCRUDTest.php" line="38" class="Tests\Feature\AcademicCRUDTest" classname="Tests.Feature.AcademicCRUDTest" assertions="2" time="0.273932"/>
+        <testcase name="test_can_create_course" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AcademicCRUDTest.php" line="44" class="Tests\Feature\AcademicCRUDTest" classname="Tests.Feature.AcademicCRUDTest" assertions="3" time="0.281316"/>
+        <testcase name="test_can_update_course" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AcademicCRUDTest.php" line="65" class="Tests\Feature\AcademicCRUDTest" classname="Tests.Feature.AcademicCRUDTest" assertions="3" time="0.274362"/>
+        <testcase name="test_can_delete_course" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AcademicCRUDTest.php" line="94" class="Tests\Feature\AcademicCRUDTest" classname="Tests.Feature.AcademicCRUDTest" assertions="3" time="0.254444"/>
+        <testcase name="test_cannot_delete_other_users_course" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AcademicCRUDTest.php" line="110" class="Tests\Feature\AcademicCRUDTest" classname="Tests.Feature.AcademicCRUDTest" assertions="2" time="0.263620"/>
+        <testcase name="test_can_create_academic_task" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AcademicCRUDTest.php" line="129" class="Tests\Feature\AcademicCRUDTest" classname="Tests.Feature.AcademicCRUDTest" assertions="3" time="0.284868"/>
+        <testcase name="test_task_status_toggle" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AcademicCRUDTest.php" line="145" class="Tests\Feature\AcademicCRUDTest" classname="Tests.Feature.AcademicCRUDTest" assertions="3" time="0.280920"/>
+        <testcase name="test_can_delete_academic_task" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AcademicCRUDTest.php" line="162" class="Tests\Feature\AcademicCRUDTest" classname="Tests.Feature.AcademicCRUDTest" assertions="3" time="0.282103"/>
+        <testcase name="test_can_create_thesis_milestone" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AcademicCRUDTest.php" line="179" class="Tests\Feature\AcademicCRUDTest" classname="Tests.Feature.AcademicCRUDTest" assertions="3" time="0.254295"/>
+        <testcase name="test_can_update_milestone_as_done" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AcademicCRUDTest.php" line="194" class="Tests\Feature\AcademicCRUDTest" classname="Tests.Feature.AcademicCRUDTest" assertions="3" time="0.282749"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\AdminTest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php" tests="12" assertions="16" errors="2" failures="3" skipped="0" time="0.569741">
+        <testcase name="test_admin_dashboard_accessible_by_admin" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php" line="32" class="Tests\Feature\AdminTest" classname="Tests.Feature.AdminTest" assertions="1" time="0.074381"/>
+        <testcase name="test_admin_dashboard_blocked_for_regular_user" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php" line="37" class="Tests\Feature\AdminTest" classname="Tests.Feature.AdminTest" assertions="1" time="0.035405"/>
+        <testcase name="test_admin_user_list_accessible" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php" line="42" class="Tests\Feature\AdminTest" classname="Tests.Feature.AdminTest" assertions="1" time="0.059196"/>
+        <testcase name="test_admin_can_create_user" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php" line="47" class="Tests\Feature\AdminTest" classname="Tests.Feature.AdminTest" assertions="2" time="0.042688">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\AdminTest::test_admin_can_create_user&#13;
+Failed asserting that two strings are equal.&#13;
+&#13;
+The following errors occurred during the last request:
+
+The selected role is invalid.&#13;
+The selected plan is invalid.&#13;
+
+--- Expected
++++ Actual
+@@ @@
+-'http://localhost/admin/users'
++'http://localhost'
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:45
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:431
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:205
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php:58</failure>
+        </testcase>
+        <testcase name="test_admin_can_deactivate_user" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php" line="62" class="Tests\Feature\AdminTest" classname="Tests.Feature.AdminTest" assertions="2" time="0.039927"/>
+        <testcase name="test_admin_can_reactivate_user" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php" line="73" class="Tests\Feature\AdminTest" classname="Tests.Feature.AdminTest" assertions="2" time="0.040025"/>
+        <testcase name="test_admin_cannot_deactivate_another_admin" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php" line="84" class="Tests\Feature\AdminTest" classname="Tests.Feature.AdminTest" assertions="2" time="0.043993">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\AdminTest::test_admin_cannot_deactivate_another_admin&#13;
+Failed asserting that a row in the table [users] matches the attributes {
+    "id": 29,
+    "is_active": 1
+}.
+
+Found similar results: [
+    {
+        "id": 29,
+        "is_active": 0
+    }
+].
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase.php:43
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php:93</failure>
+        </testcase>
+        <testcase name="test_admin_can_delete_regular_user" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php" line="96" class="Tests\Feature\AdminTest" classname="Tests.Feature.AdminTest" assertions="1" time="0.062235">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\AdminTest::test_admin_can_delete_regular_user&#13;
+Expected response status code [201, 301, 302, 303, 307, 308] but received 200.
+Failed asserting that false is true.
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:45
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:199
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php:102</failure>
+        </testcase>
+        <testcase name="test_admin_landing_page_accessible" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php" line="107" class="Tests\Feature\AdminTest" classname="Tests.Feature.AdminTest" assertions="1" time="0.062340"/>
+        <testcase name="test_admin_can_add_landing_content" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php" line="112" class="Tests\Feature\AdminTest" classname="Tests.Feature.AdminTest" assertions="0" time="0.037039">
+          <error type="Symfony\Component\Routing\Exception\RouteNotFoundException">Tests\Feature\AdminTest::test_admin_can_add_landing_content&#13;
+Symfony\Component\Routing\Exception\RouteNotFoundException: Route [admin.landing.store] not defined.
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:526
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Foundation\helpers.php:871
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php:114</error>
+        </testcase>
+        <testcase name="test_admin_can_delete_landing_content" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php" line="131" class="Tests\Feature\AdminTest" classname="Tests.Feature.AdminTest" assertions="0" time="0.032575">
+          <error type="Symfony\Component\Routing\Exception\RouteNotFoundException">Tests\Feature\AdminTest::test_admin_can_delete_landing_content&#13;
+Symfony\Component\Routing\Exception\RouteNotFoundException: Route [admin.landing.destroy] not defined.
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:526
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Foundation\helpers.php:871
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php:140</error>
+        </testcase>
+        <testcase name="test_user_search_works" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AdminTest.php" line="146" class="Tests\Feature\AdminTest" classname="Tests.Feature.AdminTest" assertions="3" time="0.039935"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\AssetCRUDTest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" tests="23" assertions="36" errors="15" failures="2" skipped="0" time="0.986439">
+        <testcase name="test_can_create_physical_asset" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="27" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="1" time="0.076688">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\AssetCRUDTest::test_can_create_physical_asset&#13;
+Expected response status code [200] but received 500.
+Failed asserting that 500 is identical to 200.
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:45
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:174
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:47</failure>
+        </testcase>
+        <testcase name="test_can_update_physical_asset" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="64" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.034554">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_can_update_physical_asset&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1364 Field 'name' doesn't have a default value (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `updated_at`, `created_at`) values (44, 2026-04-08 07:10:25, 2026-04-08 07:10:25))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:66</error>
+        </testcase>
+        <testcase name="test_can_update_asset_value" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="94" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.050357">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_can_update_asset_value&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1364 Field 'name' doesn't have a default value (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `current_value`, `updated_at`, `created_at`) values (45, 10000000, 2026-04-08 07:10:25, 2026-04-08 07:10:25))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:96</error>
+        </testcase>
+        <testcase name="test_can_delete_physical_asset" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="120" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.047193">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_can_delete_physical_asset&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1364 Field 'name' doesn't have a default value (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `updated_at`, `created_at`) values (46, 2026-04-08 07:10:25, 2026-04-08 07:10:25))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:122</error>
+        </testcase>
+        <testcase name="test_can_show_asset_details" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="135" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.043699">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_can_show_asset_details&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1364 Field 'name' doesn't have a default value (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `updated_at`, `created_at`) values (47, 2026-04-08 07:10:25, 2026-04-08 07:10:25))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:137</error>
+        </testcase>
+        <testcase name="test_can_create_finance_account_via_asset_controller" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="154" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="3" time="0.026550"/>
+        <testcase name="test_can_update_finance_account_via_asset_controller" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="181" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="3" time="0.046576"/>
+        <testcase name="test_can_update_account_balance_via_asset_controller" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="208" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="3" time="0.028079"/>
+        <testcase name="test_can_delete_finance_account_via_asset_controller" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="231" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="3" time="0.061198">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_can_delete_finance_account_via_asset_controller&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'deleted_at' in 'where clause' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: select exists(select * from `finance_accounts` where (`id` = 4) and `deleted_at` is not null) as `exists`)
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:411
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:3762
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\Constraints\SoftDeletedInDatabase.php:65
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase.php:145
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:243</error>
+        </testcase>
+        <testcase name="test_get_assets_summary" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="248" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.043798">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_get_assets_summary&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'purchase_price' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `purchase_price`, `current_value`, `updated_at`, `created_at`) values (52, 10000000, 12000000, 2026-04-08 07:10:25, 2026-04-08 07:10:25))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:251</error>
+        </testcase>
+        <testcase name="test_cannot_access_other_users_assets" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="300" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.049711">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_cannot_access_other_users_assets&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1364 Field 'name' doesn't have a default value (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `updated_at`, `created_at`) values (54, 2026-04-08 07:10:25, 2026-04-08 07:10:25))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:303</error>
+        </testcase>
+        <testcase name="test_cannot_access_other_users_accounts_via_asset_controller" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="323" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="2" time="0.055869"/>
+        <testcase name="test_physical_asset_validation" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="343" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="8" time="0.046043">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\AssetCRUDTest::test_physical_asset_validation&#13;
+Expected response status code [422] but received 500.
+Failed asserting that 500 is identical to 422.
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:45
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:174
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:361</failure>
+        </testcase>
+        <testcase name="test_finance_account_validation_via_asset_controller" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="417" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="11" time="0.069166"/>
+        <testcase name="test_asset_appreciation_calculation" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="448" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.040956">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_asset_appreciation_calculation&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'purchase_price' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `purchase_price`, `current_value`, `updated_at`, `created_at`) values (59, 10000000, 12000000, 2026-04-08 07:10:25, 2026-04-08 07:10:25))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:450</error>
+        </testcase>
+        <testcase name="test_asset_depreciation_calculation" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="461" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.016212">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_asset_depreciation_calculation&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'purchase_price' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `purchase_price`, `current_value`, `updated_at`, `created_at`) values (60, 10000000, 8000000, 2026-04-08 07:10:25, 2026-04-08 07:10:25))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:463</error>
+        </testcase>
+        <testcase name="test_asset_age_calculation" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="474" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.031809">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_asset_age_calculation&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1364 Field 'name' doesn't have a default value (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `purchase_date`, `updated_at`, `created_at`) values (61, 2025-04-08 07:10:25, 2026-04-08 07:10:25, 2026-04-08 07:10:25))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:476</error>
+        </testcase>
+        <testcase name="test_warranty_expiry_alert" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="486" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.031105">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_warranty_expiry_alert&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'warranty_expiry' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `warranty_expiry`, `updated_at`, `created_at`) values (62, 2026-04-23 07:10:25, 2026-04-08 07:10:25, 2026-04-08 07:10:25))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:489</error>
+        </testcase>
+        <testcase name="test_insurance_expiry_alert" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="516" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.029342">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_insurance_expiry_alert&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1364 Field 'name' doesn't have a default value (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `is_insured`, `insurance_expiry`, `updated_at`, `created_at`) values (63, 1, 2026-04-28 07:10:26, 2026-04-08 07:10:26, 2026-04-08 07:10:26))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:519</error>
+        </testcase>
+        <testcase name="test_asset_status_color" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="548" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.037424">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_asset_status_color&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'purchase_price' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `purchase_price`, `current_value`, `updated_at`, `created_at`) values (64, 10000000, 12000000, 2026-04-08 07:10:26, 2026-04-08 07:10:26))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:551</error>
+        </testcase>
+        <testcase name="test_cannot_delete_account_with_transactions_via_asset_controller" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="578" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="2" time="0.060321"/>
+        <testcase name="test_asset_formatted_values" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="597" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.027836">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_asset_formatted_values&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'purchase_price' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `purchase_price`, `current_value`, `updated_at`, `created_at`) values (66, 10000000, 12000000, 2026-04-08 07:10:26, 2026-04-08 07:10:26))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:599</error>
+        </testcase>
+        <testcase name="test_asset_condition_colors" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php" line="610" class="Tests\Feature\AssetCRUDTest" classname="Tests.Feature.AssetCRUDTest" assertions="0" time="0.031954">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AssetCRUDTest::test_asset_condition_colors&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'condition' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `assets` (`user_id`, `condition`, `updated_at`, `created_at`) values (67, Excellent, 2026-04-08 07:10:26, 2026-04-08 07:10:26))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AssetCRUDTest.php:612</error>
+        </testcase>
+      </testsuite>
+      <testsuite name="Tests\Feature\AuthLoginTest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AuthLoginTest.php" tests="7" assertions="23" errors="0" failures="0" skipped="0" time="2.508067">
+        <testcase name="test_login_page_is_accessible" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AuthLoginTest.php" line="14" class="Tests\Feature\AuthLoginTest" classname="Tests.Feature.AuthLoginTest" assertions="1" time="0.048870"/>
+        <testcase name="test_user_can_login_with_email" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AuthLoginTest.php" line="19" class="Tests\Feature\AuthLoginTest" classname="Tests.Feature.AuthLoginTest" assertions="5" time="0.530095"/>
+        <testcase name="test_user_can_login_with_username" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AuthLoginTest.php" line="36" class="Tests\Feature\AuthLoginTest" classname="Tests.Feature.AuthLoginTest" assertions="5" time="0.525153"/>
+        <testcase name="test_login_fails_with_wrong_password" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AuthLoginTest.php" line="53" class="Tests\Feature\AuthLoginTest" classname="Tests.Feature.AuthLoginTest" assertions="3" time="0.529066"/>
+        <testcase name="test_inactive_user_cannot_login" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AuthLoginTest.php" line="69" class="Tests\Feature\AuthLoginTest" classname="Tests.Feature.AuthLoginTest" assertions="3" time="0.546808"/>
+        <testcase name="test_user_can_logout" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AuthLoginTest.php" line="86" class="Tests\Feature\AuthLoginTest" classname="Tests.Feature.AuthLoginTest" assertions="3" time="0.037895"/>
+        <testcase name="test_register_creates_user_with_auto_username" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\AuthLoginTest.php" line="93" class="Tests\Feature\AuthLoginTest" classname="Tests.Feature.AuthLoginTest" assertions="3" time="0.290179"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\CreativeStudioTest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\CreativeStudioTest.php" tests="6" assertions="9" errors="1" failures="1" skipped="0" time="0.255393">
+        <testcase name="test_creative_studio_page_loads" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\CreativeStudioTest.php" line="22" class="Tests\Feature\CreativeStudioTest" classname="Tests.Feature.CreativeStudioTest" assertions="1" time="0.055733"/>
+        <testcase name="test_creative_studio_page_redirects_guest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\CreativeStudioTest.php" line="27" class="Tests\Feature\CreativeStudioTest" classname="Tests.Feature.CreativeStudioTest" assertions="2" time="0.044706"/>
+        <testcase name="test_can_create_creative_project" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\CreativeStudioTest.php" line="32" class="Tests\Feature\CreativeStudioTest" classname="Tests.Feature.CreativeStudioTest" assertions="1" time="0.027729">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\CreativeStudioTest::test_can_create_creative_project&#13;
+Expected response status code [200] but received 422.
+Failed asserting that 422 is identical to 200.&#13;
+&#13;
+The following errors occurred during the last request:
+
+{
+    "message": "The project mode field is required.",
+    "errors": {
+        "project_mode": [
+            "The project mode field is required."
+        ]
+    }
+}
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:45
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:174
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\CreativeStudioTest.php:43</failure>
+        </testcase>
+        <testcase name="test_can_update_creative_project_status" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\CreativeStudioTest.php" line="53" class="Tests\Feature\CreativeStudioTest" classname="Tests.Feature.CreativeStudioTest" assertions="0" time="0.038900">
+          <error type="Symfony\Component\Routing\Exception\RouteNotFoundException">Tests\Feature\CreativeStudioTest::test_can_update_creative_project_status&#13;
+Symfony\Component\Routing\Exception\RouteNotFoundException: Route [dashboard.creative.update-status] not defined.
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:526
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Foundation\helpers.php:871
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\CreativeStudioTest.php:65</error>
+        </testcase>
+        <testcase name="test_can_delete_creative_project" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\CreativeStudioTest.php" line="72" class="Tests\Feature\CreativeStudioTest" classname="Tests.Feature.CreativeStudioTest" assertions="2" time="0.047811"/>
+        <testcase name="test_projects_are_grouped_by_stage_in_view" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\CreativeStudioTest.php" line="89" class="Tests\Feature\CreativeStudioTest" classname="Tests.Feature.CreativeStudioTest" assertions="3" time="0.040514"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\DebtCRUDTest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" tests="15" assertions="4" errors="13" failures="2" skipped="0" time="0.507278">
+        <testcase name="test_can_create_debt" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="27" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="1" time="0.030402">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\DebtCRUDTest::test_can_create_debt&#13;
+Expected response status code [200] but received 422.
+Failed asserting that 422 is identical to 200.&#13;
+&#13;
+The following errors occurred during the last request:
+
+{
+    "message": "The creditor name field is required. (and 2 more errors)",
+    "errors": {
+        "creditor_name": [
+            "The creditor name field is required."
+        ],
+        "debt_type": [
+            "The selected debt type is invalid."
+        ],
+        "start_date": [
+            "The start date field is required."
+        ]
+    }
+}
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:45
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:174
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:43</failure>
+        </testcase>
+        <testcase name="test_can_update_debt" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="58" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="0" time="0.032983">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\DebtCRUDTest::test_can_update_debt&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1364 Field 'debtor' doesn't have a default value (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `debts` (`user_id`, `updated_at`, `created_at`) values (81, 2026-04-08 07:10:29, 2026-04-08 07:10:29))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:60</error>
+        </testcase>
+        <testcase name="test_can_delete_debt" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="90" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="0" time="0.033550">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\DebtCRUDTest::test_can_delete_debt&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1364 Field 'debtor' doesn't have a default value (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `debts` (`user_id`, `updated_at`, `created_at`) values (82, 2026-04-08 07:10:29, 2026-04-08 07:10:29))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:92</error>
+        </testcase>
+        <testcase name="test_can_mark_debt_as_paid" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="105" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="0" time="0.033062">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\DebtCRUDTest::test_can_mark_debt_as_paid&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'remaining_amount' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `debts` (`user_id`, `status`, `remaining_amount`, `updated_at`, `created_at`) values (83, active, 1000000, 2026-04-08 07:10:29, 2026-04-08 07:10:29))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:107</error>
+        </testcase>
+        <testcase name="test_can_add_debt_payment" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="130" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="0" time="0.024612">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\DebtCRUDTest::test_can_add_debt_payment&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'remaining_amount' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `debts` (`user_id`, `remaining_amount`, `updated_at`, `created_at`) values (84, 3000000, 2026-04-08 07:10:29, 2026-04-08 07:10:29))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:132</error>
+        </testcase>
+        <testcase name="test_can_get_debt_payments" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="166" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="0" time="0.038537">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\DebtCRUDTest::test_can_get_debt_payments&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1364 Field 'debtor' doesn't have a default value (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `debts` (`user_id`, `updated_at`, `created_at`) values (85, 2026-04-08 07:10:29, 2026-04-08 07:10:29))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:168</error>
+        </testcase>
+        <testcase name="test_can_delete_debt_payment" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="184" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="0" time="0.046166">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\DebtCRUDTest::test_can_delete_debt_payment&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'remaining_amount' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `debts` (`user_id`, `remaining_amount`, `updated_at`, `created_at`) values (86, 2000000, 2026-04-08 07:10:29, 2026-04-08 07:10:29))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:186</error>
+        </testcase>
+        <testcase name="test_cannot_access_other_users_debts" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="216" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="0" time="0.022243">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\DebtCRUDTest::test_cannot_access_other_users_debts&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1364 Field 'debtor' doesn't have a default value (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `debts` (`user_id`, `updated_at`, `created_at`) values (88, 2026-04-08 07:10:29, 2026-04-08 07:10:29))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:219</error>
+        </testcase>
+        <testcase name="test_debt_validation" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="244" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="3" time="0.032140">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\DebtCRUDTest::test_debt_validation&#13;
+Failed to find a validation error in the response for key: 'name'&#13;
+&#13;
+Response has the following JSON validation errors:&#13;
+&#13;
+{
+    "creditor_name": [
+        "The creditor name field is required."
+    ],
+    "debt_type": [
+        "The debt type field is required."
+    ],
+    "total_amount": [
+        "The total amount field is required."
+    ],
+    "start_date": [
+        "The start date field is required."
+    ]
+}&#13;
+
+Failed asserting that an array has the key 'name'.&#13;
+&#13;
+The following errors occurred during the last request:
+
+{
+    "message": "The creditor name field is required. (and 3 more errors)",
+    "errors": {
+        "creditor_name": [
+            "The creditor name field is required."
+        ],
+        "debt_type": [
+            "The debt type field is required."
+        ],
+        "total_amount": [
+            "The total amount field is required."
+        ],
+        "start_date": [
+            "The start date field is required."
+        ]
+    }
+}
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:45
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:1128
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:1056
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:250</failure>
+        </testcase>
+        <testcase name="test_debt_payment_validation" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="289" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="0" time="0.039354">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\DebtCRUDTest::test_debt_payment_validation&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1364 Field 'debtor' doesn't have a default value (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `debts` (`user_id`, `updated_at`, `created_at`) values (90, 2026-04-08 07:10:29, 2026-04-08 07:10:29))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:291</error>
+        </testcase>
+        <testcase name="test_debt_remaining_amount_calculates_correctly" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="331" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="0" time="0.030464">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\DebtCRUDTest::test_debt_remaining_amount_calculates_correctly&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'total_amount' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `debts` (`user_id`, `total_amount`, `remaining_amount`, `updated_at`, `created_at`) values (91, 5000000, 5000000, 2026-04-08 07:10:29, 2026-04-08 07:10:29))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:333</error>
+        </testcase>
+        <testcase name="test_debt_auto_marks_as_paid_when_fully_paid" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="358" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="0" time="0.028333">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\DebtCRUDTest::test_debt_auto_marks_as_paid_when_fully_paid&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'total_amount' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `debts` (`user_id`, `total_amount`, `remaining_amount`, `status`, `updated_at`, `created_at`) values (92, 3000000, 3000000, active, 2026-04-08 07:10:29, 2026-04-08 07:10:29))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:360</error>
+        </testcase>
+        <testcase name="test_cannot_add_payment_to_paid_debt" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="378" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="0" time="0.033720">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\DebtCRUDTest::test_cannot_add_payment_to_paid_debt&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'remaining_amount' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `debts` (`user_id`, `status`, `remaining_amount`, `updated_at`, `created_at`) values (93, paid, 0, 2026-04-08 07:10:29, 2026-04-08 07:10:29))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:380</error>
+        </testcase>
+        <testcase name="test_cannot_delete_payment_from_paid_debt" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="398" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="0" time="0.033969">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\DebtCRUDTest::test_cannot_delete_payment_from_paid_debt&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'total_amount' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `debts` (`user_id`, `total_amount`, `remaining_amount`, `status`, `updated_at`, `created_at`) values (94, 2000000, 0, paid, 2026-04-08 07:10:29, 2026-04-08 07:10:29))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:400</error>
+        </testcase>
+        <testcase name="test_debt_interest_calculation" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php" line="422" class="Tests\Feature\DebtCRUDTest" classname="Tests.Feature.DebtCRUDTest" assertions="0" time="0.047743">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\DebtCRUDTest::test_debt_interest_calculation&#13;
+Illuminate\Database\QueryException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'principal_amount' in 'field list' (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: SFHub, SQL: insert into `debts` (`user_id`, `principal_amount`, `interest_rate`, `interest_type`, `tenure_months`, `updated_at`, `created_at`) values (95, 10000000, 12, simple, 12, 2026-04-08 07:10:29, 2026-04-08 07:10:29))
+&#13;
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:838
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Connection.php:794
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:42
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\MySqlProcessor.php:35
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4054
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2235
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1436
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1401
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1240
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:370
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:272
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:365
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:321
+D:\03_Developer\Project Web\Website portfolio\SFHUB\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:315
+D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\DebtCRUDTest.php:424</error>
+        </testcase>
+      </testsuite>
+      <testsuite name="Tests\Feature\ExampleTest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\ExampleTest.php" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.096728">
+        <testcase name="test_the_application_returns_a_successful_response" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\ExampleTest.php" line="13" class="Tests\Feature\ExampleTest" classname="Tests.Feature.ExampleTest" assertions="1" time="0.096728"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\FinanceCRUDTest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" tests="24" assertions="84" errors="0" failures="0" skipped="0" time="1.106961">
+        <testcase name="test_can_create_finance_account" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="30" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.053528"/>
+        <testcase name="test_can_update_finance_account" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="57" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.024632"/>
+        <testcase name="test_can_update_account_balance" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="84" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.038559"/>
+        <testcase name="test_can_delete_finance_account" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="105" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.027781"/>
+        <testcase name="test_cannot_delete_account_with_transactions" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="120" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="2" time="0.048055"/>
+        <testcase name="test_can_create_income_transaction" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="136" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.031075"/>
+        <testcase name="test_can_create_expense_transaction" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="166" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="2" time="0.029072"/>
+        <testcase name="test_can_create_transfer_transaction" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="191" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="2" time="0.029378"/>
+        <testcase name="test_can_delete_transaction" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="218" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.039309"/>
+        <testcase name="test_can_create_savings_goal" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="239" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.082000"/>
+        <testcase name="test_can_update_savings_goal" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="267" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.063945"/>
+        <testcase name="test_can_delete_savings_goal" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="295" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.043458"/>
+        <testcase name="test_can_create_budget" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="312" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.054082"/>
+        <testcase name="test_cannot_create_duplicate_budget" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="337" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="2" time="0.041933"/>
+        <testcase name="test_can_update_budget" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="360" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.046774"/>
+        <testcase name="test_can_delete_budget" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="385" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.028429"/>
+        <testcase name="test_can_create_pending_need" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="402" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.048784"/>
+        <testcase name="test_can_purchase_pending_need" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="430" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="4" time="0.053885"/>
+        <testcase name="test_can_cancel_pending_need" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="465" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.055724"/>
+        <testcase name="test_can_create_transfer" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="488" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="3" time="0.050071"/>
+        <testcase name="test_cannot_transfer_to_same_account" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="521" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="2" time="0.038744"/>
+        <testcase name="test_cannot_access_other_users_data" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="543" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="2" time="0.058750"/>
+        <testcase name="test_finance_account_validation" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="563" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="11" time="0.045687"/>
+        <testcase name="test_transaction_validation" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\FinanceCRUDTest.php" line="592" class="Tests\Feature\FinanceCRUDTest" classname="Tests.Feature.FinanceCRUDTest" assertions="12" time="0.073308"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\GeneralTrackerTest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\GeneralTrackerTest.php" tests="7" assertions="19" errors="0" failures="0" skipped="0" time="0.312748">
+        <testcase name="test_general_tracker_page_loads" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\GeneralTrackerTest.php" line="22" class="Tests\Feature\GeneralTrackerTest" classname="Tests.Feature.GeneralTrackerTest" assertions="1" time="0.050098"/>
+        <testcase name="test_general_tracker_redirects_guest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\GeneralTrackerTest.php" line="27" class="Tests\Feature\GeneralTrackerTest" classname="Tests.Feature.GeneralTrackerTest" assertions="2" time="0.041306"/>
+        <testcase name="test_can_create_general_task" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\GeneralTrackerTest.php" line="32" class="Tests\Feature\GeneralTrackerTest" classname="Tests.Feature.GeneralTrackerTest" assertions="3" time="0.040489"/>
+        <testcase name="test_can_toggle_task_status" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\GeneralTrackerTest.php" line="51" class="Tests\Feature\GeneralTrackerTest" classname="Tests.Feature.GeneralTrackerTest" assertions="3" time="0.046095"/>
+        <testcase name="test_can_delete_task" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\GeneralTrackerTest.php" line="71" class="Tests\Feature\GeneralTrackerTest" classname="Tests.Feature.GeneralTrackerTest" assertions="4" time="0.044113"/>
+        <testcase name="test_tracker_view_has_correct_variables" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\GeneralTrackerTest.php" line="89" class="Tests\Feature\GeneralTrackerTest" classname="Tests.Feature.GeneralTrackerTest" assertions="4" time="0.060887"/>
+        <testcase name="test_user_cannot_delete_other_users_task" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\GeneralTrackerTest.php" line="106" class="Tests\Feature\GeneralTrackerTest" classname="Tests.Feature.GeneralTrackerTest" assertions="2" time="0.029759"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\PklCRUDTest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\PklCRUDTest.php" tests="9" assertions="24" errors="0" failures="0" skipped="0" time="0.442410">
+        <testcase name="test_pkl_page_loads_for_authenticated_user" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\PklCRUDTest.php" line="23" class="Tests\Feature\PklCRUDTest" classname="Tests.Feature.PklCRUDTest" assertions="2" time="0.084052"/>
+        <testcase name="test_pkl_page_redirects_guest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\PklCRUDTest.php" line="30" class="Tests\Feature\PklCRUDTest" classname="Tests.Feature.PklCRUDTest" assertions="2" time="0.040435"/>
+        <testcase name="test_can_create_pkl_info" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\PklCRUDTest.php" line="35" class="Tests\Feature\PklCRUDTest" classname="Tests.Feature.PklCRUDTest" assertions="3" time="0.048215"/>
+        <testcase name="test_can_update_pkl_info" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\PklCRUDTest.php" line="54" class="Tests\Feature\PklCRUDTest" classname="Tests.Feature.PklCRUDTest" assertions="3" time="0.046705"/>
+        <testcase name="test_can_store_pkl_activity" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\PklCRUDTest.php" line="72" class="Tests\Feature\PklCRUDTest" classname="Tests.Feature.PklCRUDTest" assertions="3" time="0.049743"/>
+        <testcase name="test_can_update_pkl_activity" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\PklCRUDTest.php" line="91" class="Tests\Feature\PklCRUDTest" classname="Tests.Feature.PklCRUDTest" assertions="3" time="0.032689"/>
+        <testcase name="test_can_delete_pkl_activity" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\PklCRUDTest.php" line="116" class="Tests\Feature\PklCRUDTest" classname="Tests.Feature.PklCRUDTest" assertions="3" time="0.040489"/>
+        <testcase name="test_cannot_modify_other_users_pkl_activity" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\PklCRUDTest.php" line="136" class="Tests\Feature\PklCRUDTest" classname="Tests.Feature.PklCRUDTest" assertions="2" time="0.049717"/>
+        <testcase name="test_pkl_schedule_can_be_updated" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\PklCRUDTest.php" line="155" class="Tests\Feature\PklCRUDTest" classname="Tests.Feature.PklCRUDTest" assertions="3" time="0.050365"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\SmartCalendarCRUDTest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\SmartCalendarCRUDTest.php" tests="11" assertions="35" errors="0" failures="0" skipped="0" time="0.596709">
+        <testcase name="test_smart_calendar_page_loads_for_authenticated_user" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\SmartCalendarCRUDTest.php" line="30" class="Tests\Feature\SmartCalendarCRUDTest" classname="Tests.Feature.SmartCalendarCRUDTest" assertions="2" time="0.104608"/>
+        <testcase name="test_smart_calendar_page_redirects_guest" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\SmartCalendarCRUDTest.php" line="38" class="Tests\Feature\SmartCalendarCRUDTest" classname="Tests.Feature.SmartCalendarCRUDTest" assertions="2" time="0.034907"/>
+        <testcase name="test_can_create_regular_event" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\SmartCalendarCRUDTest.php" line="44" class="Tests\Feature\SmartCalendarCRUDTest" classname="Tests.Feature.SmartCalendarCRUDTest" assertions="3" time="0.052636"/>
+        <testcase name="test_can_create_all_day_multi_day_event" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\SmartCalendarCRUDTest.php" line="69" class="Tests\Feature\SmartCalendarCRUDTest" classname="Tests.Feature.SmartCalendarCRUDTest" assertions="6" time="0.044088"/>
+        <testcase name="test_validation_fails_when_end_date_before_start_date" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\SmartCalendarCRUDTest.php" line="93" class="Tests\Feature\SmartCalendarCRUDTest" classname="Tests.Feature.SmartCalendarCRUDTest" assertions="3" time="0.044059"/>
+        <testcase name="test_can_update_event" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\SmartCalendarCRUDTest.php" line="109" class="Tests\Feature\SmartCalendarCRUDTest" classname="Tests.Feature.SmartCalendarCRUDTest" assertions="3" time="0.032884"/>
+        <testcase name="test_cannot_update_other_users_event" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\SmartCalendarCRUDTest.php" line="146" class="Tests\Feature\SmartCalendarCRUDTest" classname="Tests.Feature.SmartCalendarCRUDTest" assertions="1" time="0.028161"/>
+        <testcase name="test_can_delete_event" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\SmartCalendarCRUDTest.php" line="171" class="Tests\Feature\SmartCalendarCRUDTest" classname="Tests.Feature.SmartCalendarCRUDTest" assertions="3" time="0.053976"/>
+        <testcase name="test_cannot_delete_other_users_event" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\SmartCalendarCRUDTest.php" line="194" class="Tests\Feature\SmartCalendarCRUDTest" classname="Tests.Feature.SmartCalendarCRUDTest" assertions="1" time="0.045586"/>
+        <testcase name="test_multi_day_event_is_expanded_in_index_view_data" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\SmartCalendarCRUDTest.php" line="214" class="Tests\Feature\SmartCalendarCRUDTest" classname="Tests.Feature.SmartCalendarCRUDTest" assertions="2" time="0.103060"/>
+        <testcase name="test_can_crud_recurring_schedule" file="D:\03_Developer\Project Web\Website portfolio\SFHUB\tests\Feature\SmartCalendarCRUDTest.php" line="242" class="Tests\Feature\SmartCalendarCRUDTest" classname="Tests.Feature.SmartCalendarCRUDTest" assertions="9" time="0.052742"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

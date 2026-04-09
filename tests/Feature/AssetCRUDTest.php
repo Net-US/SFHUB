@@ -28,15 +28,13 @@ class AssetCRUDTest extends TestCase
     {
         $data = [
             'name' => 'MacBook Pro 14"',
-            'category' => 'electronics',
-            'purchase_price' => 25000000,
+            'type' => 'electronics',
+            'purchase_value' => 25000000,
             'current_value' => 22000000,
             'purchase_date' => now()->subMonths(6)->toDateString(),
-            'condition' => 'Excellent',
             'description' => 'Laptop untuk kerja',
             'location' => 'Ruang Kerja',
             'serial_number' => 'MBP123456789',
-            'warranty_expiry' => now()->addMonths(18)->toDateString(),
             'is_insured' => true,
             'insurance_expiry' => now()->addMonths(12)->toDateString(),
             'notes' => 'Dibeli di iBox'
@@ -53,10 +51,9 @@ class AssetCRUDTest extends TestCase
         $this->assertDatabaseHas('assets', [
             'user_id' => $this->user->id,
             'name' => 'MacBook Pro 14"',
-            'category' => 'electronics',
-            'purchase_price' => 25000000,
+            'type' => 'electronics',
+            'purchase_value' => 25000000,
             'current_value' => 22000000,
-            'condition' => 'Excellent',
             'is_insured' => true
         ]);
     }
@@ -67,9 +64,8 @@ class AssetCRUDTest extends TestCase
 
         $data = [
             'name' => 'MacBook Pro Updated',
-            'category' => 'electronics',
+            'type' => 'electronics',
             'current_value' => 20000000,
-            'condition' => 'Good',
             'description' => 'Updated description',
             'location' => 'Kamar Tidur',
             'notes' => 'Updated notes'
@@ -578,7 +574,7 @@ class AssetCRUDTest extends TestCase
     public function test_cannot_delete_account_with_transactions_via_asset_controller()
     {
         $account = FinanceAccount::factory()->create(['user_id' => $this->user->id]);
-        
+
         // Create a transaction for this account
         \App\Models\Transaction::factory()->create([
             'finance_account_id' => $account->id,

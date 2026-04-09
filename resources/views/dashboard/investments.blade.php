@@ -299,7 +299,8 @@
                                                     title="Edit Posisi (koreksi modal/qty)">
                                                     <i class="fa-solid fa-sliders text-xs"></i>
                                                 </button>
-                                                <button onclick="deleteInstrument({{ $ins->id }})"
+                                                <button
+                                                    onclick="deleteInstrument({{ $ins->id }}, '{{ addslashes($ins->name) }}')"
                                                     class="w-7 h-7 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-500 flex items-center justify-center hover:bg-rose-200"
                                                     title="Hapus">
                                                     <i class="fa-solid fa-trash-can text-xs"></i>
@@ -978,13 +979,19 @@
             } else toast(res.message, false)
         }
 
-        async function deleteInstrument(id) {
-            if (!confirm('Hapus instrumen beserta semua pembelian?')) return;
-            const res = await api('DELETE', `/investments/${id}`);
-            if (res.success) {
-                toast(res.message);
-                setTimeout(() => location.reload(), 800)
-            } else toast(res.message, false)
+        async function deleteInstrument(id, name) {
+            showDeleteConfirm({
+                title: 'Hapus Instrumen?',
+                message: `Hapus "${name || 'Instrumen ini'}" beserta seluruh riwayat pembelian?`,
+                warning: 'Semua data pembelian terkait akan ikut terhapus.',
+                onConfirm: async () => {
+                    const res = await api('DELETE', `/investments/${id}`);
+                    if (res.success) {
+                        toast(res.message);
+                        setTimeout(() => location.reload(), 800)
+                    } else toast(res.message, false)
+                }
+            });
         }
 
         function openUpdatePriceModal(id, name, price) {
@@ -1059,13 +1066,19 @@
         }
 
         async function deletePurchase(id) {
-            if (!confirm('Hapus pembelian ini?')) return;
-            const res = await api('DELETE', `/investments/purchases/${id}`);
-            if (res.success) {
-                toast(res.message);
-                closeModal('modal-detail');
-                setTimeout(() => location.reload(), 800)
-            } else toast(res.message, false)
+            showDeleteConfirm({
+                title: 'Hapus Pembelian?',
+                message: 'Hapus data pembelian ini?',
+                warning: 'Data pembelian akan dihapus dan portofolio akan diperbarui.',
+                onConfirm: async () => {
+                    const res = await api('DELETE', `/investments/purchases/${id}`);
+                    if (res.success) {
+                        toast(res.message);
+                        closeModal('modal-detail');
+                        setTimeout(() => location.reload(), 800)
+                    } else toast(res.message, false)
+                }
+            });
         }
 
         // ── Toggle Setup Awal fields ──────────────────────────────────────

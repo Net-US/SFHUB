@@ -186,7 +186,7 @@
                                                         <p class="font-bold text-stone-800 dark:text-white text-sm">
                                                             {{ $acc->getFormattedBalance() }}</p>
                                                         <button
-                                                            onclick="event.stopPropagation(); deleteAccount({{ $acc->id }})"
+                                                            onclick="event.stopPropagation(); deleteAccount({{ $acc->id }}, '{{ addslashes($acc->name) }}')"
                                                             class="opacity-0 group-hover:opacity-100 text-xs text-stone-300 hover:text-rose-500 transition-all mt-0.5"><i
                                                                 class="fa-solid fa-trash-can"></i></button>
                                                     </div>
@@ -245,7 +245,8 @@
                                             <button onclick="openEditAsset({{ $asset->id }})"
                                                 class="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center hover:bg-blue-200 transition-colors"><i
                                                     class="fa-solid fa-pen text-xs"></i></button>
-                                            <button onclick="deleteAsset({{ $asset->id }})"
+                                            <button
+                                                onclick="deleteAsset({{ $asset->id }}, '{{ addslashes($asset->name) }}')"
                                                 class="w-7 h-7 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-500 flex items-center justify-center hover:bg-rose-200 transition-colors"><i
                                                     class="fa-solid fa-trash-can text-xs"></i></button>
                                         </div>
@@ -793,13 +794,19 @@
         }
 
         // ── HAPUS AKUN ────────────────────────────────────────────────────────
-        async function deleteAccount(id) {
-            if (!confirm('Hapus akun ini? Akun yang sudah memiliki transaksi tidak dapat dihapus.')) return;
-            const res = await api('DELETE', `/assets/accounts/${id}`);
-            if (res.success) {
-                toast(res.message);
-                setTimeout(() => location.reload(), 800)
-            } else toast(res.message || 'Akun tidak dapat dihapus', false)
+        async function deleteAccount(id, name) {
+            showDeleteConfirm({
+                title: 'Hapus Akun?',
+                message: `Hapus akun "${name || 'ini'}"?`,
+                warning: 'Akun yang sudah memiliki transaksi tidak dapat dihapus.',
+                onConfirm: async () => {
+                    const res = await api('DELETE', `/assets/accounts/${id}`);
+                    if (res.success) {
+                        toast(res.message);
+                        setTimeout(() => location.reload(), 800)
+                    } else toast(res.message || 'Akun tidak dapat dihapus', false)
+                }
+            });
         }
 
         let editingAssetId = null;
@@ -852,13 +859,19 @@
                 setTimeout(() => location.reload(), 800)
             } else toast(res.message, false)
         }
-        async function deleteAsset(id) {
-            if (!confirm('Hapus aset ini?')) return;
-            const res = await api('DELETE', `/assets/${id}`);
-            if (res.success) {
-                toast(res.message);
-                setTimeout(() => location.reload(), 800)
-            } else toast(res.message, false)
+        async function deleteAsset(id, name) {
+            showDeleteConfirm({
+                title: 'Hapus Aset?',
+                message: `Hapus aset "${name || 'ini'}"?`,
+                warning: 'Data aset fisik akan dihapus permanen.',
+                onConfirm: async () => {
+                    const res = await api('DELETE', `/assets/${id}`);
+                    if (res.success) {
+                        toast(res.message);
+                        setTimeout(() => location.reload(), 800)
+                    } else toast(res.message, false)
+                }
+            });
         }
 
         async function syncIndodaxAssets() {

@@ -25,21 +25,43 @@ class SmartCalendarController extends Controller
         $prevMonth   = $currentDate->copy()->subMonth();
         $nextMonth   = $currentDate->copy()->addMonth();
 
-        // ── One-off events bulan ini ──────────────────────────────────────
-        $events = $user->calendarEvents()
+        // ── One-off events bulan ini (support multi-day) ─────────────────────
+        $rawEvents = $user->calendarEvents()
             ->whereMonth('start_time', $month)
             ->whereYear('start_time', $year)
-            ->get()
-            ->map(fn($e) => [
-                'id'          => $e->id,
-                'title'       => $e->title,
-                'date'        => $e->start_time->format('Y-m-d'),
-                'type'        => $e->type,
-                'color'       => $e->color ?? $this->getEventColor($e->type),
-                'description' => $e->description,
-                'start_time'  => $e->start_time->format('H:i'),
-                'end_time'    => optional($e->end_time)->format('H:i') ?? '23:59',
-            ]);
+            ->orWhere(function ($q) use ($month, $year) {
+                // Also get events that span into this month
+                $q->whereMonth('end_date', $month)
+                    ->whereYear('end_date', $year);
+            })
+            ->get();
+
+        // Expand multi-day events to each date
+        $events = collect();
+        foreach ($rawEvents as $e) {
+            $startDate = $e->start_time->copy();
+            $endDate = $e->end_date ? Carbon::parse($e->end_date) : $startDate->copy();
+
+            // Iterate each day from start to end
+            for ($d = $startDate->copy(); $d->lte($endDate); $d->addDay()) {
+                // Only include if in current month/year view
+                if ($d->month == $month && $d->year == $year) {
+                    $events->push([
+                        'id'          => $e->id,
+                        'title'       => $e->title,
+                        'date'        => $d->format('Y-m-d'),
+                        'end_date'    => $endDate->format('Y-m-d'),
+                        'type'        => $e->type,
+                        'color'       => $e->color ?? $this->getEventColor($e->type),
+                        'description' => $e->description,
+                        'start_time'  => $e->is_all_day ? null : $e->start_time->format('H:i'),
+                        'end_time'    => $e->is_all_day ? null : optional($e->end_time)->format('H:i'),
+                        'is_all_day'  => $e->is_all_day,
+                        'is_multi_day' => $startDate->format('Y-m-d') !== $endDate->format('Y-m-d'),
+                    ]);
+                }
+            }
+        }
 
         // ── Upcoming deadlines dari tasks ─────────────────────────────────
         $upcomingDeadlines = $user->tasks()
@@ -186,20 +208,34 @@ class SmartCalendarController extends Controller
             'description' => 'nullable|string|max:1000',
             'type'        => 'required|in:deadline,academic,creative,pkl,personal,routine,finance',
             'date'        => 'required|date',
-            'start_time'  => 'required|date_format:H:i',
-            'end_time'    => 'required|date_format:H:i',
+            'end_date'    => 'nullable|date|after_or_equal:date',
+            'start_time'  => 'nullable|date_format:H:i',
+            'end_time'    => 'nullable|date_format:H:i',
             'is_all_day'  => 'boolean',
         ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        $startDT = Carbon::parse($validated['date'] . ' ' . $validated['start_time']);
-        $endDT   = Carbon::parse($validated['date'] . ' ' . $validated['end_time']);
+        $isAllDay = $request->boolean('is_all_day');
+        $startDate = Carbon::parse($validated['date']);
+        $endDate = !empty($validated['end_date']) ? Carbon::parse($validated['end_date']) : $startDate->copy();
 
-        // Jika end <= start, tambah 1 hari (kegiatan melewati tengah malam)
-        if ($endDT->lte($startDT)) {
-            $endDT->addDay();
+        // Handle all day event
+        if ($isAllDay) {
+            $startDT = $startDate->copy()->startOfDay(); // 00:00:00
+            $endDT = $endDate->copy()->endOfDay();       // 23:59:59
+        } else {
+            // Regular event with time
+            $startT = $validated['start_time'] ?? '08:00';
+            $endT = $validated['end_time'] ?? '10:00';
+            $startDT = Carbon::parse($validated['date'] . ' ' . $startT);
+            $endDT = $endDate->copy()->setTimeFromTimeString($endT);
+
+            // If end time <= start time, assume next day
+            if ($endDT->lte($startDT)) {
+                $endDT->addDay();
+            }
         }
 
         $user->calendarEvents()->create([
@@ -209,7 +245,8 @@ class SmartCalendarController extends Controller
             'color'       => $this->getEventColor($validated['type']),
             'start_time'  => $startDT,
             'end_time'    => $endDT,
-            'is_all_day'  => $request->boolean('is_all_day'),
+            'end_date'    => $endDate->format('Y-m-d'),
+            'is_all_day'  => $isAllDay,
             'is_recurring' => false,
         ]);
 
@@ -337,6 +374,62 @@ class SmartCalendarController extends Controller
             return response()->json(['success' => true, 'message' => 'Jadwal berhasil diperbarui!']);
         }
         return redirect()->back()->with('success', 'Jadwal berhasil diperbarui!');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // UPDATE EVENT — PUT /calendar/events/{id}
+    // ─────────────────────────────────────────────────────────────────────
+    public function updateEvent(Request $request, $id)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $event = $user->calendarEvents()->findOrFail($id);
+
+        $validated = $request->validate([
+            'title'       => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'type'        => 'required|in:deadline,academic,creative,pkl,personal,routine,finance',
+            'date'        => 'required|date',
+            'end_date'    => 'nullable|date|after_or_equal:date',
+            'start_time'  => 'nullable|date_format:H:i',
+            'end_time'    => 'nullable|date_format:H:i',
+            'is_all_day'  => 'boolean',
+        ]);
+
+        $isAllDay = $request->boolean('is_all_day');
+        $startDate = Carbon::parse($validated['date']);
+        $endDate = !empty($validated['end_date']) ? Carbon::parse($validated['end_date']) : $startDate->copy();
+
+        // Handle all day event
+        if ($isAllDay) {
+            $startDT = $startDate->copy()->startOfDay();
+            $endDT = $endDate->copy()->endOfDay();
+        } else {
+            $startT = $validated['start_time'] ?? '08:00';
+            $endT = $validated['end_time'] ?? '10:00';
+            $startDT = Carbon::parse($validated['date'] . ' ' . $startT);
+            $endDT = $endDate->copy()->setTimeFromTimeString($endT);
+
+            if ($endDT->lte($startDT)) {
+                $endDT->addDay();
+            }
+        }
+
+        $event->update([
+            'title'       => $validated['title'],
+            'description' => $validated['description'],
+            'type'        => $validated['type'],
+            'color'       => $this->getEventColor($validated['type']),
+            'start_time'  => $startDT,
+            'end_time'    => $endDT,
+            'end_date'    => $endDate->format('Y-m-d'),
+            'is_all_day'  => $isAllDay,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Event berhasil diperbarui!']);
+        }
+        return redirect()->back()->with('success', 'Event berhasil diperbarui!');
     }
 
     // ─────────────────────────────────────────────────────────────────────

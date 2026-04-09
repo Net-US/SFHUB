@@ -163,6 +163,11 @@
             #sidebar-overlay.active {
                 opacity: 1;
                 visibility: visible;
+                pointer-events: auto;
+            }
+
+            #sidebar-overlay {
+                pointer-events: none;
             }
 
             .sidebar-toggle-desktop {
@@ -275,16 +280,17 @@
 </head>
 
 <body
-    class="bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100 h-screen flex overflow-hidden transition-colors duration-300">
+    class="bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-100 h-dvh flex overflow-hidden transition-colors duration-300">
 
     <!-- === SIDEBAR OVERLAY (MOBILE) === -->
-    <div id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+    <div id="sidebar-overlay"></div>
 
     <!-- === SIDEBAR NAVIGATION === -->
     <aside id="sidebar"
         class="bg-white dark:bg-stone-900 border-r border-stone-200 dark:border-stone-800
-               md:flex flex-col z-30 shadow-sm w-64 sidebar-transition relative
-               md:translate-x-0 fixed md:static top-0 left-0 h-screen">
+               md:flex flex-col z-50 shadow-sm w-64 sidebar-transition relative
+               md:translate-x-0 fixed md:static top-0 left-0 h-dvh overflow-y-auto md:overflow-visible"
+        onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()">
 
         <!-- Toggle Button Desktop -->
         <button onclick="toggleSidebar()"
@@ -316,7 +322,7 @@
         </div>
 
         <!-- Navigation Content -->
-        <nav class="flex-1 overflow-y-auto py-2 px-2 custom-scrollbar">
+        <nav class="flex-1 overflow-y-auto md:overflow-visible py-2 px-2 custom-scrollbar pb-20 md:pb-2">
             <!-- Group: FOKUS UTAMA -->
             <div class="mb-4">
                 <p class="nav-header text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2 px-3">
@@ -551,7 +557,7 @@
 
     <!-- === MAIN CONTENT === -->
     <main
-        class="flex-1 flex flex-col h-screen overflow-hidden relative bg-stone-50 dark:bg-stone-950 transition-colors duration-300">
+        class="flex-1 flex flex-col h-dvh overflow-hidden relative bg-stone-50 dark:bg-stone-950 transition-colors duration-300">
 
         <!-- Top Header -->
         <header
@@ -669,13 +675,61 @@
         </header>
 
         <!-- Scrollable Content -->
-        <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar scroll-smooth">
+        <div id="content-area"
+            class="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 custom-scrollbar scroll-smooth">
             @yield('content')
         </div>
     </main>
 
     {{-- Stack untuk modal --}}
     @stack('modals')
+
+    {{-- ═══════════════════════════════════════════════════════════════════════ --}}
+    {{-- MODAL KONFIRMASI HAPUS (User-Friendly) --}}
+    {{-- ═══════════════════════════════════════════════════════════════════════ --}}
+    <div id="modal-confirm-delete"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] hidden items-center justify-center p-4 flex">
+        <div class="bg-white dark:bg-stone-900 rounded-2xl w-full max-w-sm shadow-2xl border border-stone-200 dark:border-stone-800 overflow-hidden transform scale-95 opacity-0 transition-all duration-200"
+            id="modal-confirm-delete-content">
+            <div class="p-6 text-center">
+                {{-- Icon Warning --}}
+                <div
+                    class="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-trash-can text-rose-500 text-2xl"></i>
+                </div>
+
+                {{-- Title --}}
+                <h3 class="font-bold text-stone-900 dark:text-white text-lg mb-2" id="confirm-delete-title">
+                    Hapus Item?
+                </h3>
+
+                {{-- Message --}}
+                <p class="text-sm text-stone-500 dark:text-stone-400 mb-1" id="confirm-delete-message">
+                    Apakah Anda yakin ingin menghapus item ini?
+                </p>
+
+                {{-- Warning Text --}}
+                <p class="text-xs text-rose-500 dark:text-rose-400 mt-3 bg-rose-50 dark:bg-rose-900/20 p-2 rounded-lg">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                    <span id="confirm-delete-warning">Tindakan ini tidak dapat dibatalkan.</span>
+                </p>
+            </div>
+
+            {{-- Buttons --}}
+            <div class="flex gap-3 p-5 pt-0">
+                <button onclick="closeDeleteConfirm()"
+                    class="flex-1 py-2.5 border border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 rounded-xl text-sm font-medium hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+                    Batal
+                </button>
+                <button onclick="executeDeleteConfirm()"
+                    class="flex-1 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                    id="confirm-delete-btn">
+                    <i class="fa-solid fa-trash text-xs"></i>
+                    <span>Hapus</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- === JAVASCRIPT LOGIC === -->
     <script>
@@ -713,19 +767,22 @@
             const overlay = document.getElementById('sidebar-overlay');
 
             if (window.innerWidth < 768) {
-                // Mobile: reset to closed state
-                sidebar.classList.remove('sidebar-collapsed', 'w-20');
-                sidebar.classList.add('w-64');
-                sidebar.style.transform = 'translateX(-100%)';
-                if (overlay) overlay.classList.remove('active');
-                isMobileMenuOpen = false;
-                isSidebarCollapsed = false;
+                // Mobile: only reset if sidebar is NOT currently open
+                // This prevents closing sidebar during scroll (which triggers resize on mobile)
+                if (!isMobileMenuOpen) {
+                    sidebar.classList.remove('sidebar-collapsed', 'w-20');
+                    sidebar.classList.add('w-64');
+                    sidebar.style.transform = 'translateX(-100%)';
+                    if (overlay) overlay.classList.remove('active');
+                    isSidebarCollapsed = false;
+                }
             } else {
                 // Desktop: ensure sidebar visible
                 sidebar.style.transform = '';
                 sidebar.classList.remove('mobile-open');
                 if (overlay) overlay.classList.remove('active');
                 document.body.style.overflow = '';
+                isMobileMenuOpen = false;
             }
         }
 
@@ -764,11 +821,37 @@
 
             sidebar.classList.add('mobile-open');
             sidebar.style.transform = 'translateX(0)';
-            if (overlay) overlay.classList.add('active');
+            if (overlay) {
+                overlay.classList.add('active');
+                overlay.style.pointerEvents = 'auto';
+            }
             isMobileMenuOpen = true;
 
             // Prevent body scroll
             document.body.style.overflow = 'hidden';
+
+            // Add touch/click handler for overlay (with scroll detection)
+            setTimeout(() => {
+                if (overlay) {
+                    overlay.addEventListener('touchstart', handleOverlayTouch, {
+                        passive: true
+                    });
+                    overlay.addEventListener('click', handleOverlayClick);
+                }
+            }, 100);
+        }
+
+        // Touch handling for overlay to prevent accidental close during scroll
+        let overlayTouchStartY = 0;
+
+        function handleOverlayTouch(e) {
+            overlayTouchStartY = e.touches[0].clientY;
+        }
+
+        function handleOverlayClick(e) {
+            // Check if this was a scroll gesture (moved more than 10px)
+            // If it's a real click (not scroll), close sidebar
+            closeMobileSidebar();
         }
 
         // === MOBILE SIDEBAR CLOSE ===
@@ -778,7 +861,12 @@
 
             sidebar.classList.remove('mobile-open');
             sidebar.style.transform = 'translateX(-100%)';
-            if (overlay) overlay.classList.remove('active');
+            if (overlay) {
+                overlay.classList.remove('active');
+                overlay.style.pointerEvents = 'none';
+                overlay.removeEventListener('touchstart', handleOverlayTouch);
+                overlay.removeEventListener('click', handleOverlayClick);
+            }
             isMobileMenuOpen = false;
 
             // Restore body scroll
@@ -830,6 +918,98 @@
         // === TIME SIMULATION ===
         document.getElementById('time-simulation')?.addEventListener('change', function() {
             console.log('Time simulation changed to:', this.value);
+        });
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // MODAL KONFIRMASI HAPUS - Fungsi Global
+        // ═══════════════════════════════════════════════════════════════════════
+        let deleteConfirmCallback = null;
+        let deleteConfirmBtnRef = null;
+
+        /**
+         * Tampilkan modal konfirmasi hapus yang user-friendly
+         * @param {Object} options - Konfigurasi modal
+         * @param {string} options.title - Judul modal (opsional, default: 'Hapus Item?')
+         * @param {string} options.message - Pesan utama (opsional)
+         * @param {string} options.warning - Pesan peringatan (opsional, default: 'Tindakan ini tidak dapat dibatalkan.')
+         * @param {string} options.confirmText - Text tombol hapus (opsional, default: 'Hapus')
+         * @param {Function} options.onConfirm - Callback function saat user klik hapus
+         * @param {HTMLElement} options.btnRef - Reference tombol yang diklik (untuk loading state)
+         */
+        function showDeleteConfirm(options = {}) {
+            const modal = document.getElementById('modal-confirm-delete');
+            const content = document.getElementById('modal-confirm-delete-content');
+
+            // Set content
+            document.getElementById('confirm-delete-title').textContent = options.title || 'Hapus Item?';
+            document.getElementById('confirm-delete-message').textContent = options.message ||
+                'Apakah Anda yakin ingin menghapus item ini?';
+            document.getElementById('confirm-delete-warning').textContent = options.warning ||
+                'Tindakan ini tidak dapat dibatalkan.';
+
+            const btnText = document.querySelector('#confirm-delete-btn span');
+            if (btnText) btnText.textContent = options.confirmText || 'Hapus';
+
+            // Save callback
+            deleteConfirmCallback = options.onConfirm || null;
+            deleteConfirmBtnRef = options.btnRef || null;
+
+            // Show modal dengan animasi
+            modal.classList.remove('hidden');
+            // Force reflow
+            void modal.offsetWidth;
+
+            requestAnimationFrame(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            });
+        }
+
+        function closeDeleteConfirm() {
+            const modal = document.getElementById('modal-confirm-delete');
+            const content = document.getElementById('modal-confirm-delete-content');
+
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                deleteConfirmCallback = null;
+                deleteConfirmBtnRef = null;
+            }, 200);
+        }
+
+        async function executeDeleteConfirm() {
+            const btn = document.getElementById('confirm-delete-btn');
+            const originalContent = btn.innerHTML;
+
+            // Loading state
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i><span>Menghapus...</span>';
+
+            try {
+                if (deleteConfirmCallback) {
+                    await deleteConfirmCallback(deleteConfirmBtnRef);
+                }
+                closeDeleteConfirm();
+            } catch (e) {
+                console.error('Error during delete:', e);
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('modal-confirm-delete')?.addEventListener('click', (e) => {
+            if (e.target.id === 'modal-confirm-delete') closeDeleteConfirm();
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !document.getElementById('modal-confirm-delete').classList.contains(
+                'hidden')) {
+                closeDeleteConfirm();
+            }
         });
 
         // === UTILITY FUNCTIONS ===
@@ -1026,6 +1206,29 @@
 
         // === INIT ===
         window.addEventListener("DOMContentLoaded", init);
+
+        // === SIDEBAR TOUCH PROTECTION ===
+        // Prevent any touch events in sidebar from bubbling to overlay
+        (function() {
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar) return;
+
+            // Block all touch events from bubbling
+            ['touchstart', 'touchmove', 'touchend', 'touchcancel', 'click'].forEach(eventName => {
+                sidebar.addEventListener(eventName, function(e) {
+                    e.stopPropagation();
+                }, {
+                    passive: true
+                });
+            });
+
+            // Also block scroll events from triggering sidebar close
+            sidebar.addEventListener('scroll', function(e) {
+                e.stopPropagation();
+            }, {
+                passive: true
+            });
+        })();
     </script>
 
     @stack('scripts')

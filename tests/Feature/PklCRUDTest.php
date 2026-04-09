@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Models\PklInfo;
 use App\Models\PklLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 
 class PklCRUDTest extends TestCase
 {
@@ -45,7 +44,7 @@ class PklCRUDTest extends TestCase
             'allowance'      => 2500000,
         ]);
 
-        $response->assertRedirect();
+        $response->assertStatus(200)->assertJson(['success' => true]);
         $this->assertDatabaseHas('pkl_infos', [
             'user_id' => $this->user->id,
             'company' => 'PT. Digital Kreatif Indonesia',
@@ -66,13 +65,13 @@ class PklCRUDTest extends TestCase
             'department' => 'Digital Marketing',
         ]);
 
-        $response->assertRedirect();
+        $response->assertStatus(200)->assertJson(['success' => true]);
         $this->assertDatabaseHas('pkl_infos', ['id' => $info->id, 'company' => 'PT Baru']);
     }
 
     public function test_can_store_pkl_activity(): void
     {
-        $response = $this->actingAs($this->user)->postJson(route('pkl.activities.store'), [
+        $response = $this->actingAs($this->user)->postJson(route('pkl.activity.store'), [
             'task'     => 'Membuat desain banner',
             'log_date' => now()->format('Y-m-d'),
             'hours'    => 4,
@@ -80,7 +79,7 @@ class PklCRUDTest extends TestCase
             'notes'    => 'Menggunakan Figma',
         ]);
 
-        $response->assertRedirect();
+        $response->assertStatus(200)->assertJson(['success' => true]);
         $this->assertDatabaseHas('pkl_logs', [
             'user_id' => $this->user->id,
             'task'    => 'Membuat desain banner',
@@ -98,16 +97,19 @@ class PklCRUDTest extends TestCase
             'hours'    => 2,
             'category' => 'Design',
             'status'   => 'done',
+            'start_time' => '00:00:00',
+            'end_time' => '00:00:00',
+            'activity' => 'Aktivitas Lama',
         ]);
 
-        $response = $this->actingAs($this->user)->putJson(route('pkl.activities.update', $log->id), [
+        $response = $this->actingAs($this->user)->putJson(route('pkl.activity.update', $log->id), [
             'task'     => 'Aktivitas Baru',
             'log_date' => now()->format('Y-m-d'),
             'hours'    => 3,
             'category' => 'Development',
         ]);
 
-        $response->assertRedirect();
+        $response->assertStatus(200)->assertJson(['success' => true]);
         $this->assertDatabaseHas('pkl_logs', ['id' => $log->id, 'task' => 'Aktivitas Baru', 'hours' => 3]);
     }
 
@@ -120,9 +122,14 @@ class PklCRUDTest extends TestCase
             'hours'    => 1,
             'category' => 'Meeting',
             'status'   => 'done',
+            'start_time' => '00:00:00',
+            'end_time' => '00:00:00',
+            'activity' => 'Aktivitas Hapus',
         ]);
 
-        $this->actingAs($this->user)->deleteJson(route('pkl.activities.destroy', $log->id))->assertRedirect();
+        $this->actingAs($this->user)->deleteJson(route('pkl.activity.destroy', $log->id))
+            ->assertStatus(200)
+            ->assertJson(['success' => true]);
         $this->assertDatabaseMissing('pkl_logs', ['id' => $log->id]);
     }
 
@@ -136,9 +143,12 @@ class PklCRUDTest extends TestCase
             'hours'    => 1,
             'category' => 'Lainnya',
             'status'   => 'done',
+            'start_time' => '00:00:00',
+            'end_time' => '00:00:00',
+            'activity' => 'Orang Lain',
         ]);
 
-        $this->actingAs($this->user)->deleteJson(route('pkl.activities.destroy', $log->id))->assertStatus(404);
+        $this->actingAs($this->user)->deleteJson(route('pkl.activity.destroy', $log->id))->assertStatus(404);
         $this->assertDatabaseHas('pkl_logs', ['id' => $log->id]);
     }
 
@@ -152,7 +162,7 @@ class PklCRUDTest extends TestCase
             ],
         ]);
 
-        $response->assertRedirect();
+        $response->assertStatus(200)->assertJson(['success' => true]);
         $this->assertDatabaseHas('pkl_schedules', [
             'user_id' => $this->user->id,
             'day'     => 'Senin',

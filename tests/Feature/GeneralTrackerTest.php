@@ -21,12 +21,12 @@ class GeneralTrackerTest extends TestCase
 
     public function test_general_tracker_page_loads(): void
     {
-        $this->actingAs($this->user)->get('/tracker')->assertStatus(200);
+        $this->actingAs($this->user)->get('/dashboard/tracker')->assertStatus(200);
     }
 
     public function test_general_tracker_redirects_guest(): void
     {
-        $this->get('/tracker')->assertRedirect('/login');
+        $this->get('/dashboard/tracker')->assertRedirect('/login');
     }
 
     public function test_can_create_general_task(): void
@@ -80,7 +80,8 @@ class GeneralTrackerTest extends TestCase
 
         $this->actingAs($this->user)
             ->deleteJson(route('tasks.destroy', $task->id))
-            ->assertRedirect();
+            ->assertStatus(302)
+            ->assertRedirect(route('dashboard.tracker'));
 
         $this->assertSoftDeleted('tasks', ['id' => $task->id]);
     }
@@ -95,7 +96,7 @@ class GeneralTrackerTest extends TestCase
             'status'   => 'todo',
         ]);
 
-        $response = $this->actingAs($this->user)->get('/tracker');
+        $response = $this->actingAs($this->user)->get('/dashboard/tracker');
         $response->assertViewHas('allTasks');
         $response->assertViewHas('completedCount');
         $response->assertViewHas('totalCount');

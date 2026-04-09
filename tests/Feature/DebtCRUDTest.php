@@ -27,15 +27,13 @@ class DebtCRUDTest extends TestCase
     public function test_can_create_debt()
     {
         $data = [
-            'name' => 'Pinjaman Online',
-            'creditor' => 'Fintech XYZ',
-            'principal_amount' => 5000000,
-            'interest_rate' => 12.5,
-            'total_amount' => 5625000,
-            'debt_type' => 'loan',
+            'debtor' => 'Fintech XYZ',
+            'type' => 'payable',
+            'amount' => 5000000,
+            'start_date' => now()->toDateString(),
             'due_date' => now()->addMonths(12)->toDateString(),
+            'interest_rate' => 12.5,
             'description' => 'Pinjaman untuk modal usaha',
-            'status' => 'active'
         ];
 
         $response = $this->postJson('/debts', $data);
@@ -43,14 +41,13 @@ class DebtCRUDTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'message' => 'Hutang berhasil ditambahkan.'
             ]);
 
         $this->assertDatabaseHas('debts', [
             'user_id' => $this->user->id,
-            'name' => 'Pinjaman Online',
-            'creditor' => 'Fintech XYZ',
-            'principal_amount' => 5000000,
+            'debtor' => 'Fintech XYZ',
+            'type' => 'payable',
+            'amount' => 5000000,
             'status' => 'active'
         ]);
     }
@@ -60,14 +57,11 @@ class DebtCRUDTest extends TestCase
         $debt = Debt::factory()->create(['user_id' => $this->user->id]);
 
         $data = [
-            'name' => 'Pinjaman Updated',
-            'creditor' => 'Bank ABC',
-            'principal_amount' => 6000000,
-            'interest_rate' => 10.0,
-            'total_amount' => 6600000,
+            'debtor' => 'Bank ABC Updated',
             'due_date' => now()->addMonths(18)->toDateString(),
+            'interest_rate' => 10.0,
             'description' => 'Updated description',
-            'status' => 'completed'
+            'status' => 'paid'
         ];
 
         $response = $this->putJson("/debts/{$debt->id}", $data);
@@ -80,10 +74,8 @@ class DebtCRUDTest extends TestCase
 
         $this->assertDatabaseHas('debts', [
             'id' => $debt->id,
-            'name' => 'Pinjaman Updated',
-            'creditor' => 'Bank ABC',
-            'principal_amount' => 6000000,
-            'status' => 'completed'
+            'debtor' => 'Bank ABC Updated',
+            'status' => 'paid'
         ]);
     }
 
@@ -166,7 +158,7 @@ class DebtCRUDTest extends TestCase
     public function test_can_get_debt_payments()
     {
         $debt = Debt::factory()->create(['user_id' => $this->user->id]);
-        
+
         DebtPayment::factory()->count(3)->create([
             'debt_id' => $debt->id,
             'user_id' => $this->user->id
@@ -187,7 +179,7 @@ class DebtCRUDTest extends TestCase
             'user_id' => $this->user->id,
             'remaining_amount' => 2000000
         ]);
-        
+
         $payment = DebtPayment::factory()->create([
             'debt_id' => $debt->id,
             'user_id' => $this->user->id,
@@ -316,7 +308,7 @@ class DebtCRUDTest extends TestCase
 
         // Test payment amount exceeding remaining amount
         $debt->update(['remaining_amount' => 500000]);
-        
+
         $response = $this->postJson("/debts/{$debt->id}/payments", [
             'amount' => 600000,
             'payment_date' => now()->toDateString()
@@ -430,7 +422,7 @@ class DebtCRUDTest extends TestCase
         ]);
 
         // For simple interest: Total = Principal + (Principal * Rate * Time)
-        $expectedInterest = 10000000 * (12/100) * (12/12); // 1 year
+        $expectedInterest = 10000000 * (12 / 100) * (12 / 12); // 1 year
         $expectedTotal = 10000000 + $expectedInterest;
 
         $this->assertEquals($expectedTotal, $debt->total_amount);

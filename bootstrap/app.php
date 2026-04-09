@@ -13,10 +13,14 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(\App\Http\Middleware\CheckMaintenanceMode::class);
 
-        $middleware->validateCsrfTokens(except: [
-            'midtrans/webhook',
-            'midtrans/*',
-        ]);
+        $appEnv = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? env('APP_ENV');
+
+        if ($appEnv !== 'testing') {
+            $middleware->validateCsrfTokens(except: [
+                'midtrans/webhook',
+                'midtrans/*',
+            ]);
+        }
 
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,

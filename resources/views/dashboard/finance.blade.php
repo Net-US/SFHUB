@@ -343,7 +343,8 @@
                                             {{ $t->type === 'income' ? '+' : ($t->type === 'transfer' ? '⇄' : '−') }}Rp
                                             {{ number_format($t->amount, 0, ',', '.') }}
                                         </span>
-                                        <button onclick="deleteTransaction({{ $t->id }})"
+                                        <button
+                                            onclick="deleteTransaction({{ $t->id }}, '{{ addslashes($t->description) }}')"
                                             class="opacity-0 group-hover:opacity-100 text-stone-300 hover:text-rose-500 transition-all ml-1">
                                             <i class="fa-solid fa-trash-can text-xs"></i>
                                         </button>
@@ -503,7 +504,8 @@
                             {{ $b->isOverBudget() ? 'text-red-600' : ($b->isNearLimit() ? 'text-amber-600' : 'text-emerald-600') }}">
                                                 {{ round($b->getUsagePercentage(), 0) }}%
                                             </span>
-                                            <button onclick="deleteBudget({{ $b->id }})"
+                                            <button
+                                                onclick="deleteBudget({{ $b->id }}, '{{ addslashes($b->name) }}')"
                                                 class="opacity-0 group-hover:opacity-100 text-stone-300 hover:text-rose-500 transition-all">
                                                 <i class="fa-solid fa-trash-can text-xs"></i>
                                             </button>
@@ -557,7 +559,8 @@
                                         <div class="flex items-center gap-1">
                                             <span
                                                 class="text-sm font-bold text-stone-700 dark:text-stone-300">{{ round($g->getProgressPercentage(), 0) }}%</span>
-                                            <button onclick="deleteSavingsGoal({{ $g->id }})"
+                                            <button
+                                                onclick="deleteSavingsGoal({{ $g->id }}, '{{ addslashes($g->name) }}')"
                                                 class="opacity-0 group-hover:opacity-100 text-stone-300 hover:text-rose-500 transition-all ml-1">
                                                 <i class="fa-solid fa-trash-can text-xs"></i>
                                             </button>
@@ -1229,13 +1232,19 @@
         }
 
         // ── DELETE: Transaksi ─────────────────────────────────────────
-        async function deleteTransaction(id) {
-            if (!confirm('Hapus transaksi ini? Saldo akun akan dikembalikan.')) return;
-            const res = await api('DELETE', `/finance/transactions/${id}`);
-            if (res.success) {
-                toast(res.message);
-                setTimeout(() => location.reload(), 800);
-            } else toast(res.message, false);
+        async function deleteTransaction(id, desc) {
+            showDeleteConfirm({
+                title: 'Hapus Transaksi?',
+                message: `Hapus transaksi "${desc || 'ini'}"?`,
+                warning: 'Saldo akun akan dikembalikan seperti sebelum transaksi.',
+                onConfirm: async () => {
+                    const res = await api('DELETE', `/finance/transactions/${id}`);
+                    if (res.success) {
+                        toast(res.message);
+                        setTimeout(() => location.reload(), 800);
+                    } else toast(res.message, false);
+                }
+            });
         }
 
         // ── SUBMIT: Transfer ──────────────────────────────────────────
@@ -1263,13 +1272,19 @@
         }
 
         // ── DELETE: Budget ────────────────────────────────────────────
-        async function deleteBudget(id) {
-            if (!confirm('Hapus budget ini?')) return;
-            const res = await api('DELETE', `/finance/budgets/${id}`);
-            if (res.success) {
-                toast(res.message);
-                setTimeout(() => location.reload(), 800);
-            } else toast(res.message, false);
+        async function deleteBudget(id, name) {
+            showDeleteConfirm({
+                title: 'Hapus Budget?',
+                message: `Hapus budget "${name || 'ini'}"?`,
+                warning: 'Data anggaran bulanan akan dihapus.',
+                onConfirm: async () => {
+                    const res = await api('DELETE', `/finance/budgets/${id}`);
+                    if (res.success) {
+                        toast(res.message);
+                        setTimeout(() => location.reload(), 800);
+                    } else toast(res.message, false);
+                }
+            });
         }
 
         // ── SUBMIT: Savings Goal ──────────────────────────────────────
@@ -1297,13 +1312,19 @@
         }
 
         // ── DELETE: Savings Goal ──────────────────────────────────────
-        async function deleteSavingsGoal(id) {
-            if (!confirm('Hapus target tabungan ini?')) return;
-            const res = await api('DELETE', `/finance/savings-goals/${id}`);
-            if (res.success) {
-                toast(res.message);
-                setTimeout(() => location.reload(), 800);
-            } else toast(res.message, false);
+        async function deleteSavingsGoal(id, name) {
+            showDeleteConfirm({
+                title: 'Hapus Target Tabungan?',
+                message: `Hapus target "${name || 'ini'}"?`,
+                warning: 'Progress tabungan akan dihapus.',
+                onConfirm: async () => {
+                    const res = await api('DELETE', `/finance/savings-goals/${id}`);
+                    if (res.success) {
+                        toast(res.message);
+                        setTimeout(() => location.reload(), 800);
+                    } else toast(res.message, false);
+                }
+            });
         }
 
         // ── SUBMIT: Pending Need ──────────────────────────────────────

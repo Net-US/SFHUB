@@ -49,10 +49,12 @@ class AcademicCRUDTest extends TestCase
             'sks'         => 3,
             'day_of_week' => 'Senin',
             'start_time'  => '08:00',
+            'end_time'    => '10:00',
+            'start_date'  => now()->format('Y-m-d'),
             'room'        => 'R.202',
         ]);
 
-        $response->assertRedirect();
+        $response->assertStatus(200)->assertJson(['success' => true]);
         $this->assertDatabaseHas('subjects', [
             'user_id' => $this->user->id,
             'code'    => 'IF401',
@@ -76,10 +78,12 @@ class AcademicCRUDTest extends TestCase
             'name'        => 'Metodologi Penelitian (Update)',
             'sks'         => 3,
             'day_of_week' => 'Selasa',
+            'start_time'  => '09:00',
+            'end_time'    => '11:00',
             'progress'    => 75,
         ]);
 
-        $response->assertRedirect();
+        $response->assertStatus(200)->assertJson(['success' => true]);
         $this->assertDatabaseHas('subjects', [
             'id'       => $subject->id,
             'name'     => 'Metodologi Penelitian (Update)',
@@ -99,7 +103,7 @@ class AcademicCRUDTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->user)->deleteJson(route('academic.courses.destroy', $subject->id));
-        $response->assertRedirect();
+        $response->assertStatus(200)->assertJson(['success' => true]);
         $this->assertDatabaseMissing('subjects', ['id' => $subject->id]);
     }
 
@@ -130,7 +134,7 @@ class AcademicCRUDTest extends TestCase
             'due_date' => now()->addDays(5)->format('Y-m-d'),
         ]);
 
-        $response->assertRedirect();
+        $response->assertStatus(200)->assertJson(['success' => true]);
         $this->assertDatabaseHas('tasks', [
             'user_id'  => $this->user->id,
             'title'    => 'Laporan Praktikum',
@@ -166,7 +170,7 @@ class AcademicCRUDTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->user)->deleteJson(route('academic.tasks.destroy', $task->id));
-        $response->assertRedirect();
+        $response->assertStatus(200)->assertJson(['success' => true]);
         $this->assertSoftDeleted('tasks', ['id' => $task->id]);
     }
 
@@ -176,11 +180,11 @@ class AcademicCRUDTest extends TestCase
     {
         $response = $this->actingAs($this->user)->postJson(route('academic.milestones.store'), [
             'label'       => 'Pengajuan Judul',
-            'target_date' => 'Jan 2025',
+            'target_date' => now()->addMonths(2)->format('Y-m-d'),
             'sort_order'  => 1,
         ]);
 
-        $response->assertRedirect();
+        $response->assertStatus(200)->assertJson(['success' => true]);
         $this->assertDatabaseHas('thesis_milestones', [
             'user_id' => $this->user->id,
             'label'   => 'Pengajuan Judul',
@@ -192,17 +196,18 @@ class AcademicCRUDTest extends TestCase
         $milestone = ThesisMilestone::create([
             'user_id'     => $this->user->id,
             'label'       => 'Seminar Proposal',
-            'target_date' => 'Mar 2025',
+            'target_date' => now()->addMonths(3)->format('Y-m-d'),
             'done'        => false,
             'sort_order'  => 3,
         ]);
 
         $response = $this->actingAs($this->user)->putJson(route('academic.milestones.update', $milestone->id), [
             'label' => 'Seminar Proposal',
+            'target_date' => now()->addMonths(3)->format('Y-m-d'),
             'done'  => true,
         ]);
 
-        $response->assertRedirect();
+        $response->assertStatus(200)->assertJson(['success' => true]);
         $this->assertDatabaseHas('thesis_milestones', ['id' => $milestone->id, 'done' => 1]);
     }
 }

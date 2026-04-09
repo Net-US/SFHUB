@@ -223,10 +223,10 @@ class AcademicController extends Controller
     public function updateSessionSchedule(Request $request, $id)
     {
         $session = SubjectSession::findOrFail($id);
-        $action = $request->action; // 'reschedule', 'tba', 'holiday', 'revert'
+        $action = $request->action; // 'reschedule', 'tba', 'holiday', 'holiday_shift', 'revert'
 
         // Bersihkan title dari label status sebelumnya agar tidak menumpuk
-        $cleanTitle = str_replace([' (Libur)', ' (Menunggu Jadwal)', ' (Kelas Pengganti)'], '', $session->title);
+        $cleanTitle = str_replace([' (Libur)', ' (Menunggu Jadwal)', ' (Kelas Pengganti)', ' (Libur + Geser Jadwal)'], '', $session->title);
 
         if ($action === 'reschedule') {
             $request->validate(['new_date' => 'required|date']);
@@ -248,6 +248,46 @@ class AcademicController extends Controller
                 'title' => $cleanTitle . ' (Libur)'
             ]);
             $msg = 'Sesi ditandai libur tetap tanpa pengganti.';
+        } elseif ($action === 'holiday_shift') {
+            // LIBUR & GESER SEMUA SESI BERIKUTNYA dengan tanggal fleksibel
+            $request->validate(['resume_date' => 'required|date']);
+
+            $subject = $session->subject;
+            $currentSessionNum = $session->session_number;
+            $originalDate = Carbon::parse($session->date);
+            $resumeDate = Carbon::parse($request->resume_date);
+
+            // Hitung selisih hari antara tanggal asli dan tanggal mulai lagi
+            $daysDiff = $originalDate->diffInDays($resumeDate);
+
+            if ($daysDiff <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tanggal mulai lagi harus setelah tanggal asli sesi.'
+                ], 422);
+            }
+
+            // Ambil semua sesi dari sesi ini sampai sesi 16
+            $sessionsToShift = $subject->sessions()
+                ->where('session_number', '>=', $currentSessionNum)
+                ->orderBy('session_number')
+                ->get();
+
+            // Geser semua sesi sesuai selisih hari yang dihitung
+            foreach ($sessionsToShift as $s) {
+                $newDate = Carbon::parse($s->date)->addDays($daysDiff);
+                $s->update([
+                    'date' => $newDate,
+                    'status' => $s->session_number === $currentSessionNum ? 'holiday' : $s->status,
+                    'title' => $s->session_number === $currentSessionNum
+                        ? $cleanTitle . " (Libur, Mulai: {$resumeDate->format('d M')})"
+                        : str_replace([' (Libur)', ' (Menunggu Jadwal)', ' (Kelas Pengganti)', ' (Libur + Geser Jadwal)'], '', $s->title)
+                ]);
+            }
+
+            $shiftedCount = $sessionsToShift->count();
+            $weeks = round($daysDiff / 7, 1);
+            $msg = "Sesi {$currentSessionNum} libur & {$shiftedCount} sesi digeser {$daysDiff} hari (~{$weeks} minggu). Mulai lagi: {$resumeDate->format('d M Y')}.";
         } elseif ($action === 'revert') {
             $session->update([
                 'status' => 'scheduled',
@@ -261,6 +301,33 @@ class AcademicController extends Controller
             'message' => $msg
         ]);
     }
+
+    // Fungsi untuk mengelola materi sesi (catatan dan link materi)
+    public function updateSessionMaterial(Request $request, $id)
+    {
+        $session = SubjectSession::findOrFail($id);
+
+        // Validasi bahwa sesi ini milik mata kuliah user yang login
+        $subject = Subject::where('id', $session->subject_id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $data = $request->validate([
+            'notes'         => 'nullable|string|max:2000',
+            'material_link' => 'nullable|url|max:500',
+        ]);
+
+        $session->update([
+            'notes'         => $data['notes'] ?? null,
+            'material_link' => $data['material_link'] ?? null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Materi sesi berhasil diperbarui.'
+        ]);
+    }
+
     public function destroyCourse(Request $request, $id)
     {
         $subject = Subject::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
@@ -332,7 +399,7 @@ class AcademicController extends Controller
             'drive_link'        => 'nullable|url|max:500',
         ]);
 
-        
+
 
         $task->update($data);
 

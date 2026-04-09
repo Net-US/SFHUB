@@ -136,6 +136,7 @@ Route::middleware('auth')->group(function () {
 
     // Events (one-off)
     Route::post('/calendar/events',          [SmartCalendarController::class, 'storeEvent'])->name('calendar.events.store');
+    Route::put('/calendar/events/{id}',      [SmartCalendarController::class, 'updateEvent'])->name('calendar.events.update');
     Route::delete('/calendar/events/{id}',   [SmartCalendarController::class, 'destroyEvent'])->name('calendar.events.destroy');
 
     // Schedules (recurring)
@@ -174,6 +175,9 @@ Route::middleware('auth')->group(function () {
 
         // UBAH ROUTE INI:
         Route::post('/sessions/{id}/reschedule', [AcademicController::class, 'updateSessionSchedule'])->name('sessions.reschedule');
+
+        // Session Material Management
+        Route::post('/sessions/{id}/material', [AcademicController::class, 'updateSessionMaterial'])->name('sessions.material');
     });
 
     // ════════════════════════════════════════════════════════════════════════

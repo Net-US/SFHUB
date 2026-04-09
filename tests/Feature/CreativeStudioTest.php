@@ -34,6 +34,7 @@ class CreativeStudioTest extends TestCase
         $response = $this->actingAs($this->user)->postJson(route('dashboard.creative.store'), [
             'title'          => 'Video Explainer Klien A',
             'project_type'   => 'Freelance',
+            'project_mode'   => 'sequential',
             'workflow_stage' => 'production',
             'priority'       => 'high',
             'due_date'       => now()->addDays(14)->format('Y-m-d'),
@@ -46,7 +47,7 @@ class CreativeStudioTest extends TestCase
             'user_id'        => $this->user->id,
             'title'          => 'Video Explainer Klien A',
             'category'       => 'Creative',
-            'workflow_stage' => 'production',
+            'workflow_stage' => 'planning', // Auto-set to first stage when sequential
         ]);
     }
 

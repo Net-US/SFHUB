@@ -186,6 +186,7 @@
 
     @stack('styles')
 </head>
+
 @include('components.payment-status-banner')
 
 <body

@@ -16,6 +16,7 @@ class CalendarEvent extends Model
         'description',
         'start_time',
         'end_time',
+        'end_date',
         'type',
         'color',
         'is_all_day',
@@ -28,6 +29,7 @@ class CalendarEvent extends Model
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
+        'end_date' => 'date',
         'is_all_day' => 'boolean',
         'is_recurring' => 'boolean',
         'reminders' => 'array',

@@ -158,7 +158,8 @@
                                                             <i class="fa-solid fa-money-bill-transfer text-xs"></i>
                                                         </button>
                                                     @endif
-                                                    <button onclick="deleteDebt({{ $debt->id }})"
+                                                    <button
+                                                        onclick="deleteDebt({{ $debt->id }}, '{{ addslashes($debt->name) }}')"
                                                         class="w-7 h-7 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-500 flex items-center justify-center hover:bg-rose-200 transition-colors"
                                                         title="Hapus">
                                                         <i class="fa-solid fa-trash-can text-xs"></i>
@@ -275,7 +276,8 @@
                                                             <i class="fa-solid fa-money-bill-transfer text-xs"></i>
                                                         </button>
                                                     @endif
-                                                    <button onclick="deleteDebt({{ $debt->id }})"
+                                                    <button
+                                                        onclick="deleteDebt({{ $debt->id }}, '{{ addslashes($debt->name) }}')"
                                                         class="w-7 h-7 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-500 flex items-center justify-center hover:bg-rose-200 transition-colors"
                                                         title="Hapus">
                                                         <i class="fa-solid fa-trash-can text-xs"></i>
@@ -671,13 +673,19 @@
             } else toast(res.message, false)
         }
 
-        async function deleteDebt(id) {
-            if (!confirm('Hapus hutang/piutang ini beserta semua riwayat pembayaran?')) return;
-            const res = await api('DELETE', `/debts/${id}`);
-            if (res.success) {
-                toast(res.message);
-                setTimeout(() => location.reload(), 800)
-            } else toast(res.message, false)
+        async function deleteDebt(id, name) {
+            showDeleteConfirm({
+                title: 'Hapus Hutang/Piutang?',
+                message: `Hapus "${name || 'Data ini'}" beserta semua riwayat pembayarannya?`,
+                warning: 'Semua pembayaran terkait akan ikut terhapus.',
+                onConfirm: async () => {
+                    const res = await api('DELETE', `/debts/${id}`);
+                    if (res.success) {
+                        toast(res.message);
+                        setTimeout(() => location.reload(), 800)
+                    } else toast(res.message, false)
+                }
+            });
         }
 
         // Pay modal
@@ -718,12 +726,18 @@
         }
 
         async function deletePayment(id) {
-            if (!confirm('Hapus pembayaran ini? Sisa hutang akan dikembalikan.')) return;
-            const res = await api('DELETE', `/debts/payments/${id}`);
-            if (res.success) {
-                toast(res.message);
-                setTimeout(() => location.reload(), 800)
-            } else toast(res.message, false)
+            showDeleteConfirm({
+                title: 'Hapus Pembayaran?',
+                message: 'Hapus riwayat pembayaran ini?',
+                warning: 'Sisa hutang/piutang akan dikembalikan seperti sebelumnya.',
+                onConfirm: async () => {
+                    const res = await api('DELETE', `/debts/payments/${id}`);
+                    if (res.success) {
+                        toast(res.message);
+                        setTimeout(() => location.reload(), 800)
+                    } else toast(res.message, false)
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', () => {

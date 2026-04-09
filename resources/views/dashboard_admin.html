@@ -17,16 +17,16 @@
                                 850: "#1f1f1f",
                             },
                             primary: {
-                                50: "#fef3e9",
-                                100: "#fde4d3",
-                                200: "#fbc8a7",
-                                300: "#f9ab7b",
-                                400: "#f78f4f",
-                                500: "#f57223",
-                                600: "#e65e0e",
-                                700: "#c44b0b",
-                                800: "#a23909",
-                                900: "#802707",
+                                50: "#f0f8fb", // Background sangat terang
+                                100: "#dceef6", // Background elemen
+                                200: "#bedeef", // Border/Garis terang
+                                300: "#94c8e4", // Elemen sekunder
+                                400: "#76b7db", // WARNA ASLI LOGO KIRIUS
+                                500: "#4296c5", // Warna utama UI (Sedikit digelapkan agar teks putih terbaca)
+                                600: "#317aa8", // Warna saat tombol di-hover
+                                700: "#286389", // Teks tebal / elemen aktif
+                                800: "#245371", // Teks gelap
+                                900: "#21455e", // Teks sangat gelap
                             },
                         },
                     },
@@ -4117,28 +4117,56 @@
             }
 
             // Placeholder functions for actions
-      function showAddUserModal() { showNotification("Add user modal would open here"); }
-      function showEditLandingModal() { showNotification("Edit landing modal would open here"); }
-      function showBackupModal() { showNotification("Backup modal would open here"); }
-      function clearCache() { showNotification("Cache cleared successfully!"); }
-      function exportUsers() { showNotification("Exporting users..."); }
-      function editUser(id) { showNotification(`Edit user ${id}`); }
-      function toggleUserStatus(id) { showNotification(`Toggle user ${id} status`); }
-      function deleteUser(id) {
-        if(confirm("Are you sure you want to delete this user?")) {
-          showNotification(`User ${id} deleted`);
-        }
-      }
-      function saveLandingChanges() { showNotification("Landing page changes saved!"); }
-      function saveSEOSettings() { showNotification("SEO settings saved!"); }
-      function generateSitemap() { showNotification("Sitemap generated successfully!"); }
-      function downloadSitemap() { showNotification("Downloading sitemap..."); }
-      function addFeature() { showNotification("Add feature clicked"); }
-      function moveFeature(id, direction) { showNotification(`Move feature ${id} ${direction}`); }
-      function deleteFeature(id) { showNotification(`Delete feature ${id}`); }
-      function updatePageSEO(page) { showNotification(`Update SEO for ${page}`); }
-
-
+            function showAddUserModal() {
+                showNotification("Add user modal would open here");
+            }
+            function showEditLandingModal() {
+                showNotification("Edit landing modal would open here");
+            }
+            function showBackupModal() {
+                showNotification("Backup modal would open here");
+            }
+            function clearCache() {
+                showNotification("Cache cleared successfully!");
+            }
+            function exportUsers() {
+                showNotification("Exporting users...");
+            }
+            function editUser(id) {
+                showNotification(`Edit user ${id}`);
+            }
+            function toggleUserStatus(id) {
+                showNotification(`Toggle user ${id} status`);
+            }
+            function deleteUser(id) {
+                if (confirm("Are you sure you want to delete this user?")) {
+                    showNotification(`User ${id} deleted`);
+                }
+            }
+            function saveLandingChanges() {
+                showNotification("Landing page changes saved!");
+            }
+            function saveSEOSettings() {
+                showNotification("SEO settings saved!");
+            }
+            function generateSitemap() {
+                showNotification("Sitemap generated successfully!");
+            }
+            function downloadSitemap() {
+                showNotification("Downloading sitemap...");
+            }
+            function addFeature() {
+                showNotification("Add feature clicked");
+            }
+            function moveFeature(id, direction) {
+                showNotification(`Move feature ${id} ${direction}`);
+            }
+            function deleteFeature(id) {
+                showNotification(`Delete feature ${id}`);
+            }
+            function updatePageSEO(page) {
+                showNotification(`Update SEO for ${page}`);
+            }
             // --- INIT ---
             window.addEventListener("DOMContentLoaded", init);
         </script>

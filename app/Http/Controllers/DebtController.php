@@ -47,7 +47,7 @@ class DebtController extends Controller
         $myDebts       = $debts->where('debt_type', 'borrower');
         $totalDebt     = $myDebts->sum('total_amount');
         $totalPaid     = $myDebts->sum(fn($d) => $d->total_amount - $d->remaining_amount);
-        $totalRemaining= $myDebts->sum('remaining_amount');
+        $totalRemaining = $myDebts->sum('remaining_amount');
 
         // Piutang yang harus ditagih (debt_type = lender)
         $myReceivables      = $debts->where('debt_type', 'lender');
@@ -109,7 +109,7 @@ class DebtController extends Controller
         ]);
 
         $data['user_id']         = Auth::id();
-        $data['remaining_amount']= $data['total_amount'];
+        $data['remaining_amount'] = $data['total_amount'];
         $data['interest_rate']   = $data['interest_rate'] ?? 0;
         $data['status']          = 'active';
 
@@ -305,7 +305,7 @@ class DebtController extends Controller
     {
         $paid         = (float) $d->total_amount - (float) $d->remaining_amount;
         $progressPct  = $d->total_amount > 0 ? round(($paid / $d->total_amount) * 100, 1) : 0;
-        $daysRemaining= $d->due_date ? (int) Carbon::now()->diffInDays($d->due_date, false) : null;
+        $daysRemaining = $d->due_date ? (int) Carbon::now()->diffInDays($d->due_date, false) : null;
 
         return [
             'id'                  => $d->id,
@@ -315,7 +315,7 @@ class DebtController extends Controller
             'total_amount'        => (float) $d->total_amount,
             'total_amount_fmt'    => 'Rp ' . number_format($d->total_amount, 0, ',', '.'),
             'remaining_amount'    => (float) $d->remaining_amount,
-            'remaining_amount_fmt'=> 'Rp ' . number_format($d->remaining_amount, 0, ',', '.'),
+            'remaining_amount_fmt' => 'Rp ' . number_format($d->remaining_amount, 0, ',', '.'),
             'paid_amount'         => $paid,
             'paid_amount_fmt'     => 'Rp ' . number_format($paid, 0, ',', '.'),
             'progress_pct'        => $progressPct,
@@ -344,7 +344,7 @@ class DebtController extends Controller
             'amount'         => (float) $p->amount,
             'amount_fmt'     => 'Rp ' . number_format($p->amount, 0, ',', '.'),
             'payment_date'   => $p->payment_date?->format('Y-m-d'),
-            'payment_date_fmt'=> $p->payment_date?->isoFormat('D MMM YYYY'),
+            'payment_date_fmt' => $p->payment_date?->isoFormat('D MMM YYYY'),
             'payment_method' => $p->payment_method,
             'notes'          => $p->notes,
         ];

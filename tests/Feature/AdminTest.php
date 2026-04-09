@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\LandingContent;
+use App\Models\SubscriptionPlan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 
@@ -25,6 +26,15 @@ class AdminTest extends TestCase
         ]);
         $this->regularUser = User::factory()->create([
             'role'      => 'student',
+            'is_active' => true,
+        ]);
+
+        // Create 'free' plan for testing
+        SubscriptionPlan::create([
+            'name' => 'Free',
+            'slug' => 'free',
+            'price_monthly' => 0,
+            'price_yearly' => 0,
             'is_active' => true,
         ]);
     }

@@ -10,10 +10,12 @@ class SubjectSession extends Model
         'subject_id',
         'session_number',
         'date',
+        'original_date',
         'type',
         'status',
         'title',
-        'notes'
+        'notes',
+        'material_link'
     ];
 
     protected $casts = [

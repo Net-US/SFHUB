@@ -1084,7 +1084,7 @@
                     <input type="text" id="ms-label" class="fi"
                         placeholder="misal: Pengajuan Judul, Bab 1 Selesai...">
                 </div>
-              <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="fi-label">Target Tanggal (Deadline)</label>
                         {{-- ✅ UBAH type="text" menjadi type="date" --}}
@@ -1146,49 +1146,115 @@
     <div id="modal-reschedule-session"
         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] hidden items-center justify-center p-4 flex">
         <div
-            class="bg-white dark:bg-stone-900 rounded-2xl w-full max-w-sm shadow-2xl border border-stone-200 dark:border-stone-800 overflow-hidden">
+            class="bg-white dark:bg-stone-900 rounded-2xl w-full max-w-md shadow-2xl border border-stone-200 dark:border-stone-800 overflow-hidden">
             <div class="flex items-center justify-between p-5 border-b border-stone-100 dark:border-stone-800">
-                <h3 class="font-bold text-stone-900 dark:text-white text-lg">Atur Jadwal Sesi</h3>
+                <div>
+                    <h3 class="font-bold text-stone-900 dark:text-white text-lg">Atur Jadwal Sesi</h3>
+                    <p class="text-xs text-stone-400 mt-1">Pilih cara mengatur ulang jadwal pertemuan ini</p>
+                </div>
                 <button onclick="closeModal('modal-reschedule-session')" class="text-stone-400 hover:text-stone-700"><i
                         class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-5 space-y-4">
                 <input type="hidden" id="rs-session-id">
 
+                {{-- Panduan Singkat --}}
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                    <p class="text-xs text-blue-700 dark:text-blue-300">
+                        <i class="fa-solid fa-lightbulb mr-1"></i>
+                        <strong>Tip:</strong> Pilih opsi sesuai kondisi. Semua perubahan bisa diubah lagi nanti.
+                    </p>
+                </div>
+
                 <div class="space-y-3">
+                    {{-- Opsi 1: Kelas Pengganti --}}
                     <label
-                        class="flex items-start gap-3 p-3 border border-stone-200 dark:border-stone-700 rounded-xl cursor-pointer hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+                        class="flex items-start gap-3 p-3 border-2 border-blue-200 dark:border-blue-800 rounded-xl cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group"
+                        title="Gunakan ini kalau kelas tetap diadakan tapi di hari/tanggal berbeda">
                         <input type="radio" name="rs_action" value="reschedule" class="mt-1 accent-blue-500"
                             onchange="toggleRsDate(true)" checked>
-                        <div>
-                            <p class="text-sm font-bold text-stone-800 dark:text-white">Tetapkan Kelas Pengganti</p>
-                            <p class="text-[10px] text-stone-400">Pindahkan sesi ini ke tanggal lain secara spesifik.</p>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-calendar-check text-blue-500"></i>
+                                <p class="text-sm font-bold text-stone-800 dark:text-white">Kelas Pengganti</p>
+                            </div>
+                            <p class="text-[11px] text-stone-500 mt-1">Kelas tetap diadakan, pindah ke tanggal lain.</p>
+                            <p class="text-[10px] text-blue-600 mt-1"><i class="fa-solid fa-arrow-right mr-1"></i>Pilih
+                                tanggal baru di bawah</p>
                         </div>
                     </label>
 
-                    <div id="rs-date-wrap" class="pl-8 pr-3">
+                    <div id="rs-date-wrap" class="pl-10 pr-3">
+                        <label class="block text-xs font-medium text-stone-600 dark:text-stone-400 mb-1">Tanggal Kelas
+                            Pengganti:</label>
                         <input type="date" id="rs-new-date" class="fi w-full text-sm">
                     </div>
 
+                    {{-- Opsi 2: Ditunda (TBA) --}}
                     <label
-                        class="flex items-start gap-3 p-3 border border-stone-200 dark:border-stone-700 rounded-xl cursor-pointer hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+                        class="flex items-start gap-3 p-3 border border-stone-200 dark:border-stone-700 rounded-xl cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+                        title="Gunakan ini kalau belum tahu kapan jadwal penggantinya">
                         <input type="radio" name="rs_action" value="tba" class="mt-1 accent-orange-500"
                             onchange="toggleRsDate(false)">
-                        <div>
-                            <p class="text-sm font-bold text-stone-800 dark:text-white">Diundur (Belum Pasti)</p>
-                            <p class="text-[10px] text-stone-400">Tandai diundur, tentukan tanggalnya nanti.</p>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-clock text-orange-500"></i>
+                                <p class="text-sm font-bold text-stone-800 dark:text-white">Ditunda (Belum Ada Jadwal)</p>
+                            </div>
+                            <p class="text-[11px] text-stone-500 mt-1">Kelas diundur, jadwal pengganti belum ditentukan.
+                            </p>
+                            <p class="text-[10px] text-orange-600 mt-1"><i class="fa-solid fa-info-circle mr-1"></i>Bisa
+                                atur jadwal nanti</p>
                         </div>
                     </label>
 
+                    {{-- Opsi 3: Libur Tetap --}}
                     <label
-                        class="flex items-start gap-3 p-3 border border-stone-200 dark:border-stone-700 rounded-xl cursor-pointer hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
+                        class="flex items-start gap-3 p-3 border border-stone-200 dark:border-stone-700 rounded-xl cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                        title="Gunakan ini untuk libur nasional atau cuti tanpa pengganti">
                         <input type="radio" name="rs_action" value="holiday" class="mt-1 accent-rose-500"
                             onchange="toggleRsDate(false)">
-                        <div>
-                            <p class="text-sm font-bold text-stone-800 dark:text-white">Libur Tetap</p>
-                            <p class="text-[10px] text-stone-400">Libur total, tidak ada pergantian kelas.</p>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-umbrella-beach text-rose-500"></i>
+                                <p class="text-sm font-bold text-stone-800 dark:text-white">Libur (Tanpa Pengganti)</p>
+                            </div>
+                            <p class="text-[11px] text-stone-500 mt-1">Libur total, materi bisa dipelajari mandiri.</p>
+                            <p class="text-[10px] text-rose-600 mt-1"><i class="fa-solid fa-minus-circle mr-1"></i>Tidak
+                                ada kelas pengganti</p>
                         </div>
                     </label>
+
+                    {{-- Opsi 4: Libur & Geser --}}
+                    <label
+                        class="flex items-start gap-3 p-3 border-2 border-amber-200 dark:border-amber-700 rounded-xl cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors bg-amber-50/30 dark:bg-amber-900/10"
+                        title="Gunakan ini untuk libur panjang yang menggeser semua jadwal berikutnya">
+                        <input type="radio" name="rs_action" value="holiday_shift" class="mt-1 accent-amber-500"
+                            onchange="toggleResumeDate(true)">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-arrow-right-long text-amber-500"></i>
+                                <p class="text-sm font-bold text-amber-800 dark:text-amber-400">Libur & Geser Semua Jadwal
+                                </p>
+                            </div>
+                            <p class="text-[11px] text-stone-600 dark:text-stone-400 mt-1">Libur ini + semua sesi
+                                berikutnya digeser.</p>
+                            <p class="text-[10px] text-amber-600 mt-1"><i
+                                    class="fa-solid fa-layer-group mr-1"></i>Otomatis mengatur ulang jadwal</p>
+                        </div>
+                    </label>
+
+                    <div id="rs-resume-date-wrap" class="pl-10 pr-3 hidden">
+                        <label class="block text-xs font-medium text-amber-700 dark:text-amber-400 mb-1">
+                            <i class="fa-solid fa-play mr-1"></i>Tanggal Mulai Lagi Perkuliahan:
+                        </label>
+                        <input type="date" id="rs-resume-date"
+                            class="fi w-full text-sm border-amber-300 dark:border-amber-700 focus:border-amber-500 focus:ring-amber-500">
+                        <p class="text-[10px] text-amber-700 mt-1 bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
+                            <i class="fa-solid fa-calculator mr-1"></i>
+                            Sistem akan menghitung selisih hari dan menggeser semua sesi berikutnya secara otomatis.
+                        </p>
+                    </div>
                 </div>
             </div>
             <div class="flex gap-2 p-5 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-800/50">
@@ -1197,6 +1263,62 @@
                 <button onclick="submitReschedule(this)"
                     class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-colors">Simpan
                     Perubahan</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- ══════ MODAL: KELOLA MATERI SESI ══════ --}}
+    <div id="modal-session-material"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] hidden items-center justify-center p-4 flex">
+        <div
+            class="bg-white dark:bg-stone-900 rounded-2xl w-full max-w-lg shadow-2xl border border-stone-200 dark:border-stone-800 overflow-hidden">
+            <div class="flex items-center justify-between p-5 border-b border-stone-100 dark:border-stone-800">
+                <div>
+                    <h3 class="font-bold text-stone-900 dark:text-white text-lg">Kelola Materi Sesi</h3>
+                    <p class="text-xs text-stone-400 mt-0.5">Catatan dan link materi pembelajaran</p>
+                </div>
+                <button onclick="closeModal('modal-session-material')" class="text-stone-400 hover:text-stone-700">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <input type="hidden" id="sm-session-id">
+
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">Catatan
+                        Materi</label>
+                    <textarea id="sm-notes" rows="4" class="fi w-full text-sm resize-none"
+                        placeholder="Tulis catatan materi yang dipelajari..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">Link Materi</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-link absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm"></i>
+                        <input type="url" id="sm-material-link" class="fi w-full text-sm pl-9"
+                            placeholder="https://drive.google.com/... atau link materi lain">
+                    </div>
+                    <p class="text-[10px] text-stone-400 mt-1">Bisa link Google Drive, YouTube, atau sumber materi lainnya
+                    </p>
+                </div>
+
+                <div id="sm-current-material" class="hidden">
+                    <label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">Link Saat
+                        Ini</label>
+                    <a id="sm-current-link" href="#" target="_blank"
+                        class="inline-flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-sm hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                        <i class="fa-solid fa-external-link-alt"></i>
+                        <span id="sm-link-text">Buka Materi</span>
+                    </a>
+                </div>
+            </div>
+            <div class="flex gap-2 p-5 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-800/50">
+                <button onclick="closeModal('modal-session-material')"
+                    class="flex-1 py-2.5 bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-300 rounded-xl text-sm font-semibold transition-colors">Batal</button>
+                <button onclick="saveMaterial(this)"
+                    class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-colors">
+                    <i class="fa-solid fa-save mr-1"></i>Simpan Materi
+                </button>
             </div>
         </div>
     </div>
@@ -1373,23 +1495,29 @@
         }
 
         async function deleteCourse(id, name) {
-            if (!confirm(`Hapus mata kuliah "${name}"?\nTugas yang terhubung tidak ikut terhapus.`)) return;
-            try {
-                const fd = new FormData();
-                fd.append('_method', 'DELETE');
-                await fetch(`/academic/courses/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': CSRF
-                    },
-                    body: fd,
-                }).then(r => r.json());
-                toast('Mata kuliah dihapus.');
-                setTimeout(() => location.reload(), 700);
-            } catch (e) {
-                toast('Gagal menghapus.', false);
-            }
+            showDeleteConfirm({
+                title: 'Hapus Mata Kuliah?',
+                message: `Hapus "${name || 'Mata kuliah ini'}"?`,
+                warning: 'Tugas yang terhubung tidak ikut terhapus.',
+                onConfirm: async () => {
+                    try {
+                        const fd = new FormData();
+                        fd.append('_method', 'DELETE');
+                        await fetch(`/academic/courses/${id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': CSRF
+                            },
+                            body: fd,
+                        }).then(r => r.json());
+                        toast('Mata kuliah dihapus.');
+                        setTimeout(() => location.reload(), 700);
+                    } catch (e) {
+                        toast('Gagal menghapus.', false);
+                    }
+                }
+            });
         }
 
         // ─────────────────────────────── SESSIONS TRACKING ─────────────────────────────────
@@ -1419,29 +1547,58 @@
                         opacityClass = 'opacity-80';
                         statusHtml =
                             `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">✅ Selesai</span>`;
-                        actionsHtml =
-                            `<button onclick="toggleSession(${ses.id}, this)" class="w-8 h-8 rounded bg-stone-200 dark:bg-stone-700 text-stone-500 hover:text-rose-500 transition-colors" title="Batal Selesai"><i class="fa-solid fa-rotate-left text-xs"></i></button>`;
+                        // Tombol: Batal Selesai & Materi
+                        const materialIcon = ses.material_link ? 'fa-book-open' : 'fa-book';
+                        const materialClass = ses.material_link ?
+                            'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30' :
+                            'text-stone-500 bg-stone-200 dark:bg-stone-700';
+                        actionsHtml = `
+                            <button onclick="toggleSession(${ses.id}, this)" class="w-8 h-8 rounded bg-stone-200 dark:bg-stone-700 text-stone-500 hover:text-rose-500 transition-colors" title="Batal Selesai"><i class="fa-solid fa-rotate-left text-xs"></i></button>
+                            <button onclick="openMaterialModal(${ses.id}, '${ses.notes ? ses.notes.replace(/'/g, "\\'") : ''}', '${ses.material_link || ''}')" class="w-8 h-8 rounded ${materialClass} hover:bg-emerald-500 hover:text-white transition-colors" title="Kelola Materi"><i class="fa-solid ${materialIcon} text-xs"></i></button>
+                        `;
                     } else if (ses.status === 'holiday') {
                         bgClass = 'bg-stone-100 dark:bg-stone-900 border-stone-200 dark:border-stone-800';
-                        opacityClass = 'opacity-60';
+                        opacityClass = 'opacity-75';
 
-                        // Mendeteksi apakah ini TBA atau Libur murni dari titlenya
-                        let badgeLabel = ses.title.includes('Menunggu') ? '🔄 Belum Ada Jadwal' : '🏖️ Libur';
+                        // Mendeteksi apakah ini TBA, Libur murni, atau Libur+Geser dari titlenya
+                        let badgeLabel = '🏖️ Libur';
+                        let badgeClass = 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400';
+
+                        if (ses.title.includes('Menunggu')) {
+                            badgeLabel = '🔄 Belum Ada Jadwal';
+                        } else if (ses.title.includes('Kelas Pengganti')) {
+                            badgeLabel = '🔄 Kelas Pengganti';
+                            badgeClass = 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
+                        } else if (ses.title.includes('Mulai:')) {
+                            // Extract tanggal mulai lagi dari title format: (Libur, Mulai: DD MMM)
+                            const match = ses.title.match(/Mulai: (\d+ \w+)/);
+                            const resumeDate = match ? match[1] : '';
+                            badgeLabel = resumeDate ? `📅 Mulai ${resumeDate}` : '📅 Libur Fleksibel';
+                            badgeClass = 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400';
+                        }
+
                         statusHtml =
-                            `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">${badgeLabel}</span>`;
+                            `<span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeClass}">${badgeLabel}</span>`;
 
-                        // Tombol: Revert (Normal) & Tombol Edit Ulang Tanggal
-                        actionsHtml = `
-                            <button onclick="revertSession(${ses.id}, this)" class="w-8 h-8 rounded bg-stone-200 dark:bg-stone-700 text-stone-500 hover:text-emerald-500 transition-colors" title="Kembalikan ke Normal"><i class="fa-solid fa-rotate-left text-xs"></i></button>
-                            <button onclick="openRescheduleModal(${ses.id}, '${ses.date.split('T')[0]}')" class="w-8 h-8 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 hover:bg-blue-500 hover:text-white transition-colors" title="Atur Ulang Jadwal"><i class="fa-solid fa-calendar-pen text-xs"></i></button>
-                        `;
-                    } else {
-                        statusHtml =
-                            `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">⏳ Terjadwal</span>`;
-
-                        // Tombol: Selesai & Buka Modal Reschedule
+                        // Tombol: Selesai, Materi & Edit Ulang Tanggal (SAMA dengan sesi normal)
+                        const materialIcon = ses.material_link ? 'fa-book-open' : 'fa-book';
+                        const materialClass = ses.material_link ?
+                            'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30' :
+                            'text-stone-500 bg-stone-200 dark:bg-stone-700';
                         actionsHtml = `
                             <button onclick="toggleSession(${ses.id}, this)" class="w-8 h-8 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-colors" title="Tandai Selesai"><i class="fa-solid fa-check text-xs"></i></button>
+                            <button onclick="openMaterialModal(${ses.id}, '${ses.notes ? ses.notes.replace(/'/g, "\\'") : ''}', '${ses.material_link || ''}')" class="w-8 h-8 rounded ${materialClass} hover:bg-emerald-500 hover:text-white transition-colors" title="Kelola Materi"><i class="fa-solid ${materialIcon} text-xs"></i></button>
+                            <button onclick="openRescheduleModal(${ses.id}, '${ses.date.split('T')[0]}')" class="w-8 h-8 rounded bg-rose-100 dark:bg-rose-900/30 text-rose-600 hover:bg-rose-500 hover:text-white transition-colors" title="Atur Ulang / Liburkan"><i class="fa-solid fa-calendar-xmark text-xs"></i></button>
+                        `;
+                    } else {
+                        // Tombol: Selesai, Materi & Buka Modal Reschedule
+                        const materialIcon = ses.material_link ? 'fa-book-open' : 'fa-book';
+                        const materialClass = ses.material_link ?
+                            'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30' :
+                            'text-stone-500 bg-stone-200 dark:bg-stone-700';
+                        actionsHtml = `
+                            <button onclick="toggleSession(${ses.id}, this)" class="w-8 h-8 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-colors" title="Tandai Selesai"><i class="fa-solid fa-check text-xs"></i></button>
+                            <button onclick="openMaterialModal(${ses.id}, '${ses.notes ? ses.notes.replace(/'/g, "\\'") : ''}', '${ses.material_link || ''}')" class="w-8 h-8 rounded ${materialClass} hover:bg-emerald-500 hover:text-white transition-colors" title="Kelola Materi"><i class="fa-solid ${materialIcon} text-xs"></i></button>
                             <button onclick="openRescheduleModal(${ses.id}, '${ses.date.split('T')[0]}')" class="w-8 h-8 rounded bg-rose-100 dark:bg-rose-900/30 text-rose-600 hover:bg-rose-500 hover:text-white transition-colors" title="Atur Ulang / Liburkan"><i class="fa-solid fa-calendar-xmark text-xs"></i></button>
                         `;
                     }
@@ -1454,19 +1611,56 @@
                         year: 'numeric'
                     });
 
+                    // Bersihkan title dari label status untuk tampilan
+                    let cleanTitle = ses.title
+                        .replace(/ \(Libur[^)]*\)/g, '')
+                        .replace(/ \(Kelas Pengganti\)/g, '')
+                        .replace(/ \(Menunggu Jadwal\)/g, '');
+
+                    // Cek status untuk subtitle
+                    let subtitleBadges = '';
+                    if (ses.title.includes('Libur')) {
+                        const match = ses.title.match(/Mulai: (\d+ \w+)/);
+                        const resumeText = match ? `Mulai ${match[1]}` : 'Ditunda';
+                        subtitleBadges +=
+                            `<span class="text-[10px] text-amber-600 dark:text-amber-400">📅 ${resumeText}</span>`;
+                    }
+                    if (ses.title.includes('Kelas Pengganti')) {
+                        subtitleBadges += subtitleBadges ? ' · ' : '';
+                        subtitleBadges +=
+                            `<span class="text-[10px] text-blue-600 dark:text-blue-400">🔄 Kelas Pengganti</span>`;
+                    }
+                    if (ses.title.includes('Menunggu')) {
+                        subtitleBadges = `<span class="text-[10px] text-stone-500">⏳ Menunggu Jadwal</span>`;
+                    }
+
+                    // Badge untuk materi dan catatan
+                    let infoBadges = '';
+                    if (ses.material_link) {
+                        infoBadges +=
+                            `<a href="${ses.material_link}" target="_blank" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-200" title="Buka Materi"><i class="fa-solid fa-link text-[8px]"></i>Materi</a>`;
+                    }
+                    if (ses.notes) {
+                        infoBadges += infoBadges ? ' ' : '';
+                        infoBadges +=
+                            `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" title="Ada Catatan"><i class="fa-solid fa-sticky-note text-[8px]"></i>Catatan</span>`;
+                    }
+
                     listContainer.innerHTML += `
-                        <div class="flex items-center gap-3 p-3 border rounded-xl ${bgClass} ${opacityClass} transition-all">
+                        <div class="flex items-start gap-3 p-3 border rounded-xl ${bgClass} ${opacityClass} transition-all">
                             <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-lg bg-stone-100 dark:bg-stone-700 text-stone-500 font-bold">
                                 ${ses.session_number}
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-0.5">
-                                    <h4 class="font-bold text-sm text-stone-800 dark:text-white truncate">${ses.title}</h4>
+                                    <h4 class="font-bold text-sm text-stone-800 dark:text-white truncate">${cleanTitle}</h4>
                                     ${statusHtml}
                                 </div>
-                                <p class="text-xs text-stone-500"><i class="fa-regular fa-calendar mr-1"></i>${dateStr}</p>
+                                <p class="text-xs text-stone-500 mb-1"><i class="fa-regular fa-calendar mr-1"></i>${dateStr}</p>
+                                ${subtitleBadges ? `<p class="text-xs mb-1">${subtitleBadges}</p>` : ''}
+                                ${infoBadges ? `<div class="flex gap-1">${infoBadges}</div>` : ''}
                             </div>
-                            <div class="flex gap-1.5 flex-shrink-0">
+                            <div class="flex gap-1.5 flex-shrink-0 pt-0.5">
                                 ${actionsHtml}
                             </div>
                         </div>
@@ -1492,9 +1686,14 @@
         function openRescheduleModal(id, currentDate) {
             document.getElementById('rs-session-id').value = id;
             document.getElementById('rs-new-date').value = currentDate;
+            // Set default resume date to 1 week after current date
+            const defaultResume = new Date(currentDate);
+            defaultResume.setDate(defaultResume.getDate() + 7);
+            document.getElementById('rs-resume-date').value = defaultResume.toISOString().split('T')[0];
             // Reset radio ke opsi pertama (Reschedule)
             document.querySelector('input[name="rs_action"][value="reschedule"]').checked = true;
             toggleRsDate(true);
+            toggleResumeDate(false);
             openModal('modal-reschedule-session');
         }
 
@@ -1502,46 +1701,101 @@
             const wrap = document.getElementById('rs-date-wrap');
             if (show) wrap.classList.remove('hidden');
             else wrap.classList.add('hidden');
+            // Hide resume date when this is shown
+            if (show) toggleResumeDate(false);
+        }
+
+        function toggleResumeDate(show) {
+            const wrap = document.getElementById('rs-resume-date-wrap');
+            if (show) wrap.classList.remove('hidden');
+            else wrap.classList.add('hidden');
+            // Hide regular date when resume date is shown
+            if (show) {
+                const dateWrap = document.getElementById('rs-date-wrap');
+                dateWrap.classList.add('hidden');
+            }
         }
 
         async function submitReschedule(btn) {
             const id = document.getElementById('rs-session-id').value;
             const action = document.querySelector('input[name="rs_action"]:checked').value;
             const newDate = document.getElementById('rs-new-date').value;
+            const resumeDate = document.getElementById('rs-resume-date').value;
 
             if (action === 'reschedule' && !newDate) {
                 toast('Pilih tanggal pengganti terlebih dahulu!', false);
                 return;
             }
 
+            if (action === 'holiday_shift' && !resumeDate) {
+                toast('Pilih tanggal mulai lagi perkuliahan!', false);
+                return;
+            }
+
             setLoading(btn, true);
             try {
-                const res = await api('POST', `/academic/sessions/${id}/reschedule`, {
+                const payload = {
                     action: action,
                     new_date: newDate
-                });
+                };
+
+                if (action === 'holiday_shift') {
+                    payload.resume_date = resumeDate;
+                }
+
+                const res = await api('POST', `/academic/sessions/${id}/reschedule`, payload);
                 toast(res.message);
                 closeModal('modal-reschedule-session');
                 setTimeout(() => location.reload(), 800);
             } catch (e) {
-                toast('Gagal mengatur ulang jadwal.', false);
+                const msg = e?.message || e?.errors?.resume_date?.[0] || 'Gagal mengatur ulang jadwal.';
+                toast(msg, false);
                 setLoading(btn, false);
             }
         }
 
-        async function revertSession(id, btn) {
+        // ─────────────────────────────── SESSION MATERIAL ─────────────────────────────────
+        function openMaterialModal(id, notes, materialLink) {
+            document.getElementById('sm-session-id').value = id;
+            document.getElementById('sm-notes').value = notes || '';
+            document.getElementById('sm-material-link').value = materialLink || '';
+
+            // Show/hide current link section
+            const currentMaterialDiv = document.getElementById('sm-current-material');
+            const currentLink = document.getElementById('sm-current-link');
+            if (materialLink) {
+                currentMaterialDiv.classList.remove('hidden');
+                currentLink.href = materialLink;
+                document.getElementById('sm-link-text').textContent = materialLink.length > 40 ? materialLink.substring(0,
+                    40) + '...' : materialLink;
+            } else {
+                currentMaterialDiv.classList.add('hidden');
+            }
+
+            openModal('modal-session-material');
+        }
+
+        async function saveMaterial(btn) {
+            const id = document.getElementById('sm-session-id').value;
+            const notes = document.getElementById('sm-notes').value;
+            const materialLink = document.getElementById('sm-material-link').value;
+
             setLoading(btn, true);
             try {
-                const res = await api('POST', `/academic/sessions/${id}/reschedule`, {
-                    action: 'revert'
+                const res = await api('POST', `/academic/sessions/${id}/material`, {
+                    notes: notes,
+                    material_link: materialLink
                 });
                 toast(res.message);
+                closeModal('modal-session-material');
                 setTimeout(() => location.reload(), 800);
             } catch (e) {
-                toast('Gagal mengembalikan status.', false);
+                const msg = e?.message || e?.errors?.material_link?.[0] || 'Gagal menyimpan materi.';
+                toast(msg, false);
                 setLoading(btn, false);
             }
         }
+
         // ─────────────────────────────── TASKS ─────────────────────────────────
         function editTask(t) {
             document.getElementById('task-edit-id').value = t.id;
@@ -1627,30 +1881,36 @@
         }
 
         async function deleteTask(id, title) {
-            if (!confirm(`Hapus tugas "${title}"?`)) return;
-            try {
-                const fd = new FormData();
-                fd.append('_method', 'DELETE');
-                await fetch(`/academic/tasks/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': CSRF
-                    },
-                    body: fd
-                }).then(r => r.json());
-                document.getElementById('task-row-' + id)?.remove();
-                toast('Tugas dihapus.');
-            } catch (e) {
-                toast('Gagal menghapus.', false);
-            }
+            showDeleteConfirm({
+                title: 'Hapus Tugas?',
+                message: `Hapus "${title || 'Tugas ini'}"?`,
+                warning: 'Tugas yang dihapus tidak dapat dikembalikan.',
+                onConfirm: async () => {
+                    try {
+                        const fd = new FormData();
+                        fd.append('_method', 'DELETE');
+                        await fetch(`/academic/tasks/${id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': CSRF
+                            },
+                            body: fd
+                        }).then(r => r.json());
+                        document.getElementById('task-row-' + id)?.remove();
+                        toast('Tugas dihapus.');
+                    } catch (e) {
+                        toast('Gagal menghapus.', false);
+                    }
+                }
+            });
         }
 
         // ─────────────────────────────── MILESTONES ────────────────────────────
         function editMilestone(m) {
             document.getElementById('ms-edit-id').value = m.id;
             document.getElementById('ms-label').value = m.label || '';
-           document.getElementById('ms-date').value = m.target_date_raw || m.target_date || '';
+            document.getElementById('ms-date').value = m.target_date_raw || m.target_date || '';
             document.getElementById('ms-order').value = m.sort_order || 999;
             document.getElementById('ms-active').checked = !!m.is_active;
             document.getElementById('modal-ms-title').textContent = 'Edit Milestone';
@@ -1721,23 +1981,29 @@
         }
 
         async function deleteMilestone(id, label) {
-            if (!confirm(`Hapus milestone "${label}"?`)) return;
-            try {
-                const fd = new FormData();
-                fd.append('_method', 'DELETE');
-                await fetch(`/academic/milestones/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': CSRF
-                    },
-                    body: fd
-                }).then(r => r.json());
-                document.getElementById('ms-row-' + id)?.remove();
-                toast('Milestone dihapus.');
-            } catch (e) {
-                toast('Gagal menghapus.', false);
-            }
+            showDeleteConfirm({
+                title: 'Hapus Milestone?',
+                message: `Hapus "${label || 'Milestone ini'}"?`,
+                warning: 'Milestone yang dihapus tidak dapat dikembalikan.',
+                onConfirm: async () => {
+                    try {
+                        const fd = new FormData();
+                        fd.append('_method', 'DELETE');
+                        await fetch(`/academic/milestones/${id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': CSRF
+                            },
+                            body: fd
+                        }).then(r => r.json());
+                        document.getElementById('ms-row-' + id)?.remove();
+                        toast('Milestone dihapus.');
+                    } catch (e) {
+                        toast('Gagal menghapus.', false);
+                    }
+                }
+            });
         }
 
         // ── Init: restore tab from hash ──────────────────────────────────────────

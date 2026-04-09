@@ -778,29 +778,33 @@
 
         // ── Delete project ───────────────────────────────────────────────────────
         async function deleteProject(id, title) {
-            if (!confirm(
-                    `Hapus proyek "${title}"?\nSemua sub-tugas ikut terhapus. Tindakan ini tidak bisa dibatalkan.`))
-                return;
-            try {
-                const fd = new FormData();
-                fd.append('_method', 'DELETE');
-                const res = await fetch(`/dashboard/creative/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': CSRF
-                    },
-                    body: fd
-                }).then(r => r.json());
-                if (res.success) {
-                    toast('Proyek dihapus.');
-                    setTimeout(() => location.reload(), 700);
-                } else {
-                    toast(res.message || 'Gagal.', false);
+            showDeleteConfirm({
+                title: 'Hapus Proyek?',
+                message: `Hapus "${title || 'Proyek ini'}"?`,
+                warning: 'Semua sub-tugas akan ikut terhapus.',
+                onConfirm: async () => {
+                    try {
+                        const fd = new FormData();
+                        fd.append('_method', 'DELETE');
+                        const res = await fetch(`/dashboard/creative/${id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': CSRF
+                            },
+                            body: fd
+                        }).then(r => r.json());
+                        if (res.success) {
+                            toast('Proyek dihapus.');
+                            setTimeout(() => location.reload(), 700);
+                        } else {
+                            toast(res.message || 'Gagal.', false);
+                        }
+                    } catch (e) {
+                        toast('Gagal menghapus.', false);
+                    }
                 }
-            } catch (e) {
-                toast('Gagal menghapus.', false);
-            }
+            });
         }
 
         // ── Mark done ────────────────────────────────────────────────────────────
@@ -858,22 +862,22 @@
                         const isProgress  = s.status === 'in_progress';
                         const iconCls     = isCompleted ? 'bg-emerald-500 text-white' : isProgress ? 'bg-orange-500 text-white animate-pulse' : 'bg-stone-200 dark:bg-stone-700 text-stone-400';
                         return `
-                                            <div class="flex items-center gap-3 p-3 ${isCompleted ? 'bg-emerald-50 dark:bg-emerald-900/20' : isProgress ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-stone-50 dark:bg-stone-800'} rounded-xl" id="sub-row-${s.id}">
-                                                <div class="w-8 h-8 rounded-full ${iconCls} flex items-center justify-center text-sm flex-shrink-0">
-                                                    ${isCompleted ? '✓' : isProgress ? '▶' : (t.subtasks.indexOf(s)+1)}
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="text-sm font-medium text-stone-800 dark:text-white ${isCompleted ? 'line-through opacity-70' : ''}">${s.stage_label || s.title}</p>
-                                                    <p class="text-[10px] text-stone-400">${s.status === 'completed' ? '✅ Selesai' : s.status === 'in_progress' ? '🔄 Sedang dikerjakan' : '⏳ Menunggu'}</p>
-                                                </div>
-                                                ${!isCompleted ? `
+                                                <div class="flex items-center gap-3 p-3 ${isCompleted ? 'bg-emerald-50 dark:bg-emerald-900/20' : isProgress ? 'bg-orange-50 dark:bg-orange-900/20' : 'bg-stone-50 dark:bg-stone-800'} rounded-xl" id="sub-row-${s.id}">
+                                                    <div class="w-8 h-8 rounded-full ${iconCls} flex items-center justify-center text-sm flex-shrink-0">
+                                                        ${isCompleted ? '✓' : isProgress ? '▶' : (t.subtasks.indexOf(s)+1)}
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-sm font-medium text-stone-800 dark:text-white ${isCompleted ? 'line-through opacity-70' : ''}">${s.stage_label || s.title}</p>
+                                                        <p class="text-[10px] text-stone-400">${s.status === 'completed' ? '✅ Selesai' : s.status === 'in_progress' ? '🔄 Sedang dikerjakan' : '⏳ Menunggu'}</p>
+                                                    </div>
+                                                    ${!isCompleted ? `
                             <div class="flex gap-1">
                                 ${s.status !== 'in_progress' ? `<button onclick="updateSubtask(${t.id},${s.id},'in_progress')"
-                                                        class="px-2 py-1 bg-orange-100 dark:bg-orange-900/20 text-orange-600 text-[10px] font-medium rounded-lg hover:bg-orange-200 transition-colors">Mulai</button>` : ''}
+                                                            class="px-2 py-1 bg-orange-100 dark:bg-orange-900/20 text-orange-600 text-[10px] font-medium rounded-lg hover:bg-orange-200 transition-colors">Mulai</button>` : ''}
                                 <button onclick="updateSubtask(${t.id},${s.id},'completed')"
                                     class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 text-[10px] font-medium rounded-lg hover:bg-emerald-200 transition-colors">Selesai</button>
                             </div>` : ''}
-                                            </div>`;
+                                                </div>`;
                     }).join('')}
                 </div>
             </div>`;
@@ -902,13 +906,13 @@
             ${t.description ? `<p class="text-sm text-stone-600 dark:text-stone-400 mb-4 leading-relaxed">${t.description}</p>` : ''}
             ${subtasksHtml}
             ${t.drive_link ? `<a href="${t.drive_link}" target="_blank" class="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl text-sm hover:bg-blue-100 transition-colors mb-4">
-                                    <i class="fa-brands fa-google-drive"></i> Buka Drive / Referensi
-                                </a>` : ''}
+                                        <i class="fa-brands fa-google-drive"></i> Buka Drive / Referensi
+                                    </a>` : ''}
             <div class="flex gap-2 pt-3 border-t border-stone-100 dark:border-stone-800">
                 ${t.status !== 'done' ? `<button onclick="markProjectDone(${t.id}, this)"
-                                        class="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-medium transition-colors">
-                                        <i class="fa-solid fa-check mr-1.5"></i>Tandai Selesai
-                                    </button>` : ''}
+                                            class="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-medium transition-colors">
+                                            <i class="fa-solid fa-check mr-1.5"></i>Tandai Selesai
+                                        </button>` : ''}
                 <button onclick="editProject(${t.id}); closeModal('modal-project-detail')"
                     class="flex-1 py-2 bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-300 rounded-xl text-sm font-medium transition-colors">
                     <i class="fa-solid fa-pen mr-1.5"></i>Edit
