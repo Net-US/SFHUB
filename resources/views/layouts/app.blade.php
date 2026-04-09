@@ -239,14 +239,14 @@
                 <ul class="space-y-1">
                     <li>
                         <a href="{{ route('admin.users') }}"
-                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.users') ? 'nav-active' : '' }}">
+                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.users') || request()->routeIs('admin.users.*') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-users w-5 text-center mr-3"></i>
                             <span class="nav-text">Semua Pengguna</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{ route('admin.subscriptions') }}"
-                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.subscriptions') ? 'nav-active' : '' }}">
+                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.subscriptions') || request()->routeIs('admin.subscriptions.*') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-crown w-5 text-center mr-3"></i>
                             <span class="nav-text">Langganan</span>
                         </a>
@@ -261,7 +261,7 @@
                 <ul class="space-y-1">
                     <li>
                         <a href="{{ route('admin.landing') }}"
-                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.landing') ? 'nav-active' : '' }}">
+                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.landing') || request()->routeIs('admin.landing.*') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-globe w-5 text-center mr-3"></i>
                             <span class="nav-text">Halaman Utama</span>
                         </a>
@@ -318,7 +318,7 @@
                     </li>
                     <li>
                         <a href="{{ route('admin.settings.backups') }}"
-                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.settings.backups') ? 'nav-active' : '' }}">
+                            class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-white transition-all {{ request()->routeIs('admin.settings.backups') || request()->routeIs('admin.backups.*') ? 'nav-active' : '' }}">
                             <i class="fa-solid fa-database w-5 text-center mr-3"></i>
                             <span class="nav-text">Backup & Restore</span>
                         </a>

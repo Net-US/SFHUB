@@ -346,7 +346,7 @@
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl
                                    text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800
                                    hover:text-stone-900 dark:hover:text-white transition-all
-                                   {{ request()->routeIs('calendar.*') ? 'nav-active' : '' }}"
+                                   {{ request()->routeIs('dashboard.smartcalendar') || request()->routeIs('calendar.day') || request()->routeIs('calendar.*') ? 'nav-active' : '' }}"
                             data-tooltip="Kalender Pintar">
                             <i class="fa-solid fa-calendar-day w-5 text-center mr-3 flex-shrink-0"></i>
                             <span class="nav-text">Kalender Pintar</span>
@@ -366,7 +366,7 @@
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl
                                    text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800
                                    hover:text-stone-900 dark:hover:text-white transition-all group
-                                   {{ request()->routeIs('creative.*') ? 'nav-active' : '' }}"
+                                   {{ request()->routeIs('dashboard.creative.*') ? 'nav-active' : '' }}"
                             data-tooltip="Studio Kreatif">
                             <i
                                 class="fa-solid fa-palette w-5 text-center mr-3 flex-shrink-0 group-hover:text-pink-500 transition-colors"></i>
@@ -378,7 +378,7 @@
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl
                                    text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800
                                    hover:text-stone-900 dark:hover:text-white transition-all group
-                                   {{ request()->routeIs('academic.*') ? 'nav-active' : '' }}"
+                                   {{ request()->routeIs('dashboard.academic') ? 'nav-active' : '' }}"
                             data-tooltip="Pusat Akademik">
                             <i
                                 class="fa-solid fa-graduation-cap w-5 text-center mr-3 flex-shrink-0 group-hover:text-blue-500 transition-colors"></i>
@@ -390,7 +390,7 @@
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl
                                    text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800
                                    hover:text-stone-900 dark:hover:text-white transition-all group
-                                   {{ request()->routeIs('pkl.*') ? 'nav-active' : '' }}"
+                                   {{ request()->routeIs('dashboard.pkl') || request()->routeIs('pkl.*') ? 'nav-active' : '' }}"
                             data-tooltip="PKL / Kerja">
                             <i
                                 class="fa-solid fa-briefcase w-5 text-center mr-3 flex-shrink-0 group-hover:text-emerald-500 transition-colors"></i>
@@ -411,7 +411,7 @@
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl
                                    text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800
                                    hover:text-stone-900 dark:hover:text-white transition-all group
-                                   {{ request()->routeIs('productivity.*') ? 'nav-active' : '' }}"
+                                   {{ request()->routeIs('dashboard.productivity') || request()->routeIs('productivity.store') ? 'nav-active' : '' }}"
                             data-tooltip="Analitik">
                             <i
                                 class="fa-solid fa-chart-pie w-5 text-center mr-3 flex-shrink-0 group-hover:text-indigo-500 transition-colors"></i>
@@ -423,7 +423,7 @@
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl
                                    text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800
                                    hover:text-stone-900 dark:hover:text-white transition-all group
-                                   {{ request()->routeIs('tracker.*') ? 'nav-active' : '' }}"
+                                   {{ request()->routeIs('dashboard.tracker') || request()->routeIs('tasks.*') ? 'nav-active' : '' }}"
                             data-tooltip="Pelacak Umum">
                             <i
                                 class="fa-solid fa-list-check w-5 text-center mr-3 flex-shrink-0 group-hover:text-rose-500 transition-colors"></i>
@@ -444,7 +444,7 @@
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl
                                    text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800
                                    hover:text-stone-900 dark:hover:text-white transition-all group
-                                   {{ request()->routeIs('finance.*') ? 'nav-active' : '' }}"
+                                   {{ request()->routeIs('dashboard.finance') || request()->routeIs('finance.*') ? 'nav-active' : '' }}"
                             data-tooltip="Manajer Keuangan">
                             <i
                                 class="fa-solid fa-wallet w-5 text-center mr-3 flex-shrink-0 group-hover:text-amber-500 transition-colors"></i>
@@ -456,7 +456,7 @@
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl
                                    text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800
                                    hover:text-stone-900 dark:hover:text-white transition-all group
-                                   {{ request()->routeIs('assets.*') ? 'nav-active' : '' }}"
+                                   {{ request()->routeIs('dashboard.assets') || request()->routeIs('assets.*') ? 'nav-active' : '' }}"
                             data-tooltip="Manajemen Aset">
                             <i
                                 class="fa-solid fa-landmark w-5 text-center mr-3 flex-shrink-0 group-hover:text-blue-500 transition-colors"></i>
@@ -468,7 +468,7 @@
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl
                                    text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800
                                    hover:text-stone-900 dark:hover:text-white transition-all group
-                                   {{ request()->routeIs('debts.*') ? 'nav-active' : '' }}"
+                                   {{ request()->routeIs('dashboard.debts') || request()->routeIs('debts.*') ? 'nav-active' : '' }}"
                             data-tooltip="Pelacak Utang">
                             <i
                                 class="fa-solid fa-hand-holding-usd w-5 text-center mr-3 flex-shrink-0 group-hover:text-rose-500 transition-colors"></i>
@@ -480,7 +480,7 @@
                             class="nav-item w-full flex items-center p-3 text-sm font-medium rounded-xl
                                    text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800
                                    hover:text-stone-900 dark:hover:text-white transition-all group
-                                   {{ request()->routeIs('investments.*') ? 'nav-active' : '' }}"
+                                   {{ request()->routeIs('dashboard.investments') || request()->routeIs('investments.*') ? 'nav-active' : '' }}"
                             data-tooltip="Portofolio Investasi">
                             <i
                                 class="fa-solid fa-chart-line w-5 text-center mr-3 flex-shrink-0 group-hover:text-emerald-500 transition-colors"></i>
@@ -1007,7 +1007,7 @@
         // Close modal on Escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && !document.getElementById('modal-confirm-delete').classList.contains(
-                'hidden')) {
+                    'hidden')) {
                 closeDeleteConfirm();
             }
         });
